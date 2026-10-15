@@ -1,0 +1,6 @@
+id,kind,target,value,evidence
+OV1,split_platform,70031,70030;node-840-platform;node-sull-sbstairs-platform;node-307-platform,"MBTA facility text for Sullivan elevators 840/881: Oak Grove trains open on both sides (left = centre platform, right = Oak Grove platform); Forest Hills riders must 'cross through the train' to reach the Oak Grove platform. GTFS uses one stop_id (70031) for both physical sides, which lets a model walk between them. Split 70031 into its centre half (listed nodes) and side half (all other links)."
+OV2,split_platform,70033,70032;node-865-platform;node-welln-fhstair-platform;node-309-platform,"MBTA facility text for Wellington elevators 865/864: same layout as Sullivan (centre platform + Oak Grove side platform; cross through the train). Split 70033 into centre and side halves."
+OV3,facility_fix,qamnl-060,805,"Quincy Adams pathways qamnl-060/061 are named 'Elevator 805' and join node-805-top/bottom but carry facility_id 736; closing 736 would wrongly cut this shaft."
+OV4,facility_fix,qamnl-061,805,"See OV3."
+OV5,entrance_accessible,door-coecl-bpl,1,"Copley Boylston St door leads directly to elevator 976; MBTA's text for 976 routes riders through it, but GTFS marks the entrance wheelchair_boarding=2."

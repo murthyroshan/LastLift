@@ -1,7 +1,9 @@
 """Developer commands for LastLift.
 
   python dev.py doctor     check git identity/hooks, Python, FalkorDB reachability, and .env key names
+  python dev.py harvest    import accessibility alerts from the local collector archive into data/alerts/
 """
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -45,6 +47,48 @@ def doctor():
     return 0 if all(results) else 1
 
 
+ARCHIVE = ROOT.parent / "_alert_archive"
+ALERTS_OUT = ROOT / "data" / "alerts"
+
+
+def harvest():
+    """Copy accessibility-alert versions from the collector archive (outside the repo) into
+    data/alerts/accessibility_alert_versions.jsonl. Idempotent and deterministic: one row per
+    (alert id, content hash), sorted by first capture time then id; re-running adds only new versions."""
+    src = ARCHIVE / "alert_versions.jsonl"
+    if not src.is_file():
+        print(f"no collector archive at {src}")
+        return 1
+    rows = {}
+    for line in src.read_text(encoding="utf-8").splitlines():
+        try:
+            rec = json.loads(line)
+        except ValueError:
+            continue
+        if not rec.get("accessibility"):
+            continue
+        key = (rec["alert"]["id"], rec["sha256"])
+        if key not in rows or rec["captured_at"] < rows[key]["captured_at"]:
+            rows[key] = {"captured_at": rec["captured_at"], "sha256": rec["sha256"],
+                         "facility_types": rec.get("facility_types", {}), "alert": rec["alert"]}
+    ALERTS_OUT.mkdir(parents=True, exist_ok=True)
+    out = ALERTS_OUT / "accessibility_alert_versions.jsonl"
+    ordered = sorted(rows.values(), key=lambda r: (r["captured_at"], r["alert"]["id"], r["sha256"]))
+    with out.open("w", encoding="utf-8", newline="\n") as fh:
+        for r in ordered:
+            fh.write(json.dumps(r, sort_keys=True, ensure_ascii=False, separators=(",", ":")) + "\n")
+    polls = (ARCHIVE / "polls.jsonl").read_text(encoding="utf-8").splitlines() if (ARCHIVE / "polls.jsonl").is_file() else []
+    first = json.loads(polls[0])["at"] if polls else None
+    last = json.loads(polls[-1])["at"] if polls else None
+    summary = {"source": "MBTA V3 /alerts, polled every 10 minutes by the local collector",
+               "polls": len(polls), "first_poll": first, "last_poll": last,
+               "accessibility_alerts": len({r["alert"]["id"] for r in ordered}), "versions": len(ordered)}
+    (ALERTS_OUT / "HARVEST.json").write_text(json.dumps(summary, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    print(json.dumps(summary, indent=1))
+    return 0
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "doctor"
-    sys.exit(doctor() if cmd == "doctor" else (print(__doc__) or 2))
+    commands = {"doctor": doctor, "harvest": harvest}
+    sys.exit(commands[cmd]() if cmd in commands else (print(__doc__) or 2))

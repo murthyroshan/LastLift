@@ -1,0 +1,53 @@
+{
+ "big": 1000000,
+ "counts": {
+  "edges": 11870,
+  "edges_by_type": {
+   "HAS_ENTRANCE": 330,
+   "HAS_LIFT": 244,
+   "HAS_PLATFORM": 388,
+   "RIDE": 591,
+   "SF": 9248,
+   "STEP": 1069
+  },
+  "nodes": 3720,
+  "nodes_by_labels": {
+   "Lift": 42,
+   "Node,Entrance": 330,
+   "Node,Generic": 1924,
+   "Node,Lift": 202,
+   "Node,LiftOut": 202,
+   "Node,Platform": 388,
+   "Node,Street": 89,
+   "Platform": 267,
+   "Station": 276
+  },
+  "sf_edges_by_kind": {
+   "gate": 274,
+   "lift": 202,
+   "lift_access": 856,
+   "street": 424,
+   "walk": 7492
+  }
+ },
+ "feed_version": "Fall 2026, 2026-10-14T18:47:38+00:00, version D",
+ "files": {
+  "edges.jsonl": "7e68cc1bec01878c7f93586901aa5f79596a756e036506a4799286629c5793ff",
+  "nodes.jsonl": "e106d2a75e25d39a34016d1e4d7dabcfc2f7480a01cdb999cc292ed16e4e156f"
+ },
+ "overrides_applied": {
+  "entrance_accessible:door-coecl-bpl": 1,
+  "facility_fix:qamnl-060": 1,
+  "facility_fix:qamnl-061": 1,
+  "split_platform:70031": 8,
+  "split_platform:70033": 8
+ },
+ "rules_version": 1,
+ "seed_sha256": "9d88639d8fb94bae8e1e11713d595295fa8d22181b0f8e80a4a2d1d6616c62c8",
+ "service_date": "2026-10-15",
+ "source": {
+  "name": "MBTA GTFS",
+  "sha256": "21578a40f6cb1de9c61ab1c5dde58f1f17c6ed7812953f2fc9baca62a1ccd931",
+  "url": "https://cdn.mbta.com/MBTA_GTFS.zip"
+ }
+}
