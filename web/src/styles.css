@@ -1,0 +1,8 @@
+:root { color-scheme: light dark; font-family: system-ui, sans-serif; line-height: 1.5; }
+body { margin: 0 auto; max-width: 60rem; padding: 1rem; }
+.skip { position: absolute; left: -999px; }
+.skip:focus { left: 1rem; top: 1rem; background: Canvas; color: CanvasText; padding: 0.5rem; outline: 3px solid; }
+.tagline { font-size: 1.125rem; }
+footer { margin-top: 3rem; font-size: 0.875rem; }
+:focus-visible { outline: 3px solid; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }

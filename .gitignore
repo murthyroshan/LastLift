@@ -1,0 +1,38 @@
+# secrets (the real .env lives outside this repo)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa*
+
+# python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# web
+node_modules/
+web/dist/
+dist/
+build/
+.vercel/
+
+# raw data and runtime artefacts (never committed)
+data/raw/
+*.zip
+stop_times.txt
+*.rdb
+*.aof
+*.log
+
+# os / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.tsbuildinfo

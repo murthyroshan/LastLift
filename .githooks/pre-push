@@ -1,0 +1,12 @@
+#!/bin/sh
+# Re-checks every outgoing commit (author, message, added lines) and refuses non-fast-forward pushes.
+zero=0000000000000000000000000000000000000000
+while read local_ref local_sha remote_ref remote_sha; do
+  [ "$local_sha" = "$zero" ] && continue
+  if [ "$remote_sha" = "$zero" ]; then range="$local_sha"; else
+    if ! git merge-base --is-ancestor "$remote_sha" "$local_sha" 2>/dev/null; then
+      echo "BLOCKED (pre-push): non-fast-forward push to $remote_ref" >&2; exit 1; fi
+    range="$remote_sha..$local_sha"; fi
+  python -I scripts/secret_scan.py --range "$range" || exit 1
+done
+exit 0

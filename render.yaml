@@ -1,0 +1,41 @@
+# Render Blueprint. Secrets are sync:false (entered in the dashboard, never committed).
+services:
+  - type: web
+    name: lastlift-api
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /healthz
+    autoDeployTrigger: checksPass
+    buildFilter:
+      paths: [lastlift/**, data/**, deploy/**, Dockerfile, requirements.txt]
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: LLM_MODE
+        value: replay
+      - key: ACTIONS_MODE
+        value: draft
+      - key: LIVE_FEED
+        value: "off"
+      - key: GROQ_MODEL
+        value: qwen/qwen3.8-27b
+      - key: GROQ_FALLBACK_MODEL
+        value: openai/gpt-oss-120b
+      - key: GEMINI_CHAT_MODEL
+        value: gemini-3.1-flash-lite
+      - key: OPS_REPO
+        value: murthyroshan/lastlift-ops
+      - key: LIVE_DAILY_LLM_CAP
+        value: "150"
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: MBTA_API_KEY
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false

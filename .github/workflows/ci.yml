@@ -1,0 +1,67 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      falkordb:
+        image: falkordb/falkordb-server:v4.22.0
+        ports: ["6379:6379"]
+        env:
+          FALKORDB_ARGS: "TIMEOUT_DEFAULT 15000 TIMEOUT_MAX 30000 RESULTSET_SIZE 50000"
+    env:
+      FALKORDB_HOST: localhost
+      FALKORDB_PORT: "6379"
+      GRAPH_PREFIX: ci_ll
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - run: python -m pip install -r requirements-dev.txt
+      - run: python -m pytest -q
+      - name: repo guard (all tracked files)
+        run: python -I scripts/secret_scan.py --all
+
+  docker-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t lastlift:ci .
+      - name: linked libraries resolve
+        run: |
+          docker run --rm --entrypoint sh lastlift:ci -c \
+            "ldd /usr/local/bin/redis-server /opt/falkordb/falkordb.so | grep 'not found' && exit 1 || exit 0"
+      - name: boot under Render-free limits (512 MB / 0.1 CPU)
+        run: |
+          docker run -d --name ll --memory=512m --cpus=0.1 -p 10000:10000 lastlift:ci
+          start=$(date +%s)
+          for i in $(seq 1 120); do
+            if curl -fsS localhost:10000/healthz >/dev/null 2>&1; then break; fi; sleep 1
+          done
+          curl -fsS localhost:10000/healthz
+          echo "time_to_healthy_s=$(( $(date +%s) - start ))"
+          curl -fsS localhost:10000/v1/health
+          mem=$(docker stats --no-stream --format '{{.MemUsage}}' ll); echo "memory: $mem"
+      - if: always()
+        run: docker logs ll || true
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: npm ci
+      - run: npm run build

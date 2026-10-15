@@ -1,0 +1,3 @@
+#!/bin/sh
+# Blocks secrets, .env values, wrong author, tool-config files/references, and post-freeze commits.
+exec python -I scripts/secret_scan.py --staged

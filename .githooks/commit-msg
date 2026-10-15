@@ -1,0 +1,3 @@
+#!/bin/sh
+# Rejects co-author/sign-off trailers, generated-by lines and tool references in messages.
+exec python -I scripts/secret_scan.py --msg "$1"
