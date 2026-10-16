@@ -23,19 +23,10 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from lastlift import db  # noqa: E402
-from lastlift.checker import check  # noqa: E402
+from lastlift import redundancy  # noqa: E402
 from lastlift.config import settings  # noqa: E402
-from lastlift.flow import decompose, min_cut, repair  # noqa: E402
 from lastlift.seed import latest_snapshot  # noqa: E402
 
-MAXFLOW = (
-    "MATCH (s:Node) WHERE s.uid IN $src WITH collect(s) AS S "
-    "MATCH (t:Node) WHERE t.uid IN $dst WITH S, collect(t) AS T "
-    "CALL algo.maxFlow({sourceNodes:S, targetNodes:T, relationshipTypes:['SF'], capacityProperty:'cap'}) "
-    "YIELD edges, edgeFlows, maxFlow RETURN [e IN edges | e.eid], edgeFlows, maxFlow"
-)
-COMPLEX_EDGES = ("MATCH (a:Node {cx:$cx})-[e:SF]->(b:Node) "
-                 "RETURN e.eid, a.uid, b.uid, e.cap, e.kind, e.facility_id")
 
 
 def networkx_value(edges, sources, sinks):
@@ -73,7 +64,7 @@ def main(argv=None):
     for st, n in g.ro_query("MATCH (l:Node:Lift) RETURN l.station_id, count(DISTINCT l.facility_id)").result_set:
         lifts_per_station[st] = n
 
-    cx_edges = {}
+    cx_cache = {}
     stats = collections.Counter()
     rows = []
     started = time.time()
@@ -85,46 +76,31 @@ def main(argv=None):
             row["status"] = "no_accessible_entrance"
             rows.append(row)
             continue
-        if cx not in cx_edges:
-            raw = g.ro_query(COMPLEX_EDGES, {"cx": cx}).result_set
-            cx_edges[cx] = {"edges": [(r[0], r[1], r[2], r[3]) for r in raw],
-                            "lift_fac": {r[0]: r[5] for r in raw if r[4] == "lift"}}
-        edges, lift_fac = cx_edges[cx]["edges"], cx_edges[cx]["lift_fac"]
-        for direction, src, dst in (("board", streets[cx], platforms[stop_id]),
-                                    ("exit", platforms[stop_id], streets[cx])):
-            res = g.ro_query(MAXFLOW, {"src": src, "dst": dst}).result_set
+        if cx not in cx_cache:
+            cx_cache[cx] = redundancy.complex_edges(g, cx)
+        edges, lift_fac = cx_cache[cx]
+        result = redundancy.platform(g, cx, platforms[stop_id], streets[cx], edges, lift_fac)
+        for d in ("board", "exit"):
+            r = result[d]
             stats["maxflow_calls"] += 1
-            eids, flows, reported = res[0] if res else ([], [], 0.0)
-            value, flow, outcome = repair(edges, dict(zip(eids, flows)), src, dst)
-            stats[f"falkordb_{'first_pass_exact' if outcome == 'exact' else 'repaired'}"] += 1
-            if abs(reported - value) > 1e-6:
-                stats["falkordb_value_wrong"] += 1
-            k = int(round(value))
-            at_grade = k >= big
-            row[f"k_{direction}"] = None if at_grade else k
-            row[f"at_grade_{direction}"] = at_grade
-            if 0 < k < big:
-                cut = [e[0] for e in min_cut(edges, flow, src)]
-                paths = decompose(edges, flow, src, dst)
-                verdict = check(edges, lift_fac.keys(), src, dst, k, paths, cut)
-                stats["checker_accepted" if verdict.accepted else "checker_rejected"] += 1
-                row[f"cut_{direction}"] = sorted({lift_fac[e] for e in cut})
-                if not verdict.accepted:
-                    row[f"checker_{direction}"] = verdict.reason
+            stats["falkordb_first_pass_exact" if r.outcome == "exact" else "falkordb_repaired"] += 1
+            row[f"k_{d}"] = r.k
+            row[f"at_grade_{d}"] = r.at_grade
+            if r.k:
+                row[f"cut_{d}"] = r.cut_facilities
+                stats["checker_accepted" if r.proof == "accepted" else "checker_rejected"] += 1
+                if r.proof != "accepted":
+                    row[f"checker_{d}"] = r.proof
+            if r.spof_facilities:
+                row[f"spof_{d}"] = r.spof_facilities
             if args.oracle:
+                src, dst = (streets[cx], platforms[stop_id]) if d == "board" else (platforms[stop_id], streets[cx])
+                value = big if r.at_grade else (r.k or 0)
                 ox = networkx_value(edges, src, dst)
-                same = abs(ox - value) < 1e-6
+                same = (ox >= big and r.at_grade) or abs(ox - value) < 1e-6
                 stats["networkx_equal" if same else "networkx_mismatch"] += 1
         rows.append(row)
     elapsed = time.time() - started
-
-    # write back to the graph
-    for r in rows:
-        if "k_board" in r or r.get("at_grade_board"):
-            g.query("MATCH (p:Node:Platform) WHERE p.stop_id = $s SET p.k_board_base = $kb, p.k_exit_base = $ke, "
-                    "p.at_grade_board = $ab, p.at_grade_exit = $ae, p.cut_board = $cb, p.cut_exit = $ce",
-                    {"s": r["stop_id"], "kb": r.get("k_board"), "ke": r.get("k_exit"), "ab": r.get("at_grade_board"),
-                     "ae": r.get("at_grade_exit"), "cb": r.get("cut_board", []), "ce": r.get("cut_exit", [])})
 
     def k_of(r, d):
         return float("inf") if r.get(f"at_grade_{d}") else r.get(f"k_{d}")
@@ -133,8 +109,8 @@ def main(argv=None):
     step_free = [r for r in assessed if r["wheelchair_boarding"] != 2 and k_of(r, "board") and k_of(r, "exit")]
     lift_dependent = [r for r in step_free if min(k_of(r, "board"), k_of(r, "exit")) != float("inf")]
     single = [r for r in step_free if min(k_of(r, "board"), k_of(r, "exit")) == 1]
-    spof_b = {f for r in assessed if r.get("k_board") == 1 for f in r.get("cut_board", [])}
-    spof_e = {f for r in assessed if r.get("k_exit") == 1 for f in r.get("cut_exit", [])}
+    spof_b = {f for r in assessed for f in r.get("spof_board", [])}
+    spof_e = {f for r in assessed for f in r.get("spof_exit", [])}
 
     def hist(d):
         c = collections.Counter("at_grade" if r.get(f"at_grade_{d}") else str(r.get(f"k_{d}")) for r in assessed)
@@ -156,7 +132,6 @@ def main(argv=None):
         "maxflow_calls": stats["maxflow_calls"],
         "falkordb_first_pass_exact": stats["falkordb_first_pass_exact"],
         "falkordb_repaired": stats["falkordb_repaired"],
-        "falkordb_value_wrong": stats["falkordb_value_wrong"],
         "falkordb_certified": stats["falkordb_first_pass_exact"] + stats["falkordb_repaired"],
         "checker_accepted": stats["checker_accepted"], "checker_rejected": stats["checker_rejected"],
         "sweep_seconds": round(elapsed, 1),
@@ -170,8 +145,10 @@ def main(argv=None):
         for r in rows:
             fh.write(json.dumps(r, sort_keys=True, ensure_ascii=False, separators=(",", ":")) + "\n")
     (ROOT / "claims.json").write_text(json.dumps(claims, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    from lastlift.seed import apply_precomputed
+    apply_precomputed(args.graph, snapshot)
     print(json.dumps({k: claims[k] for k in ("maxflow_calls", "falkordb_first_pass_exact", "falkordb_repaired",
-                                             "falkordb_value_wrong", "falkordb_certified", "checker_accepted",
+                                             "falkordb_certified", "checker_accepted",
                                              "checker_rejected", "sweep_seconds")}
                      | ({"falkordb_eq_networkx": claims.get("falkordb_eq_networkx"),
                          "networkx_mismatch": claims.get("networkx_mismatch")} if args.oracle else {}), indent=1))

@@ -5,7 +5,6 @@
  "falkordb_eq_networkx": 734,
  "falkordb_first_pass_exact": 734,
  "falkordb_repaired": 0,
- "falkordb_value_wrong": 0,
  "feed_version": "Fall 2026, 2026-10-14T18:47:38+00:00, version D",
  "gtfs_sha256": "21578a40f6cb1de9c61ab1c5dde58f1f17c6ed7812953f2fc9baca62a1ccd931",
  "k_hist_board": {
@@ -36,7 +35,7 @@
  "platforms_step_free": 366,
  "seed_sha256": "9d88639d8fb94bae8e1e11713d595295fa8d22181b0f8e80a4a2d1d6616c62c8",
  "snapshot_id": "2026-10-15",
- "spof_lifts": 68,
- "spof_lifts_exit_only": 10,
- "sweep_seconds": 68.3
+ "spof_lifts": 69,
+ "spof_lifts_exit_only": 0,
+ "sweep_seconds": 27.7
 }

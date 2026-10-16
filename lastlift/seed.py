@@ -97,6 +97,39 @@ def load(snapshot: Path, graph_name: str) -> dict:
     return manifest
 
 
+def apply_precomputed(graph_name: str, snapshot: Path) -> int:
+    """Write the certified baseline sweep (precomputed.jsonl) onto the graph: baseline and current
+    k per platform, cuts, and DEPENDS_ON / DEPENDS_NOW edges to every single-point-of-failure lift."""
+    path = snapshot / "precomputed.jsonl"
+    if not path.is_file():
+        return 0
+    g = db.client().select_graph(graph_name)
+    props, depends = [], []
+    for row in read_jsonl(path):
+        if row.get("status") == "no_accessible_entrance":
+            props.append({"stop": row["stop_id"], "p": {"no_accessible_entrance": True}})
+            continue
+        p = {}
+        for d in ("board", "exit"):
+            p[f"k_{d}_base"] = row.get(f"k_{d}")
+            p[f"k_{d}"] = row.get(f"k_{d}")
+            p[f"at_grade_{d}"] = bool(row.get(f"at_grade_{d}"))
+            p[f"at_grade_{d}_now"] = bool(row.get(f"at_grade_{d}"))
+            p[f"cut_{d}"] = row.get(f"cut_{d}", [])
+            p[f"cut_{d}_now"] = row.get(f"cut_{d}", [])
+            depends += [{"stop": row["stop_id"], "fid": f, "dir": d} for f in row.get(f"spof_{d}", [])]
+        props.append({"stop": row["stop_id"], "p": {k: v for k, v in p.items() if v is not None}})
+    for chunk in batches(props):
+        g.query("UNWIND $rows AS r MATCH (p:Node:Platform) WHERE p.stop_id = r.stop SET p += r.p", {"rows": chunk})
+    g.query("MATCH ()-[d:DEPENDS_ON|DEPENDS_NOW]->() DELETE d")
+    for rel in ("DEPENDS_ON", "DEPENDS_NOW"):
+        for chunk in batches(depends):
+            g.query("UNWIND $rows AS r MATCH (p:Node:Platform) WHERE p.stop_id = r.stop "
+                    f"MATCH (l:Node:Lift {{facility_id:r.fid, cx:p.cx}}) MERGE (p)-[d:{rel} {{dir:r.dir}}]->(l)",
+                    {"rows": chunk})
+    return len(depends)
+
+
 def verify(graph_name: str, manifest: dict) -> list[str]:
     """Returns a list of problems (empty = verified)."""
     g = db.client().select_graph(graph_name)
@@ -136,7 +169,9 @@ def main(argv=None) -> int:
         print(f"{args.graph}: seed {manifest['seed_sha256'][:12]} already loaded")
         return 0
     load(snapshot, args.graph)
-    print(f"{args.graph}: loaded snapshot {snapshot.name} (seed {manifest['seed_sha256'][:12]})")
+    deps = apply_precomputed(args.graph, snapshot)
+    print(f"{args.graph}: loaded snapshot {snapshot.name} (seed {manifest['seed_sha256'][:12]}, "
+          f"{deps} single-lift dependencies)")
     if args.verify:
         problems = verify(args.graph, manifest)
         for p in problems:

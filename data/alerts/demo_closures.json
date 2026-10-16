@@ -1,0 +1,20 @@
+{
+ "frozen_at": "2026-10-15T15:42:45.030388+00:00",
+ "note": "Elevator-related MBTA alerts active in the collector harvest on 15 Oct 2026; the judged demo scope uses exactly these.",
+ "alert_ids": [
+  "1007380",
+  "1023448",
+  "1031518",
+  "1031519",
+  "1033322",
+  "1035010",
+  "1036024",
+  "1036639",
+  "1038209",
+  "1038229",
+  "1038485",
+  "1038565",
+  "1038957",
+  "1038975"
+ ]
+}

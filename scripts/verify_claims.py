@@ -4,7 +4,9 @@
 
 1. Rebuilds the step-free network from data/snapshots/<date>/{nodes,edges}.jsonl,
 2. recomputes board/exit k for every platform with NetworkX,
-3. compares them with precomputed.jsonl (the FalkorDB sweep) and re-derives every core key of
+3. re-derives the single points of failure: for every k = 1 platform-direction, removes each lift
+   in the complex in turn and tests reachability,
+4. compares all of it with precomputed.jsonl (the FalkorDB sweep) and re-derives every core key of
    claims.json from scratch. Exits non-zero on any mismatch.
 """
 import collections
@@ -40,6 +42,11 @@ def main():
     for n in nodes:
         if "Street" in n["labels"]:
             streets[n["cx"]].append(n["uid"])
+    cx_of = {n["uid"]: n.get("cx") for n in nodes}
+    lift_edges = collections.defaultdict(list)          # cx -> [(a, b, facility_id)]
+    for e in edges:
+        if e["type"] == "SF" and e["kind"] == "lift":
+            lift_edges[cx_of[e["a"]]].append((e["a"], e["b"], e["facility_id"]))
     lift_stations = collections.defaultdict(set)
     for n in nodes:
         if "Lift" in n["labels"] and "Node" in n["labels"]:
@@ -69,6 +76,40 @@ def main():
             if fal != exp:
                 problems.append(f"{stop} {d}: FalkorDB sweep {fal} != NetworkX {exp}")
 
+    adj = collections.defaultdict(list)                 # step-free adjacency, for reachability
+    for e in edges:
+        if e["type"] == "SF":
+            adj[e["a"]].append(e["b"])
+
+    def reachable(sources, sinks, removed):
+        seen, todo, sinks = set(sources), list(sources), set(sinks)
+        while todo:
+            u = todo.pop()
+            if u in sinks:
+                return True
+            for v in adj[u]:
+                if v not in seen and (u, v) != removed:
+                    seen.add(v)
+                    todo.append(v)
+        return False
+
+    spof = {"board": set(), "exit": set()}
+    for stop, ks in sorted(oracle.items()):
+        if ks is None:
+            continue
+        cx, uids = meta[stop]["cx"], platforms[stop]
+        for d, val in (("board", ks[0]), ("exit", ks[1])):
+            found = set()
+            if val == 1:
+                src, dst = (streets[cx], uids) if d == "board" else (uids, streets[cx])
+                for a, b, fid in lift_edges[cx]:
+                    if not reachable(src, dst, (a, b)):
+                        found.add(fid)
+            spof[d] |= found
+            fal = set(computed.get(stop, {}).get(f"spof_{d}", []))
+            if fal != found:
+                problems.append(f"{stop} {d}: FalkorDB sweep SPOFs {sorted(fal)} != NetworkX {sorted(found)}")
+
     def inf(v):
         return float("inf") if v >= big else v
 
@@ -84,6 +125,8 @@ def main():
         "platforms_k1_board": sum(1 for kb, _ in assessed.values() if kb == 1),
         "platforms_k1_exit": sum(1 for _, ke in assessed.values() if ke == 1),
         "naive_two_lifts_but_k1": sum(1 for s in single if len(lift_stations[meta[s]["station_id"]]) >= 2),
+        "spof_lifts": len(spof["board"] | spof["exit"]),
+        "spof_lifts_exit_only": len(spof["exit"] - spof["board"]),
     }
     for key, val in derived.items():
         if claims.get(key) != val:
@@ -93,7 +136,8 @@ def main():
 
     for p in problems:
         print("MISMATCH:", p, file=sys.stderr)
-    print(f"checked {len(assessed)} platforms x 2 directions with NetworkX; "
+    print(f"checked {len(assessed)} platforms x 2 directions with NetworkX "
+          f"(k and single-point-of-failure lifts); "
           f"{len(derived)} claim keys re-derived; {len(problems)} mismatches")
     return 1 if problems else 0
 
