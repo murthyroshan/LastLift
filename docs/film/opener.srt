@@ -1,0 +1,15 @@
+1
+00:00:00,000 --> 00:00:03,000
+Close your eyes. Ask out loud.
+
+2
+00:00:03,000 --> 00:00:07,000
+"Can I get step-free onto the Wonderland-bound platform at Revere Beach?"
+
+3
+00:00:07,000 --> 00:00:12,000
+Not directly: lift 885 is out. Take lift 884, ride to Beachmont and back, about 17 minutes.
+
+4
+00:00:12,000 --> 00:00:15,000
+Every fact checked against a FalkorDB graph. LastLift.

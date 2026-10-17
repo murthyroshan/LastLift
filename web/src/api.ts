@@ -88,6 +88,32 @@ export type HistoryBundle = { from: string; to: string;
 export const getHistory = (stationId: string) => mirror<HistoryBundle>(`history/${encodeURIComponent(stationId)}.json`);
 export const getLiftRecords = () => mirror<{ from: string; lifts: Record<string, LiftRecord> }>("history/lifts.json");
 
+/** Close a minimum cut on a throwaway copy and run FalkorDB's certified max-flow for one platform-direction. */
+export const verifyCut = (scope: Scope, stationId: string, stop: string, dir: string, cut: string[]) =>
+  json<{ max_flow: number; ms: number; graph: string }>(`${API_BASE}/v1/verify-cut`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ scope, station_id: stationId, stop_id: stop, dir, cut }),
+  }, 30000);
+
+/** The worst day (mirror) and its live re-check in FalkorDB. */
+export const getWorstDay = () => mirror<any>("worst_day.json");
+export const getOneLift = () => mirror<any>("one_lift.json");
+export const stressTest = (budget: number) => tool("stress_test", { budget });
+
+/** The Count (every platform's bin, baseline and now) and the network map (stations, ride links). */
+export const getSystem = () => mirror<{ platforms: any[] }>("system.json");
+export const getMap = () => mirror<{ stations: any[]; links: any[] }>("map.json");
+
+/** The operations agents: a mirrored demo tick, the live inbox, and human decisions (Idempotency-Key per click). */
+export const getOps = () => mirror<Record<string, any>>("ops.json");
+export const getProposals = (scope: Scope) =>
+  json<{ proposals: any[] }>(`${API_BASE}/v1/approvals?scope=${scope}&status=proposed`).then((r) => r.proposals);
+export const decideProposal = (scope: Scope, pid: string, decision: "approve" | "reject") =>
+  json<any>(`${API_BASE}/v1/approvals/${encodeURIComponent(pid)}?scope=${scope}`, {
+    method: "POST", body: JSON.stringify({ decision }),
+    headers: { "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() },
+  }, 30000);
+
 /** The network view (base analysis from the mirror; the scope-dependent parts from the API in Live). */
 export async function getContingency(scope: Scope) {
   const c = await mirror<Record<string, any>>("contingency.json");

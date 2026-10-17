@@ -1,16 +1,17 @@
-import { useEffect, useMemo, useState } from "react";
-import { getClaims, getStateFor, getStations, type Scope } from "../api";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { getStateFor, getStations, type Scope } from "../api";
+import { TheCount } from "../components/TheCount";
 import { href } from "../router";
 import { S } from "../strings.en";
 
+const CityIntro = lazy(() => import("../components/three/CityIntro").then((m) => ({ default: m.CityIntro })));
+
 export function Landing({ scope }: { scope: Scope }) {
-  const [claims, setClaims] = useState<Record<string, any> | null>(null);
   const [state, setState] = useState<Awaited<ReturnType<typeof getStateFor>> | null>(null);
   const [stations, setStations] = useState<Awaited<ReturnType<typeof getStations>>>([]);
   const [filter, setFilter] = useState("");
 
   useEffect(() => {
-    getClaims().then(setClaims).catch(() => {});
     getStateFor(scope).then(setState).catch(() => {});
     getStations().then(setStations).catch(() => {});
   }, [scope]);
@@ -21,55 +22,59 @@ export function Landing({ scope }: { scope: Scope }) {
       .filter((s) => !f || s.name.toLowerCase().includes(f))
       .sort((a, b) => b.lost - a.lost || b.single - a.single || a.name.localeCompare(b.name));
   }, [stations, filter]);
+  const maxSingle = Math.max(1, ...stations.map((s) => s.single));
 
   const c = state?.closures.data;
-  const firstLast = c?.newly_last_lift?.[0];
   return (
     <>
-      <h1>{S.tagline}</h1>
-      {claims && (
-        <section className="panel" aria-labelledby="count-h">
-          <h2 id="count-h" className="visually-hidden">{S.home.countText}</h2>
-          <p>
-            <span className="count">{S.home.countLead(claims.platforms_single_lift, claims.platforms_step_free)}</span>{" "}
-            {S.home.countText}
-          </p>
-          <p className="muted">{S.home.certified(claims.falkordb_certified, claims.maxflow_calls)}</p>
-          <ul>
-            <li>{S.home.spof(claims.spof_lifts)}</li>
-            <li>{S.home.naive(claims.naive_two_lifts_but_k1)}</li>
-          </ul>
-        </section>
-      )}
+      <Suspense fallback={<div className="ci-fallback" aria-hidden="true" />}>
+        <CityIntro />
+      </Suspense>
+      <div className="after-intro">
       {c && (
-        <section aria-labelledby="now-h">
-          <h2 id="now-h">{S.home.nowTitle}</h2>
-          <ul>
-            <li>{S.home.nowLost(c.platforms_lost.length)}</li>
-            <li>{S.home.nowLast(c.newly_last_lift.length)}</li>
-            <li>{S.home.nowAlerts(c.closures.length,
-              c.closures.filter((x: any) => x.scope === "modelled").length,
-              c.closures.filter((x: any) => x.scope !== "modelled").length)}</li>
-          </ul>
-          {firstLast && (
-            <a className="btn primary" href={href(`/station/${firstLast.station_id}`, { dir: "exit" })}
-               style={{ display: "inline-flex", alignItems: "center", textDecoration: "none" }}>
-              {S.home.seeLastLift}
-            </a>
-          )}
+        <section className="block" aria-labelledby="now-h">
+          <div className="section-head">
+            <div>
+              <h2 id="now-h">{S.home.nowTitle}</h2>
+              <p className="muted">{S.home.nowLead}</p>
+            </div>
+          </div>
+          <div className="tiles">
+            <div className="tile" data-k="0"><span className="n">{c.platforms_lost.length}</span>
+              <span className="l">{S.home.tileLost}</span></div>
+            <div className="tile" data-k="1"><span className="n">{c.newly_last_lift.length}</span>
+              <span className="l">{S.home.tileLast}</span></div>
+            <div className="tile"><span className="n">{c.closures.length}</span>
+              <span className="l">{S.home.tileAlerts(
+                c.closures.filter((x: any) => x.scope === "modelled").length,
+                c.closures.filter((x: any) => x.scope !== "modelled").length)}</span></div>
+          </div>
         </section>
       )}
-      <section aria-labelledby="st-h">
-        <h2 id="st-h">{S.home.tableTitle}</h2>
-        <label>
-          {S.home.filter}{" "}
-          <input type="search" value={filter} onChange={(e) => setFilter(e.target.value)} />
-        </label>
-        <div className="table-wrap">
+
+      <section className="block card" aria-labelledby="tc-h">
+        <div className="section-head">
+          <div>
+            <h2 id="tc-h">{S.home.countTitle}</h2>
+            <p className="muted">{S.home.countHelp}</p>
+          </div>
+        </div>
+        <TheCount />
+      </section>
+
+      <section className="block" aria-labelledby="st-h">
+        <div className="section-head">
+          <h2 id="st-h">{S.home.tableTitle}</h2>
+          <label>
+            <span className="visually-hidden">{S.home.filter}</span>
+            <input type="search" value={filter} placeholder={S.home.filter} onChange={(e) => setFilter(e.target.value)} />
+          </label>
+        </div>
+        <div className="table-wrap tall" tabIndex={0}>
           <table>
             <thead>
               <tr>
-                <th scope="col">{S.home.colStation}</th><th scope="col">{S.home.colPlatforms}</th>
+                <th scope="col">{S.home.colStation}</th><th scope="col" className="num">{S.home.colPlatforms}</th>
                 <th scope="col">{S.home.colLost}</th><th scope="col">{S.home.colSingle}</th>
                 <th scope="col">{S.home.colClosed}</th>
               </tr>
@@ -78,16 +83,20 @@ export function Landing({ scope }: { scope: Scope }) {
               {shown.map((s) => (
                 <tr key={s.id}>
                   <th scope="row"><a href={href(`/station/${s.id}`)}>{s.name}</a></th>
-                  <td>{s.platforms}</td>
-                  <td>{s.lost ? <span className="state" data-k="0">✕ {s.lost}</span> : S.home.none}</td>
-                  <td>{s.single ? <span className="state" data-k="1">◐ {s.single}</span> : S.home.none}</td>
-                  <td>{s.closed.length ? s.closed.join(", ") : S.home.none}</td>
+                  <td className="num">{s.platforms}</td>
+                  <td>{s.lost ? <span className="state" data-k="0">✕ {s.lost}</span> : <span className="muted">{S.home.none}</span>}</td>
+                  <td>
+                    {s.single ? <span className="state" data-k="1">◆ {s.single}</span> : <span className="muted">{S.home.none}</span>}
+                    {s.single > 0 && <div className="bar" aria-hidden="true"><span style={{ width: `${(100 * s.single) / maxSingle}%` }} /></div>}
+                  </td>
+                  <td>{s.closed.length ? s.closed.join(", ") : <span className="muted">{S.home.none}</span>}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </section>
+      </div>
     </>
   );
 }

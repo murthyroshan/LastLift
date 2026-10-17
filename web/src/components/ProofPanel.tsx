@@ -1,14 +1,19 @@
 import { useEffect, useId, useState } from "react";
-import { getCuts, getHistory, reliability, type CutsBundle } from "../api";
+import { getCuts, getHistory, reliability, verifyCut, type CutsBundle, type Scope } from "../api";
 import { S } from "../strings.en";
 
 const pct = (x: number) => (x * 100 < 0.01 && x > 0 ? (x * 100).toExponential(1) : (x * 100).toFixed(2));
 
 /** For one platform-direction: every minimum cut, the exact reliability for a chosen per-lift outage chance,
  *  and what each single lift closure does. All of it comes from the network sweep (the mirror). */
-export function ProofPanel({ stationId, stop, dir, name }: {
-  stationId: string; stop: string | null; dir: "board" | "exit"; name: string;
+type Route = { label: string; lifts: string[]; text: string[] };
+const PATTERN: Record<string, string> = { A: "━━", B: "┅┅", C: "┈┈" };
+
+export function ProofPanel({ stationId, stop, dir, name, routes = [], live = false, scope = "demo", kNow, closedHere = [] }: {
+  stationId: string; stop: string | null; dir: "board" | "exit"; name: string; routes?: Route[]; live?: boolean;
+  scope?: Scope; kNow?: number | null; closedHere?: string[];
 }) {
+  const [recheck, setRecheck] = useState<string>("");
   const [cuts, setCuts] = useState<CutsBundle | null>(null);
   const [q, setQ] = useState<number | null>(null);
   const [emp, setEmp] = useState<Record<string, number>>({});
@@ -25,12 +30,32 @@ export function ProofPanel({ stationId, stop, dir, name }: {
     <section aria-labelledby="pf-h" className="panel">
       <h2 id="pf-h">{S.proof.title}: {name}, {S.proof.dirLabel(dir)}</h2>
       {d.at_grade ? <p>{S.proof.atGrade}</p> : d.k === 0 ? <p>{S.proof.lost}</p> : d.mincuts && <>
+        <h3>{d.k === 1 ? S.proof.byOne : S.proof.whyExactly(d.k ?? 0)}</h3>
+        {typeof kNow === "number" && kNow !== d.k && <p className="now-differs">{S.proof.nowDiffers(kNow, closedHere.join(", "))}</p>}
+        {routes.length > 0 && <>
+          <p>✓ {typeof kNow === "number" && kNow !== d.k ? S.proof.routesNow : S.proof.atLeast(d.k ?? 0)}</p>
+          <ol className="proof-routes">
+            {routes.slice(0, Math.max(d.k ?? 0, 1)).map((r) => (
+              <li key={r.label}><span className="route-pattern" aria-hidden="true">{PATTERN[r.label] ?? "──"}</span>{" "}
+                <strong>{S.proof.route(r.label)}</strong> {r.text.join(", ")}</li>
+            ))}
+          </ol>
+        </>}
+        <p>✓ {S.proof.atMost(d.k ?? 0)}</p>
         <p>{S.proof.cutsLead(d.k ?? 0, d.mincuts.length === 1)}</p>
         <ul className="cuts">
           {d.mincuts.map((c) => <li key={c.join("+")}><strong>{c.join(" + ")}</strong></li>)}
         </ul>
         {d.mincuts.length === 1 && <p>{S.proof.cutsOnly}</p>}
         <p className="muted">{S.proof.certified}</p>
+        {live && d.mincuts[0] && <p>
+          <button onClick={async () => {
+            setRecheck(S.proof.rechecking);
+            const r = await verifyCut(scope, stationId, stop, dir, d.mincuts![0]).catch(() => null);
+            setRecheck(r ? S.proof.recheckResult(d.mincuts![0].join(" + "), r.max_flow ?? 0, r.ms) : S.proof.recheckFailed);
+          }}>{S.proof.recheck}</button>{" "}
+          <span role="status">{recheck}</span>
+        </p>}
       </>}
 
       {d.rel_counts && <>
@@ -49,7 +74,7 @@ export function ProofPanel({ stationId, stop, dir, name }: {
       {d.k !== null && d.k > 0 && <>
         <h3>{S.proof.n1Title}</h3>
         {Object.keys(d.k_without ?? {}).length === 0 ? <p>{S.proof.n1None}</p> : (
-          <div className="table-wrap">
+          <div className="table-wrap" tabIndex={0}>
             <table>
               <thead><tr><th scope="col">{S.proof.colLift}</th><th scope="col">{S.proof.colLeft}</th></tr></thead>
               <tbody>

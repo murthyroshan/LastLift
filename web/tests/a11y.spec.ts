@@ -16,7 +16,7 @@ test.beforeEach(async ({ page }) => blockApi(page));
 
 test("landing works from the mirror", async ({ page }) => {
   await page.goto("/#/");
-  await expect(page.locator(".count")).toContainText(/\d+ of \d+/);
+  await expect(page.locator(".ci-count")).toContainText(/\d+ of \d+/, { timeout: 20000 });
   await expect(page.getByRole("table")).toBeVisible();
   await noSeriousAxeIssues(page);
 });
@@ -103,7 +103,7 @@ test("Live scope reads the API and shows the feed status", async ({ page }) => {
   await toggle.click();
   await expect(toggle).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByText(/MBTA alerts polled under a minute ago/)).toBeVisible();
-  expect(asked).toContain("current_closures:live");
+  await expect.poll(() => asked).toContain("current_closures:live");
   await noSeriousAxeIssues(page);
 });
 
@@ -144,5 +144,123 @@ test("station history: replayed closures, lift table and month strip with its ta
   await expect(page.getByText(/not a forecast/)).toBeVisible();
   await page.getByText(/Hours closed per month for lift 811/).click();
   await expect(page.getByRole("columnheader", { name: "Hours closed" }).first()).toBeVisible();
+  await noSeriousAxeIssues(page);
+});
+
+test("a recorded run verifies its own hash chain in the browser", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/#/");
+  await page.getByRole("button", { name: "Ask the agent" }).click();
+  await page.getByRole("button", { name: /Which lifts should be repaired/ }).click();
+  await page.getByRole("button", { name: "Verify this replay" }).click();
+  await expect(page.getByRole("complementary", { name: "Ask the agent" }).getByText(/Verified in your browser: all \d+ events match/)).toBeVisible();
+  await noSeriousAxeIssues(page);
+});
+
+test("operations page shows the agents' playbooks from the mirror", async ({ page }) => {
+  await page.goto("/#/approvals");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Operations");
+  await expect(page.getByText("Platform loses step-free access").first()).toBeVisible();
+  await expect(page.getByText(/Decisions need the live graph server/)).toBeVisible();
+  await noSeriousAxeIssues(page);
+});
+
+test("The Count's bins equal the claims, and Now moves platforms between bins", async ({ page }) => {
+  const { readFileSync } = await import("node:fs");
+  const claims = JSON.parse(readFileSync("public/claims.json", "utf-8"));
+  const h = claims.k_hist_board;
+  const many = Object.entries(h).filter(([k]) => /^\d+$/.test(k) && Number(k) >= 2).reduce((s, [, v]) => s + (v as number), 0);
+  await page.goto("/#/");
+  const cap = page.locator("figure.count-fig figcaption");
+  await expect(cap).toContainText(`${h["1"]} hang by one lift, ${many} have two or more`);
+  await expect(cap).toContainText(`${h.at_grade} need no lift, ${h["0"] ?? 0} have no step-free route`);
+  await expect(cap).toContainText(`${claims.platforms_no_accessible_entrance} have no accessible entrance`);
+  await page.getByRole("radio", { name: "Now (demo alerts)" }).click();
+  await expect(cap).toContainText("Since the baseline:");
+  await noSeriousAxeIssues(page);
+});
+
+test("network map: picking a lift draws its journeys, and the text twin says the same", async ({ page }) => {
+  await page.goto("/#/network");
+  await expect(page.locator(".net-map-frame canvas").first()).toBeAttached({ timeout: 20000 });
+  await expect(page.locator(".net-map-frame canvas[aria-hidden='true']").first()).toBeAttached();
+  const chip = page.locator(".lift-chips button", { hasText: "Davis" }).first();
+  await chip.click();
+  await expect(chip).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator(".net-map p[aria-live='polite']")).toContainText(/alone carries \d+ step-free journeys/);
+  await expect(page.getByRole("table").first()).toBeVisible();
+});
+
+test("present mode: help, beats and the caption frame are keyboard driven", async ({ page }) => {
+  await page.goto("/?present=1#/");
+  await expect(page.locator("html.present")).toBeAttached();
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  await page.keyboard.press("?");
+  await expect(page.getByRole("dialog", { name: "Present mode keys" })).toBeVisible();
+  await page.keyboard.press("?");
+  await page.keyboard.press("3");
+  await expect(page).toHaveURL(/#\/station\/place-alfcl/);
+  await page.keyboard.press("g");
+  await expect(page.locator(".present-frame")).toBeVisible();
+});
+
+const MATRIX = ["/#/", "/#/console", "/#/network", "/#/repairs", "/#/approvals", "/#/station/place-alfcl?dir=exit", "/#/about"];
+for (const scheme of ["light", "dark"] as const) {
+  for (const width of [320, 1280]) {
+    test(`axe matrix: every page, ${scheme}, ${width} px`, async ({ page }) => {
+      test.setTimeout(180_000);
+      await page.emulateMedia({ colorScheme: scheme, reducedMotion: "reduce" });
+      await page.setViewportSize({ width, height: 900 });
+      for (const url of MATRIX) {
+        await page.goto(url);
+        await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+        await noSeriousAxeIssues(page);
+        const scroll = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+        expect(scroll, `${url} scrolls sideways at ${width} px`).toBeLessThanOrEqual(1);
+      }
+    });
+  }
+}
+
+test("sound: off by default, never plays before a gesture, and every sound has a text twin", async ({ page }) => {
+  await page.goto("/#/station/place-alfcl?dir=exit");
+  const toggle = page.getByRole("button", { name: "Sound", exact: true });
+  await expect(toggle).toHaveAttribute("aria-pressed", "false");
+  await expect(page.getByRole("button", { name: "Play this platform's sound" })).toBeDisabled();
+  await page.getByRole("button", { name: "Red Line" }).click();
+  await toggle.click();
+  await page.getByRole("button", { name: "Play this platform's sound" }).click();
+  await expect(page.getByText(/One trembling tone|Tones playing/).first()).toBeAttached();
+  await noSeriousAxeIssues(page);
+});
+
+test("eyes-free mode: Alt+E, a recorded answer is spoken, walk, why, stop, and screen-reader mode does not double-speak", async ({ page }) => {
+  await page.addInitScript(() => {
+    (window as any).__spoken = [];
+    (window as any).__cancelled = 0;
+    const synth = { speak: (u: any) => (window as any).__spoken.push(u.text), cancel: () => { (window as any).__cancelled++; } };
+    Object.defineProperty(window, "speechSynthesis", { value: synth, configurable: true });
+    (window as any).SpeechSynthesisUtterance = function (this: any, t: string) { this.text = t; } as any;
+  });
+  await page.goto("/#/");
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  await page.keyboard.press("Alt+e");
+  await expect(page.getByRole("heading", { name: "Eyes-free mode" })).toBeVisible();
+  const box = page.getByLabel("Or type a question or a command");
+  await box.fill("Which lifts should be repaired or protected first?");
+  await box.press("Enter");
+  await expect(page.locator("ol.transcript")).toContainText("recorded answer");
+  await expect.poll(async () => page.evaluate(() => (window as any).__spoken.join(" | "))).toContain("walk me through it");
+  await box.fill("walk me through it"); await box.press("Enter");
+  await expect(page.locator("ol.transcript")).toContainText("Step 1 of");
+  await box.fill("why"); await box.press("Enter");
+  await expect(page.locator("ol.transcript")).toContainText("The proof:");
+  await box.fill("stop"); await box.press("Enter");
+  expect(await page.evaluate(() => (window as any).__cancelled)).toBeGreaterThan(0);
+  const before = await page.evaluate(() => (window as any).__spoken.length);
+  await page.getByLabel("My screen reader voices it (no browser speech)").check();
+  await box.fill("repeat"); await box.press("Enter");
+  await expect(page.locator('[aria-live="assertive"]')).not.toBeEmpty();
+  expect(await page.evaluate(() => (window as any).__spoken.length)).toBe(before);
   await noSeriousAxeIssues(page);
 });

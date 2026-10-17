@@ -1,0 +1,10 @@
+[
+ {"label": "The count", "url": "#/", "dwell": 14000},
+ {"label": "The map, downtown", "url": "#/", "dwell": 12000, "scroll": "mp-h"},
+ {"label": "Alewife, exiting", "url": "#/station/place-alfcl?dir=exit", "dwell": 16000},
+ {"label": "Revere Beach", "url": "#/station/place-rbmnl?dir=board", "dwell": 14000},
+ {"label": "The network", "url": "#/network", "dwell": 16000},
+ {"label": "Repairs and repair order", "url": "#/repairs", "dwell": 14000},
+ {"label": "Operations agents", "url": "#/approvals", "dwell": 14000},
+ {"label": "About", "url": "#/about", "dwell": 10000}
+]

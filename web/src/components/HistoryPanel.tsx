@@ -30,7 +30,7 @@ export function HistoryPanel({ stationId, platformName }: {
       )}
       {lifts.length > 0 && <>
         <h3>{S.hist.liftsTitle}</h3>
-        <div className="table-wrap">
+        <div className="table-wrap" tabIndex={0}>
           <table>
             <thead><tr>
               <th scope="col">{S.hist.colLift}</th><th scope="col">{S.hist.colAvail}</th>
@@ -54,7 +54,7 @@ export function HistoryPanel({ stationId, platformName }: {
           <details key={f}>
             <summary>{S.hist.showMonths(f)}</summary>
             <Strip months={x.months!} label={S.hist.stripLabel(f)} />
-            <div className="table-wrap">
+            <div className="table-wrap" tabIndex={0}>
               <table>
                 <thead><tr><th scope="col">{S.hist.colMonth}</th><th scope="col">{S.hist.colHours}</th></tr></thead>
                 <tbody>{Object.entries(x.months!).map(([m, v]) => (

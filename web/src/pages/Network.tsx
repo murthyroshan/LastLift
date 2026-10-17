@@ -1,9 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { getClaims, getContingency, type Scope } from "../api";
+import type { Camera } from "../components/LiveMap";
 import { href } from "../router";
 import { S } from "../strings.en";
 
 type Tab = keyof typeof S.net.tabs;
+const LiveMap = lazy(() => import("../components/LiveMap").then((m) => ({ default: m.LiveMap })));
+const NET_CAMERA: Camera = { lng: -71.085, lat: 42.345, zoom: 10.7, pitch: 50, bearing: -8 };
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const TABS = Object.keys(S.net.tabs) as Tab[];
 
@@ -12,6 +15,7 @@ export function Network({ scope }: { scope: Scope }) {
   const [c, setC] = useState<Record<string, any> | null>(null);
   const [claims, setClaims] = useState<Record<string, any> | null>(null);
   const [tab, setTab] = useState<Tab>("spof");
+  const [arcLift, setArcLift] = useState<string | null>(null);
   useEffect(() => {
     getContingency(scope).then(setC).catch(() => {});
     getClaims().then(setClaims).catch(() => {});
@@ -20,6 +24,9 @@ export function Network({ scope }: { scope: Scope }) {
   const name = (s: string) => c.names[s] ?? s;
   const now = c.now?.data ?? {};
   const mc = c.monte_carlo?.q?.[String(c.q_assumed)];
+  const cutOff = new Set<string>(c.network_spof.flatMap((x: any) => x.cut_off));
+  const arcEntry = arcLift ? c.network_spof.find((x: any) => x.facility_id === arcLift) : null;
+  const arcHighlight = arcEntry ? new Set<string>([arcEntry.station_id, ...arcEntry.dominates_for]) : cutOff;
 
   function onKey(e: React.KeyboardEvent, i: number) {
     const j = e.key === "ArrowRight" ? i + 1 : e.key === "ArrowLeft" ? i - 1 : null;
@@ -31,32 +38,69 @@ export function Network({ scope }: { scope: Scope }) {
 
   return (
     <>
+      <p className="eyebrow">{S.net.eyebrow}</p>
       <h1>{S.net.title}</h1>
-      <p>{S.net.intro}</p>
-      {claims && <p className="count-line"><strong>{S.net.headline(claims.net_platform_spof_lifts, claims.net_spof_lifts)}</strong></p>}
+      <p className="lead">{S.net.intro}</p>
+      {claims && <>
+        <div className="tiles" aria-hidden="true">
+          <div className="tile" data-k="1"><span className="n">{claims.net_platform_spof_lifts}</span><span className="l">{S.net.tilePlatform}</span></div>
+          <div className="tile" data-k="0"><span className="n">{claims.net_spof_lifts}</span><span className="l">{S.net.tileStation}</span></div>
+          <div className="tile" data-k="0"><span className="n">{claims.net_cut_off_stations}</span><span className="l">{S.net.tileCutOff}</span></div>
+          <div className="tile" data-k="2"><span className="n">{claims.net_rescued_lifts}</span><span className="l">{S.net.tileRescued}</span></div>
+        </div>
+        <p className="count-line"><strong>{S.net.headline(claims.net_platform_spof_lifts, claims.net_spof_lifts)}</strong></p>
+      </>}
       <p className="muted">{S.net.method}</p>
 
-      <section aria-labelledby="now-h" className="panel">
-        <h2 id="now-h">{S.net.nowTitle}</h2>
-        <p>{cap(c.now?.summary ?? "")}</p>
-        {(now.last_link ?? []).length > 0 && <>
-          <h3>{S.net.lastLinkTitle}</h3>
-          <ul>
-            {now.last_link.map((x: any) => (
-              <li key={x.facility_id}>
-                <a href={href(`/station/${x.station_id}`)}>{S.net.lastLink(x.facility_id, name(x.station_id), x.journeys)}</a>
-              </li>
+      <div className="split">
+        <section aria-labelledby="now-h" className="card">
+          <h2 id="now-h">{S.net.nowTitle}</h2>
+          <p className="visually-hidden">{cap(c.now?.summary ?? "")}</p>
+          <div className="tiles compact" aria-hidden="true">
+            <div className="tile" data-k={now.journeys_broken ? "0" : undefined}><span className="n">{now.journeys_broken ?? 0}</span>
+              <span className="l">{S.net.tileBroken}</span></div>
+            <div className="tile" data-k="1"><span className="n">{(now.last_link ?? []).length}</span><span className="l">{S.net.tileLastLink}</span></div>
+            <div className="tile" data-k="1"><span className="n">{(now.critical_pairs ?? []).length}</span><span className="l">{S.net.tilePairs}</span></div>
+          </div>
+          {(now.last_link ?? []).length > 0 && <>
+            <h3>{S.net.lastLinkTitle}</h3>
+            <ul className="link-list">
+              {now.last_link.map((x: any) => (
+                <li key={x.facility_id}>
+                  <a href={href(`/station/${x.station_id}`)}>{S.net.lastLink(x.facility_id, name(x.station_id), x.journeys)}</a>
+                </li>
+              ))}
+            </ul>
+          </>}
+          {(now.critical_pairs ?? []).length > 0 && <>
+            <h3>{S.net.pairsNow}</h3>
+            <ul className="link-list">{now.critical_pairs.map((p: any) => (
+              <li key={`${p.a}-${p.b}`}>{S.net.pairNow(p.closed.join(" + "), [p.a, p.b].filter((x: string) => !p.closed.includes(x)).join(" + "),
+                name(p.station_id), p.platform_directions)}</li>
+            ))}</ul>
+          </>}
+        </section>
+        <section aria-labelledby="nm-h" className="net-map">
+          <h2 id="nm-h">{S.net.mapTitle}</h2>
+          <p className="muted small">{S.net.mapPick}</p>
+          <div className="lift-chips" role="group" aria-label={S.net.mapPick}>
+            {[...c.network_spof].sort((a: any, b: any) => name(a.station_id).localeCompare(name(b.station_id))).map((x: any) => (
+              <button key={x.facility_id} aria-pressed={arcLift === x.facility_id}
+                      onClick={() => setArcLift(arcLift === x.facility_id ? null : x.facility_id)}>
+                <span className="mono">{x.facility_id}</span> {name(x.station_id)}
+              </button>
             ))}
-          </ul>
-        </>}
-        {(now.critical_pairs ?? []).length > 0 && <>
-          <h3>{S.net.pairsNow}</h3>
-          <ul>{now.critical_pairs.map((p: any) => (
-            <li key={`${p.a}-${p.b}`}>{S.net.pairNow(p.closed.join(" + "), [p.a, p.b].filter((x: string) => !p.closed.includes(x)).join(" + "),
-              name(p.station_id), p.platform_directions)}</li>
-          ))}</ul>
-        </>}
-      </section>
+          </div>
+          <div className="net-map-frame">
+            <Suspense fallback={<div className="livemap" aria-hidden="true" />}>
+              <LiveMap camera={NET_CAMERA} highlight={arcHighlight} arcLifts={arcLift ? [arcLift] : []} rise={arcLift ? 0.35 : 1}
+                       labels={arcLift ? [arcEntry?.station_id ?? ""] : []} interactive />
+            </Suspense>
+          </div>
+          <p className="small" aria-live="polite">{arcEntry ? S.net.arcText(arcEntry.facility_id, name(arcEntry.station_id), arcEntry.od_cut)
+            : S.net.mapHelp}</p>
+        </section>
+      </div>
 
       <div role="tablist" aria-label={S.net.title} className="tabs">
         {TABS.map((t, i) => (
@@ -103,7 +147,7 @@ export function Network({ scope }: { scope: Scope }) {
 
 function Table({ head, rows }: { head: string[]; rows: any[][] }) {
   return (
-    <div className="table-wrap">
+    <div className="table-wrap tall" tabIndex={0}>
       <table>
         <thead><tr>{head.map((h) => <th key={h} scope="col">{h}</th>)}</tr></thead>
         <tbody>{rows.map((r, i) => (
@@ -140,7 +184,7 @@ function Matrix({ c, name }: { c: Record<string, any>; name: (s: string) => stri
   return (
     <>
       <p>{S.net.matrixIntro}</p>
-      <canvas ref={canvas} aria-hidden="true" style={{ width: "min(100%, 356px)", imageRendering: "pixelated" }} />
+      <canvas ref={canvas} aria-hidden="true" className="matrix-canvas" style={{ imageRendering: "pixelated" }} />
       <p>
         <label>{S.net.from}{" "}
           <select value={from} onChange={(e) => setFrom(e.target.value)}>

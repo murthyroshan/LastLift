@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { getContingency, getEvalRows, getLiftRecords, getRerouteFor, getStateFor, getStations, getTicketFor, type Envelope, type Scope } from "../api";
+import { OneLift } from "../components/OneLift";
+import { WorstDay } from "../components/WorstDay";
 import { href } from "../router";
 import { S } from "../strings.en";
 
-export function Repairs({ scope }: { scope: Scope }) {
+export function Repairs({ scope, live = false }: { scope: Scope; live?: boolean }) {
   const [state, setState] = useState<Awaited<ReturnType<typeof getStateFor>> | null>(null);
   const [rows, setRows] = useState<Record<string, string>[]>([]);
   const [ticket, setTicket] = useState<Envelope | null>(null);
@@ -34,34 +36,40 @@ export function Repairs({ scope }: { scope: Scope }) {
   if (!state) return <p aria-busy="true">…</p>;
   const ranked: any[] = state.priority.data.ranked;
   const ev = state.eval;
+  const shownRanks = ranked.filter((r) => r.tier <= 2).concat(ranked.filter((r) => r.tier > 2).slice(0, 10));
+  const maxDirs = Math.max(1, ...shownRanks.map((r) => r.platform_directions ?? 0));
+  const maxDeps = Math.max(1, ...shownRanks.map((r) => r.departures_day ?? 0));
+  const maxOut = Math.max(1, ...shownRanks.map((r) => records[r.facility_id]?.outages_12m ?? 0));
+  const pct = (v: number, max: number) => Math.round((100 * (v ?? 0)) / max);
   return (
     <>
+      <p className="eyebrow">{S.repairs.eyebrow}</p>
       <h1>{S.repairs.title}</h1>
-      <p>{S.repairs.intro}</p>
-      <div className="table-wrap">
-        <table>
-          <thead><tr>
-            <th scope="col">{S.repairs.colTier}</th><th scope="col">{S.repairs.colLift}</th>
-            <th scope="col">{S.repairs.colStation}</th><th scope="col">{S.repairs.colDirs}</th>
-            <th scope="col">{S.repairs.colDeps}</th><th scope="col">{S.repairs.colPrior}</th>
-            <th scope="col">{S.repairs.colChronic}</th><th scope="col"></th>
-          </tr></thead>
-          <tbody>
-            {ranked.filter((r) => r.tier <= 2).concat(ranked.filter((r) => r.tier > 2).slice(0, 10)).map((r) => (
-              <tr key={r.facility_id}>
-                <td>{r.tier_label}</td>
-                <th scope="row">{r.facility_id} <span className="muted">{r.name}</span></th>
-                <td><a href={href(`/station/${r.station_id}`)}>{names[r.station_id] ?? r.station_id}</a></td>
-                <td>{r.platform_directions}</td>
-                <td>{r.departures_day}</td>
-                <td>{r.incidents}</td>
-                <td>{records[r.facility_id]?.outages_12m ?? "–"}</td>
-                <td>{r.tier <= 2 && <button onClick={() => openTicket(r.facility_id)}>{S.repairs.draft}</button>}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <p className="lead">{S.repairs.intro}</p>
+      <ol className="rank-list">
+        {shownRanks.map((r, i) => (
+          <li key={`${r.facility_id}-${i}`} className="rank-card" data-tier={r.tier <= 1 ? "now" : r.tier <= 2 ? "protect" : "watch"}>
+            <span className="rank-no" aria-hidden="true">{i + 1}</span>
+            <div className="rank-main">
+              <p className="tier-line"><span className="tier" data-tier={r.tier <= 1 ? "repair_now" : r.tier <= 2 ? "protect" : "watch"}>{r.tier_label}</span></p>
+              <h2 className="rank-title"><span className="mono">{r.facility_id}</span> <span className="muted">{r.name}</span></h2>
+              <p className="rank-station"><a href={href(`/station/${r.station_id}`)}>{names[r.station_id] ?? r.station_id}</a></p>
+            </div>
+            <dl className="rank-metrics">
+              <div><dt>{S.repairs.colDirs}</dt><dd>{r.platform_directions}
+                <span className="bar" data-k="0" aria-hidden="true"><span style={{ width: `${pct(r.platform_directions, maxDirs)}%` }} /></span></dd></div>
+              <div><dt>{S.repairs.colDeps}</dt><dd>{r.departures_day}
+                <span className="bar" data-k="2" aria-hidden="true"><span style={{ width: `${pct(r.departures_day, maxDeps)}%` }} /></span></dd></div>
+              <div><dt>{S.repairs.colPrior}</dt><dd>{r.incidents}</dd></div>
+              <div><dt>{S.repairs.colChronic}</dt><dd>{records[r.facility_id]?.outages_12m ?? "–"}
+                <span className="bar" aria-hidden="true"><span style={{ width: `${pct(records[r.facility_id]?.outages_12m ?? 0, maxOut)}%` }} /></span></dd></div>
+            </dl>
+            <div className="rank-act">
+              {r.tier <= 2 && <button onClick={() => openTicket(r.facility_id)}>{S.repairs.draft}</button>}
+            </div>
+          </li>
+        ))}
+      </ol>
 
       <dialog ref={dlg} aria-labelledby="tk-h">
         <h2 id="tk-h">{S.repairs.ticketTitle}</h2>
@@ -82,9 +90,12 @@ export function Repairs({ scope }: { scope: Scope }) {
           {order.data.gap?.[0] === 0 && order.data.gap?.[1] === 0 ? S.order.greedySame : S.order.greedyDiffers}</p>}
       </section>}
 
-      <h2>{S.repairs.reroute}</h2>
+      <WorstDay live={live} />
+      <OneLift />
+
+      <h2 className="section-gap">{S.repairs.reroute}</h2>
       {reroutes.map((r) => (
-        <section key={r.platform.stop_id} className="panel" style={{ marginBottom: "1rem" }}>
+        <section key={r.platform.stop_id} className="card" style={{ marginBottom: "1rem" }}>
           <h3>{r.platform.name} {r.platform.platform_name}</h3>
           <p><strong>{S.repairs.rerouteExit}:</strong> {r.exit.summary}</p>
           <ol>{(r.exit.data.routes?.[0]?.steps ?? []).map((s: any, i: number) => <li key={i}>{s.text}</li>)}</ol>
@@ -99,7 +110,7 @@ export function Repairs({ scope }: { scope: Scope }) {
         <p><strong>{S.repairs.scored(ev.live_agree, ev.live_partial, ev.live_disagree, ev.live_scored)}</strong></p>
         <p>{S.repairs.falseAccessible(ev.live_false_accessible, (ev.live_false_accessible_cases ?? []).join(", "))}</p>
       </>}
-      <div className="table-wrap">
+      <div className="table-wrap" tabIndex={0}>
         <table>
           <thead><tr><th scope="col">{S.repairs.colAlert}</th><th scope="col">{S.repairs.colMbta}</th>
             <th scope="col">{S.repairs.colModel}</th><th scope="col">{S.repairs.colMatch}</th></tr></thead>
