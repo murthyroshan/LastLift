@@ -3,7 +3,8 @@ import type { Display } from "../lib/display";
 import { S } from "../strings.en";
 
 /** The display and reading panel (UI11): a non-modal dialog; Escape closes it and returns focus to its button. */
-export function DisplayPanel({ value, onChange, onClose }: { value: Display; onChange: (d: Display) => void; onClose: () => void }) {
+export function DisplayPanel({ value, onChange, onClose, eyes, onEyes }: { value: Display; onChange: (d: Display) => void;
+  onClose: () => void; eyes: boolean; onEyes: (on: boolean) => void }) {
   const box = useRef<HTMLDivElement>(null);
   useEffect(() => {
     box.current?.querySelector<HTMLElement>("input, button")?.focus();
@@ -30,6 +31,10 @@ export function DisplayPanel({ value, onChange, onClose }: { value: Display; onC
         onChange={(e) => set({ motion: e.target.checked ? "reduce" : "system" })} /> {S.display.motion}</label>
       <label className="dp-check"><input type="checkbox" checked={value.simple} onChange={(e) => set({ simple: e.target.checked })} />
         {S.display.simple}</label>
+      <label className="dp-check"><input type="checkbox" checked={!!value.readable} onChange={(e) => set({ readable: e.target.checked })} />
+        {S.display.readable}</label>
+      <label className="dp-check"><input type="checkbox" checked={eyes} onChange={(e) => onEyes(e.target.checked)} />
+        {S.display.eyes}</label>
       <p className="muted small">{S.display.note}</p>
       <button onClick={onClose}>{S.agent.close}</button>
     </div>

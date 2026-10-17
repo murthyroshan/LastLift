@@ -489,3 +489,53 @@ button.primary, .btn.primary { background: var(--fg); border-color: var(--fg); c
   clip: rect(0 0 0 0); white-space: nowrap; }
 .shell-cinematic .status-strip { position: absolute; top: 100%; left: 1.25rem; right: 1.25rem; }
 @media (max-width: 1200px) { .shell-cinematic header.site { flex-wrap: wrap; } }
+
+/* ================= One navigation bar, on top, on every page ================= */
+.shell-top { min-height: 100vh; display: flex; flex-direction: column; }
+.shell-top header.site { position: sticky; top: 0; z-index: 40; display: block; padding: 0; border: 0;
+  background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: saturate(1.3) blur(14px);
+  -webkit-backdrop-filter: saturate(1.3) blur(14px); border-bottom: 1px solid var(--line); }
+.shell-top .topbar { display: flex; align-items: center; gap: 1.25rem; max-width: 1320px; margin: 0 auto; padding: 0.55rem 1.5rem; }
+.shell-top .brand { font-size: 1.2rem; min-height: 44px; }
+.shell-top nav.site { display: flex; gap: 0.15rem; margin: 0; flex-wrap: nowrap; }
+.shell-top nav.site a { min-height: 40px; padding: 0 0.85rem; border-radius: 999px; color: var(--muted); font-weight: 600; }
+.shell-top nav.site a:hover { color: var(--fg); background: var(--panel-2); }
+.shell-top nav.site a[aria-current="page"] { color: var(--fg); background: var(--panel); box-shadow: 0 1px 2px rgb(0 0 0 / 0.08), inset 0 0 0 1px var(--line); }
+.shell-top .topbar-tools { margin-left: auto; display: flex; align-items: center; gap: 0.25rem; }
+.shell-top .topbar-tools .search-trigger { width: 12.5rem; }
+.shell-top .topbar-tools button.link { gap: 0.45rem; padding: 0 0.7rem; color: var(--muted); }
+.shell-top .topbar-tools button.link:hover { color: var(--fg); background: var(--panel-2); }
+.shell-top .status-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 0.1rem 1.25rem; max-width: 1320px; margin: 0 auto;
+  padding: 0.15rem 1.5rem 0.35rem; border: 0; background: none; font-size: 0.78rem; position: static; }
+.shell-top .status-strip .live-toggle { margin-left: auto; min-height: 30px; font-size: 0.8rem; padding: 0 0.6rem; }
+.section-tabs { display: flex; gap: 0.3rem; max-width: 1320px; width: 100%; margin: 1rem auto 0; padding: 0 1.5rem; }
+.section-tabs a { min-height: 38px; display: inline-flex; align-items: center; padding: 0 1rem; border-radius: 999px; text-decoration: none;
+  color: var(--muted); font-weight: 600; border: 1px solid var(--line); background: var(--glass); }
+.section-tabs a[aria-current="page"] { color: var(--bg); background: var(--fg); border-color: var(--fg); }
+.shell-top .shell-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.shell-top main { width: 100%; max-width: 1320px; margin: 0 auto; padding: 1.25rem 1.5rem; }
+.shell-top main:has(> .console) { max-width: none; padding: 10px 14px; }
+.shell-top main:has(> .console) .console { height: calc(100vh - 150px); }
+.shell-top main:has(> .hero-light) { max-width: none; padding: 0; }
+.shell-top .hero-light { padding-top: 3rem; min-height: min(calc(100vh - 90px), 820px); }
+.shell-top footer.site { max-width: 1320px; width: 100%; margin: 2rem auto 0; padding: 1rem 1.5rem 2rem; }
+@media (max-width: 1180px) {
+  .shell-top .topbar-tools button.link > span, .shell-top .topbar-tools .search-trigger span, .shell-top .topbar-tools kbd {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .shell-top .topbar-tools .search-trigger { width: auto; }
+}
+@media (max-width: 760px) {
+  .shell-top .topbar { flex-wrap: wrap; gap: 0.4rem 0.75rem; padding: 0.5rem 1rem; }
+  .shell-top nav.site { order: 3; width: 100%; overflow-x: auto; }
+  .shell-top .status-strip, .section-tabs { padding-left: 1rem; padding-right: 1rem; }
+  .shell-top main { padding: 1rem; }
+}
+.shell-top ~ .display-panel, .display-panel { left: auto; right: 1.5rem; top: 4.6rem; bottom: auto; }
+
+/* type system: Bricolage Grotesque headings, Instrument Serif accents, Geist text; Atkinson on request */
+h1, h2 { font-variation-settings: "opsz" 72; }
+.eyebrow, .kpi-l, .pane-h h2, thead th { font-family: var(--mono); }
+.lead { font-family: var(--font); font-weight: 500; letter-spacing: -0.01em; }
+:root[data-readable="on"] { --font: "Atkinson Hyperlegible Next", system-ui, sans-serif; --mono: "Atkinson Hyperlegible Mono", monospace;
+  --display: "Atkinson Hyperlegible Next", system-ui, sans-serif; --serif: "Atkinson Hyperlegible Next", system-ui, sans-serif; }
+:root[data-readable="on"] em { font-style: normal; }

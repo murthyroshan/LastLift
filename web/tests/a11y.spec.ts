@@ -16,8 +16,9 @@ test.beforeEach(async ({ page }) => blockApi(page));
 
 test("landing works from the mirror", async ({ page }) => {
   await page.goto("/#/");
-  await expect(page.locator(".ci-count")).toContainText(/\d+ of \d+/, { timeout: 20000 });
-  await expect(page.getByRole("table")).toBeVisible();
+  // the film's count beat, then the product (the station table now lives on the Network page)
+  await expect(page.locator(".fh-count")).toContainText(/\d+\s*\/\s*\d+/, { timeout: 20000 });
+  await expect(page.locator("#lh-product")).toBeVisible();
   await noSeriousAxeIssues(page);
 });
 
@@ -172,7 +173,7 @@ test("The Count's bins equal the claims, and Now moves platforms between bins", 
   const claims = JSON.parse(readFileSync("public/claims.json", "utf-8"));
   const h = claims.k_hist_board;
   const many = Object.entries(h).filter(([k]) => /^\d+$/.test(k) && Number(k) >= 2).reduce((s, [, v]) => s + (v as number), 0);
-  await page.goto("/#/");
+  await page.goto("/#/network");     // the count chart lives on the Network page
   const cap = page.locator("figure.count-fig figcaption");
   await expect(cap).toContainText(`${h["1"]} hang by one lift, ${many} have two or more`);
   await expect(cap).toContainText(`${h.at_grade} need no lift, ${h["0"] ?? 0} have no step-free route`);

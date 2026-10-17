@@ -1,0 +1,92 @@
+/* ================= The landing's design language on every page =================
+   Giant display headings that rise in, the section's name as outlined type behind the header, editorial numerals
+   instead of boxed tiles, softer cards, panels that rise in as they scroll into view, and film grain. The landing
+   (.landing) and the dense command console keep their own layouts. */
+
+main#main { position: relative; }
+main#main > * { position: relative; z-index: 1; }
+
+/* the section's name, huge and outlined, behind the page header */
+main#main[data-section]::before {
+  content: attr(data-section); position: absolute; z-index: 0; top: -0.06em; right: -0.03em; pointer-events: none;
+  font-family: var(--display); font-weight: 900; text-transform: uppercase; line-height: 0.8; letter-spacing: -0.01em;
+  font-size: clamp(7rem, 21vw, 21rem); color: transparent; -webkit-text-stroke: 1.5px color-mix(in srgb, var(--fg) 11%, transparent);
+}
+/* entrance animations run for visitors only (App sets html.anim-on; not under reduced motion or in automated test browsers) */
+html.anim-on main#main[data-section]::before { animation: ll-ghost 1400ms cubic-bezier(.2, 0, 0, 1) both; }
+main#main[data-page="console"]::before, main#main[data-page="station"]::before { display: none; }
+@keyframes ll-ghost { from { opacity: 0; transform: translateX(6%); } }
+
+/* page titles: display type, large, rising in as the page arrives */
+main#main:not([data-page="home"]) h1:not(.visually-hidden) {
+  font-family: var(--display); font-weight: 900; text-transform: uppercase; letter-spacing: 0.004em;
+  font-size: clamp(2.3rem, 7.5vw, 7rem); line-height: 0.86; margin: 1.2rem 0 1.1rem; max-width: 16ch; overflow-wrap: anywhere;
+}
+html.anim-on main#main:not([data-page="home"]) h1:not(.visually-hidden) { animation: ll-rise 1000ms cubic-bezier(.2, 0, 0, 1) both; }
+@keyframes ll-rise { from { clip-path: inset(0 0 100% 0); transform: translateY(0.35em); } to { clip-path: inset(0 0 -10% 0); transform: none; } }
+main#main:not([data-page="home"]) .eyebrow { letter-spacing: 0.24em; }
+html.anim-on main#main:not([data-page="home"]) .eyebrow { animation: ll-fade 900ms 120ms both; }
+main#main:not([data-page="home"]) .lead { font-size: clamp(1.12rem, 1.55vw, 1.42rem); line-height: 1.5; max-width: 58ch; }
+html.anim-on main#main:not([data-page="home"]) .lead { animation: ll-fade 900ms 220ms both; }
+@keyframes ll-fade { from { opacity: 0; transform: translateY(14px); } }
+
+/* section headings: display type, uppercase */
+main#main:not([data-page="home"]):not([data-page="console"]) h2 {
+  font-family: var(--display); font-weight: 800; text-transform: uppercase; letter-spacing: 0.01em;
+  font-size: clamp(1.7rem, 2.8vw, 2.6rem); line-height: 0.95;
+}
+
+/* numbers: editorial numerals with a coloured rule, not boxes */
+main#main:not([data-page="home"]) .tiles { gap: 0; margin: 2rem 0 1.5rem; }
+main#main:not([data-page="home"]) .tile { background: transparent; border: 0; border-radius: 0; box-shadow: none;
+  border-top: 2px solid var(--fg); padding: 1.1rem 1.4rem 0.4rem 0; }
+main#main:not([data-page="home"]) .tile + .tile { padding-left: 1.4rem; border-left: 1px solid var(--line); }
+main#main:not([data-page="home"]) .tile[data-k="0"] { border-top-color: var(--k0); }
+main#main:not([data-page="home"]) .tile[data-k="1"] { border-top-color: var(--k1-fill); }
+main#main:not([data-page="home"]) .tile[data-k="2"] { border-top-color: var(--k2); }
+main#main:not([data-page="home"]) .tile::after { display: none; }      /* the coloured rule is on top now, not the side */
+main#main:not([data-page="home"]) .tile .n { font-size: clamp(2.8rem, 5.2vw, 4.8rem); line-height: 0.85; display: block; margin-bottom: 0.4rem; }
+main#main:not([data-page="home"]) .tile .l { font-size: 0.98rem; line-height: 1.4; }
+@media (max-width: 700px) {
+  main#main:not([data-page="home"]) .tile + .tile { padding-left: 0; border-left: 0; }
+}
+
+/* cards: larger radius, more air, a soft lift */
+main#main:not([data-page="home"]) .card { border-radius: 24px; padding: clamp(1.2rem, 2.4vw, 2rem);
+  box-shadow: 0 1px 2px rgb(16 21 28 / 0.04), 0 24px 60px -32px rgb(16 21 28 / 0.28); }
+main#main a.card:hover, main#main .card:has(> a:only-child):hover { transform: translateY(-3px); }
+
+/* section tabs: chunkier pills */
+.section-tabs a { min-height: 42px; padding: 0 1.2rem; font-weight: 700; }
+
+/* panels rise in as they scroll into view (only when motion is welcome; see App) */
+html.reveal-on main#main .rv { opacity: 0; translate: 0 34px; transition: opacity 800ms cubic-bezier(.2, 0, 0, 1), translate 800ms cubic-bezier(.2, 0, 0, 1); }
+html.reveal-on main#main .rv.in { opacity: 1; translate: 0 0; }
+
+/* film grain across the whole site */
+body::after { content: ""; position: fixed; inset: -100%; z-index: 70; pointer-events: none; opacity: 0.05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1.4 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation: ll-grain 0.9s steps(6) infinite; }
+:root[data-theme="dark"] body::after { mix-blend-mode: screen; opacity: 0.04; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) body::after { mix-blend-mode: screen; opacity: 0.04; } }
+.landing::after { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  main#main::before, main#main h1, main#main .eyebrow, main#main .lead { animation: none !important; }
+  body::after { animation: none; }
+}
+:root[data-motion="reduce"] main#main::before, :root[data-motion="reduce"] body::after { animation: none !important; }
+
+/* command console: on narrower screens the stacked layout grows with the page instead of squeezing the lower panels */
+@media (min-width: 1400px) {
+  .shell-top main:has(> .console) .console { height: calc(100vh - 150px); min-height: 720px; }
+}
+@media (max-width: 1399px) {
+  .shell-top main:has(> .console) .console { height: auto; grid-template-rows: auto minmax(28rem, 62vh) 26rem;
+    grid-template-areas: "kpi kpi" "alerts map" "side log"; }
+  .pane-side, .pane-log { max-height: none; }
+}
+@media (max-width: 760px) {
+  .shell-top main:has(> .console) .console { grid-template-columns: 1fr; grid-template-rows: auto 60vh 26rem 26rem 22rem;
+    grid-template-areas: "kpi" "map" "alerts" "side" "log"; }
+}

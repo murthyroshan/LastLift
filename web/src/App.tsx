@@ -19,6 +19,7 @@ import { CommandPalette } from "./components/CommandPalette";
 import { I } from "./components/icons";
 import { DisplayPanel } from "./components/DisplayPanel";
 import { applyDisplay, loadDisplay, type Display } from "./lib/display";
+import { lessMotion, startCursor, startSmoothScroll } from "./lib/motion";
 import { href, useRoute } from "./router";
 import { S } from "./strings.en";
 
@@ -76,22 +77,56 @@ export default function App() {
   useEffect(() => { getDisclaimers().then((d) => setFooter(d.footer)).catch(() => {}); }, []);
 
   const page = route.parts[0] ?? "";
-  const cinematic = page === "";
   const [palette, setPalette] = useState(false);
   const [display, setDisplay] = useState<Display>(loadDisplay);
   const [displayOpen, setDisplayOpen] = useState(false);
   const [displayVersion, setDisplayVersion] = useState(0);
-  const changeDisplay = (d: Display) => { applyDisplay(d); setDisplay(d); setDisplayVersion((v) => v + 1); };
+  const changeDisplay = (d: Display) => { applyDisplay(d, true); setDisplay(d); setDisplayVersion((v) => v + 1); };
   const closeDisplay = useCallback(() => {
     setDisplayOpen(false);
     document.querySelector<HTMLElement>(".display-trigger")?.focus();
   }, []);
-  const nav: [string, string, string, keyof typeof I][] = [
-    ["/", S.nav.home, "", "story"], ["/console", S.nav.console, "console", "command"], ["/network", S.nav.network, "network", "network"],
-    ["/repairs", S.nav.repairs, "repairs", "repairs"], ["/sandbox", S.nav.sandbox, "sandbox", "lift"], ["/history", S.nav.history, "history", "story"], ["/approvals", S.nav.ops, "approvals", "ops"], ["/atlas", S.nav.atlas, "atlas", "network"], ["/about", S.nav.about, "about", "about"]];
+  // five sections; the pages inside a section are tabs under the bar
+  const sections: { key: string; path: string; label: string; pages: string[]; tabs?: [string, string][] }[] = [
+    { key: "home", path: "/", label: S.nav.home, pages: [""] },
+    { key: "command", path: "/console", label: S.nav.console, pages: ["console", "approvals"],
+      tabs: [["/console", S.tabs.live], ["/approvals", S.tabs.agents]] },
+    { key: "network", path: "/network", label: S.nav.network, pages: ["network", "contingency", "history", "station"],
+      tabs: [["/network", S.tabs.network], ["/history", S.tabs.history]] },
+    { key: "plan", path: "/repairs", label: S.nav.plan, pages: ["repairs", "sandbox"],
+      tabs: [["/repairs", S.tabs.priorities], ["/sandbox", S.tabs.whatif]] },
+    { key: "about", path: "/about", label: S.nav.about, pages: ["about", "atlas"],
+      tabs: [["/about", S.tabs.how], ["/atlas", S.tabs.cities]] },
+  ];
+  const current = sections.find((s) => s.pages.includes(page));
+
+  // the landing's motion language on every page: smooth scrolling and the cursor ring
+  useEffect(() => {
+    if (!lessMotion() && !navigator.webdriver) document.documentElement.classList.add("anim-on");
+    const stops = [startSmoothScroll(), startCursor()];
+    return () => stops.forEach((s) => s());
+  }, []);
+  // panels rise in as they scroll into view (not under reduced motion, and not for automated test browsers)
+  useEffect(() => {
+    if (lessMotion() || navigator.webdriver || page === "") return;
+    document.documentElement.classList.add("reveal-on");
+    const io = new IntersectionObserver((es) => es.forEach((e) => {
+      if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+    }), { threshold: 0.08 });
+    const t = window.setTimeout(() => {
+      document.querySelectorAll("#main .card, #main .tiles, #main section, #main .table-wrap").forEach((el) => {
+        if (el.closest(".landing, .console") || el.classList.contains("rv")) return;
+        el.classList.add("rv");
+        const r = el.getBoundingClientRect();
+        if (r.top < window.innerHeight) el.classList.add("in"); else io.observe(el);
+      });
+    }, 60);
+    return () => { clearTimeout(t); io.disconnect(); };
+  }, [route.path, page]);
   const actions = [
     { id: "ask", label: S.nav.ask, run: () => setDrawer(true) },
     { id: "eyes", label: S.eyes.toggle, run: () => setEyes((v) => !v) },
+    { id: "display", label: S.display.button, run: () => setDisplayOpen(true) },
     ...(wake === "live" ? [{ id: "live", label: S.live.toggle, run: () => setWantLive((v) => !v) }] : []),
   ];
   const liveText = scope === "demo" ? S.live.demo
@@ -102,41 +137,48 @@ export default function App() {
     <AnnouncerProvider>
       <a className="skip" href="#main">{S.skip}</a>
       {isPresent() && <Present />}
-      <div className={`shell ${cinematic ? "shell-cinematic" : "shell-console"}`}>
+      <div className="shell shell-top">
         <header className="site">
-          <a className="brand" href={href("/")}>
-            <svg className="brand-mark" viewBox="0 0 28 28" aria-hidden="true" focusable="false">
-              <rect className="cab" x="3" y="2" width="22" height="24" rx="5" />
-              <path className="arrow" d="M14 6.5l4.5 5h-9z M14 21.5l-4.5-5h9z" />
-            </svg>
-            <span>{S.appName}</span>
-          </a>
-          <button className="search-trigger" onClick={() => setPalette(true)} aria-haspopup="dialog" aria-label={S.shell.searchLabel}>
-            <I.search /> <span>{S.shell.search}</span> <kbd>Ctrl K</kbd>
-          </button>
-          <nav className="site" aria-label="Main">
-            {nav.map(([p, label, key, icon]) => {
-              const Icon = I[icon];
-              return <a key={p} href={href(p)} aria-current={page === key ? "page" : undefined}><Icon /><span>{label}</span></a>;
-            })}
-          </nav>
-          <div className="nav-tools">
-            <button className="link" aria-expanded={drawer} onClick={() => setDrawer(true)}><I.agent /><span>{S.nav.ask}</span></button>
-            <button className="link" aria-pressed={eyes} onClick={() => setEyes(!eyes)}><I.ear /><span>{S.eyes.toggle}</span></button>
-            <button className="link display-trigger" aria-expanded={displayOpen} onClick={() => setDisplayOpen(!displayOpen)}>
-              <I.about /><span>{S.display.button}</span></button>
-            <button className="link" aria-pressed={scope === "live"} disabled={wake !== "live"}
-                    title={wake === "live" ? undefined : S.live.needsServer} onClick={() => setWantLive(!wantLive)}>
-              <span className="live-dot" aria-hidden="true" /><span>{S.live.toggle}</span>
-            </button>
+          <div className="topbar">
+            <a className="brand" href={href("/")}>
+              <svg className="brand-mark" viewBox="0 0 28 28" aria-hidden="true" focusable="false">
+                <rect className="cab" x="3" y="2" width="22" height="24" rx="5" />
+                <path className="arrow" d="M14 6.5l4.5 5h-9z M14 21.5l-4.5-5h9z" />
+              </svg>
+              <span>{S.appName}</span>
+            </a>
+            <nav className="site" aria-label="Main">
+              {sections.map((s) => (
+                <a key={s.key} href={href(s.path)} aria-current={current?.key === s.key ? "page" : undefined}>{s.label}</a>
+              ))}
+            </nav>
+            <div className="topbar-tools">
+              <button className="search-trigger" onClick={() => setPalette(true)} aria-haspopup="dialog" aria-label={S.shell.searchLabel}>
+                <I.search /> <span>{S.shell.search}</span> <kbd>Ctrl K</kbd>
+              </button>
+              <button className="link" aria-expanded={drawer} onClick={() => setDrawer(true)}><I.agent /><span>{S.nav.ask}</span></button>
+              <button className="link display-trigger" aria-expanded={displayOpen} onClick={() => setDisplayOpen(!displayOpen)}>
+                <I.about /><span>{S.display.button}</span></button>
+            </div>
           </div>
           <div className="status-strip">
             <div className="banner" data-state={wake} role="status">{S.wake[wake]}</div>
             <div className="banner" data-state={scope === "live" ? (status?.stale ? "waking" : "live") : "demo"} role="status">{liveText}</div>
+            <button className="link live-toggle" aria-pressed={scope === "live"} disabled={wake !== "live"}
+                    title={wake === "live" ? undefined : S.live.needsServer} onClick={() => setWantLive(!wantLive)}>
+              <span className="live-dot" aria-hidden="true" />{S.live.toggle}
+            </button>
           </div>
         </header>
+        {current?.tabs && (
+          <nav className="section-tabs" aria-label={S.tabs.label(current.label)}>
+            {current.tabs.map(([p, label]) => (
+              <a key={p} href={href(p)} aria-current={`/${page}` === p ? "page" : undefined}>{label}</a>
+            ))}
+          </nav>
+        )}
         <div className="shell-main">
-          <main id="main" tabIndex={-1} key={displayVersion}>
+          <main id="main" tabIndex={-1} key={displayVersion} data-page={page || "home"} data-section={page && current ? current.label : undefined}>
             {page === "station" ? <Station key={scope} route={route} live={wake === "live"} scope={scope} />
               : page === "console" ? <Console key={scope} scope={scope} />
               : page === "repairs" ? <Repairs key={scope} scope={scope} live={wake === "live"} />
@@ -152,7 +194,8 @@ export default function App() {
           <footer className="site"><p>{footer}</p></footer>
         </div>
       </div>
-      {displayOpen && <DisplayPanel value={display} onChange={changeDisplay} onClose={closeDisplay} />}
+      {displayOpen && <DisplayPanel value={display} onChange={changeDisplay} onClose={closeDisplay}
+                                    eyes={eyes} onEyes={(v) => setEyes(v)} />}
       <CommandPalette open={palette} setOpen={setPalette} actions={actions} />
       {drawer && <AgentDrawer live={wake === "live"} scope={scope} onClose={close} />}
       {eyes && <EyesFree live={wake === "live"} onClose={closeEyes} />}

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LastLift type options</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=IBM+Plex+Mono:wght@400;600&family=Unbounded:wght@600;900&family=Manrope:wght@400;600&family=Fraunces:opsz,wght@9..144,500;9..144,900&family=JetBrains+Mono:wght@400;600&family=Syne:wght@700;800&family=Schibsted+Grotesk:wght@400;500;700&family=Archivo:wdth,wght@62..125,400..900&display=swap" />
+<style>
+  body { margin: 0; background: #f5f3ee; color: #16181d; font-family: system-ui, sans-serif; }
+  .opt { display: grid; grid-template-columns: 9rem 1fr; gap: 2rem; padding: 2.4rem 3rem; border-bottom: 1px solid #e0dbd1; align-items: center; }
+  .tag { font: 600 1rem/1.3 system-ui; }
+  .tag b { display: block; font-size: 2.6rem; line-height: 1; }
+  .tag span { color: #6b6f76; font-weight: 400; font-size: 0.85rem; }
+  h1 { margin: 0 0 0.6rem; font-size: 4.2rem; line-height: 0.95; }
+  .count { margin: 0; display: flex; align-items: baseline; gap: 0.5rem; }
+  .count b { font-size: 5rem; line-height: 0.9; color: #e8890c; }
+  .count span { font-size: 1.6rem; color: #6b6f76; }
+  p.body { margin: 0.6rem 0 0; font-size: 1.15rem; max-width: 52ch; color: #3d4148; }
+  .mono { font-size: 0.85rem; letter-spacing: 0.16em; text-transform: uppercase; color: #6b6f76; margin: 0 0 0.6rem; }
+  /* A */ .a h1, .a .count b { font-family: "Syne"; font-weight: 800; letter-spacing: -0.035em; }
+          .a .body, .a .count span, .a .mono { font-family: "Schibsted Grotesk"; }
+  /* B */ .b h1, .b .count b { font-family: "Big Shoulders Display"; font-weight: 900; text-transform: uppercase; letter-spacing: 0.01em; }
+          .b h1 { font-size: 5.4rem; } .b .body, .b .count span, .b .mono { font-family: "IBM Plex Mono"; } .b .body { font-size: 1rem; }
+  /* C */ .c h1, .c .count b { font-family: "Unbounded"; font-weight: 900; letter-spacing: -0.04em; } .c h1 { font-size: 3.5rem; }
+          .c .body, .c .count span { font-family: "Manrope"; } .c .mono { font-family: "Manrope"; font-weight: 600; }
+  /* D */ .d h1, .d .count b { font-family: "Fraunces"; font-weight: 900; letter-spacing: -0.03em; font-variation-settings: "opsz" 144, "SOFT" 100; }
+          .d .body, .d .count span, .d .mono { font-family: "Schibsted Grotesk"; }
+  /* E */ .e h1, .e .count b { font-family: "Archivo"; font-weight: 900; font-stretch: 125%; letter-spacing: -0.03em; } .e h1 { font-size: 3.6rem; }
+          .e .body, .e .count span { font-family: "Archivo"; font-stretch: 100%; } .e .mono { font-family: "JetBrains Mono"; }
+</style>
+</head>
+<body>
+<section class="opt a"><div class="tag"><b>A</b>Syne + Schibsted Grotesk<br /><span>art-gallery wide, unusual letterforms</span></div>
+  <div><p class="mono">MBTA open data · FalkorDB max-flow</p><h1>Find the last lift before it fails.</h1>
+  <p class="count"><b>89</b><span>of 366 platforms hang on a single lift</span></p>
+  <p class="body">One closed lift at Alewife and lift 813 becomes the only step-free way out for three platforms.</p></div></section>
+<section class="opt b"><div class="tag"><b>B</b>Big Shoulders + IBM Plex Mono<br /><span>tall transit-signage capitals, engineering mono</span></div>
+  <div><p class="mono">MBTA open data · FalkorDB max-flow</p><h1>Find the last lift before it fails.</h1>
+  <p class="count"><b>89</b><span>of 366 platforms hang on a single lift</span></p>
+  <p class="body">One closed lift at Alewife and lift 813 becomes the only step-free way out for three platforms.</p></div></section>
+<section class="opt c"><div class="tag"><b>C</b>Unbounded + Manrope<br /><span>wide, futuristic, very bold</span></div>
+  <div><p class="mono">MBTA open data · FalkorDB max-flow</p><h1>Find the last lift before it fails.</h1>
+  <p class="count"><b>89</b><span>of 366 platforms hang on a single lift</span></p>
+  <p class="body">One closed lift at Alewife and lift 813 becomes the only step-free way out for three platforms.</p></div></section>
+<section class="opt d"><div class="tag"><b>D</b>Fraunces + Schibsted Grotesk<br /><span>soft heavy serif, warm editorial</span></div>
+  <div><p class="mono">MBTA open data · FalkorDB max-flow</p><h1>Find the last lift before it fails.</h1>
+  <p class="count"><b>89</b><span>of 366 platforms hang on a single lift</span></p>
+  <p class="body">One closed lift at Alewife and lift 813 becomes the only step-free way out for three platforms.</p></div></section>
+<section class="opt e"><div class="tag"><b>E</b>Archivo Expanded + JetBrains Mono<br /><span>Swiss transit poster, extra-wide and heavy</span></div>
+  <div><p class="mono">MBTA open data · FalkorDB max-flow</p><h1>Find the last lift before it fails.</h1>
+  <p class="count"><b>89</b><span>of 366 platforms hang on a single lift</span></p>
+  <p class="body">One closed lift at Alewife and lift 813 becomes the only step-free way out for three platforms.</p></div></section>
+</body>
+</html>
