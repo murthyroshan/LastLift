@@ -6,6 +6,7 @@ outages are published as ACCESS_ISSUE rather than ELEVATOR_CLOSURE. Each closure
   cannot_assess  - the lift exists but its station has no pathway data (e.g. many commuter-rail stops)
 """
 import json
+import threading
 from functools import lru_cache
 
 from .config import REPO_ROOT
@@ -40,26 +41,50 @@ def activity() -> dict:
     return json.loads(ACTIVITY_FILE.read_text(encoding="utf-8"))
 
 
+def closure(alert: dict, facility_types: dict, captured_at: str) -> dict | None:
+    """One MBTA alert -> a lift closure record, or None if it names no elevator-like facility."""
+    attrs = alert["attributes"]
+    ies = attrs.get("informed_entity") or []
+    fids = sorted({ie["facility"] for ie in ies
+                   if ie.get("facility") and facility_types.get(ie["facility"]) in ELEVATOR_TYPES})
+    if not fids and attrs.get("effect") == "ELEVATOR_CLOSURE":
+        fids = sorted({ie["facility"] for ie in ies if ie.get("facility")})
+    if not fids:
+        return None
+    stations = sorted({ie["stop"] for ie in ies if str(ie.get("stop", "")).startswith("place-")})
+    periods = attrs.get("active_period") or []
+    return {"alert_id": alert["id"], "effect": attrs.get("effect"), "facility_ids": fids, "stations": stations,
+            "header": attrs.get("header"), "updated_at": attrs.get("updated_at"),
+            "started": periods[0].get("start") if periods else None, "captured_at": captured_at}
+
+
 def lift_alerts(alert_ids=None, cutoff: str | None = None) -> list[dict]:
     """Elevator-related alerts with their facility ids, newest version (at or before `cutoff`) each."""
     out = []
     for aid, rec in sorted(latest_versions(cutoff).items()):
         if alert_ids is not None and aid not in alert_ids:
             continue
-        attrs = rec["alert"]["attributes"]
-        types = rec.get("facility_types", {})
-        fids = sorted({ie["facility"] for ie in attrs.get("informed_entity", [])
-                       if ie.get("facility") and types.get(ie["facility"]) in ELEVATOR_TYPES})
-        if not fids and attrs.get("effect") == "ELEVATOR_CLOSURE":
-            fids = sorted({ie["facility"] for ie in attrs.get("informed_entity", []) if ie.get("facility")})
-        if not fids:
-            continue
-        stations = sorted({ie["stop"] for ie in attrs.get("informed_entity", []) if str(ie.get("stop", "")).startswith("place-")})
-        periods = attrs.get("active_period") or []
-        out.append({"alert_id": aid, "effect": attrs.get("effect"), "facility_ids": fids, "stations": stations,
-                    "header": attrs.get("header"), "updated_at": attrs.get("updated_at"),
-                    "started": periods[0].get("start") if periods else None, "captured_at": rec["captured_at"]})
+        c = closure(rec["alert"], rec.get("facility_types", {}), rec["captured_at"])
+        if c:
+            out.append(c)
     return out
+
+
+# The live feed's latest poll (lastlift/live.py). None until a poll succeeds: the live scope then uses the
+# committed harvest.
+_live_lock = threading.Lock()
+_live: dict | None = None
+
+
+def set_live(closures: list[dict], polled_at: str):
+    global _live
+    with _live_lock:
+        _live = {"closures": closures, "polled_at": polled_at}
+
+
+def live_snapshot() -> dict | None:
+    with _live_lock:
+        return dict(_live) if _live else None
 
 
 def demo_freeze() -> dict | None:
@@ -79,5 +104,6 @@ def closures_for(scope: str) -> list[dict]:
         f = demo_freeze()  # versions captured after the freeze never change the demo
         return lift_alerts(set(f["alert_ids"]), cutoff=f["frozen_at"]) if f else []
     if scope == "live":
-        return lift_alerts()
+        snap = live_snapshot()
+        return snap["closures"] if snap else lift_alerts()
     return []

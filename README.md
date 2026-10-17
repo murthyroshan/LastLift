@@ -85,6 +85,8 @@ Everything LastLift computes is computed in FalkorDB: redundancy (`algo.maxFlow`
 - The agent reaches the tools **only through MCP** (an in-memory MCP client; a test breaks every direct path and the agent still answers).
 - Every answer is grounded: an id or number that is not in a tool result, or wording our copy rules forbid, sends the answer back to a deterministic template built from the tool results.
 - Repair priority ranks lifts to repair now (closed, platforms cut off), to protect (working, but newly the last lift) and structural single points of failure; `draft_action` drafts a ticket and never files it.
+- Providers fail over in a fixed chain: Groq `qwen/qwen3.8-27b`, then `openai/gpt-oss-120b`, then Gemini `gemini-3.1-flash-lite`, then the template. Each switch appears in the run's trace, the answer names the model that wrote it, and a daily token budget (counted from the providers' usage figures) stops LLM calls before the free quotas run out. A fault-injection test (`tests/test_chain.py`) fails each tier in turn.
+- Every run has a W3C trace id (send a `traceparent` header to join your own trace); each tool call has its own span id, and LLM calls are logged with OpenTelemetry GenAI attribute names (`gen_ai.system`, `gen_ai.request.model`, `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`).
 - Seven recorded runs in `web/public/replay/` re-execute against the graph in CI (`scripts/verify_replays.py`): a recorded fact that no longer matches the graph fails the build.
 
 ## Use the same tools from any MCP client
@@ -205,7 +207,8 @@ FalkorDB algorithms used: `algo.maxFlow` (redundancy, certified), `algo.WCC` (lo
 graph LR
   GTFS[MBTA GTFS + alerts] --> Ingest[ingest/build_snapshot.py] --> Snap[(snapshot JSONL)] --> Seed[seed.py] --> FDB[(FalkorDB 4.22)]
   FDB --> Tools[8 tools] --> API[FastAPI /v1] --> Web[website]
-  Tools --> MCP[MCP server /mcp] --> Agent[agent: Groq LLM or template]
+  Tools --> MCP[MCP server /mcp] --> Agent[agent: LLM chain or template]
+  V3[MBTA V3 alerts] -.->|LIVE_FEED=on| Poller[live poller] --> FDB
   MCP --> Clients[any MCP client]
   FDB --> Mirror[scripts/build_mirror.py] --> Web
 ```
@@ -223,7 +226,7 @@ python -m venv .venv
 cd web && npm ci && npm run dev                              # website (VITE_API_BASE=http://localhost:8000)
 ```
 
-No API key is needed: without an LLM key the agent answers through its deterministic template. Configuration comes from environment variables or a `.env` file one level above the repository (names in `.env.example`); secrets are never committed.
+No API key is needed: without an LLM key the agent answers through its deterministic template. The website shows the frozen demo alerts by default; its **Live** toggle switches to the `live` scope, which follows the MBTA's current alerts when the server runs with `LIVE_FEED=on` (polled every `LIVE_POLL_S` seconds; `GET /v1/live` reports the last poll and marks it stale after five minutes) and otherwise uses the latest committed alert harvest. Configuration comes from environment variables or a `.env` file one level above the repository (names in `.env.example`); secrets are never committed.
 
 **Reproduce every number:** `python scripts/analyze.py` (the max-flow sweep in FalkorDB), `python scripts/verify_claims.py` (an independent NetworkX re-derivation), `python scripts/eval.py` (the validation), `python scripts/readme_sync.py --check` (this README against `claims.json`).
 

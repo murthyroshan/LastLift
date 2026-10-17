@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { getDisclaimers, pingLive } from "./api";
+import { getDisclaimers, getLiveStatus, pingLive, type LiveStatus, type Scope } from "./api";
 import { AgentDrawer } from "./components/AgentDrawer";
 import { AnnouncerProvider } from "./components/Announcer";
 import { About } from "./pages/About";
@@ -29,9 +29,26 @@ function useWake(): Wake {
   return wake;
 }
 
+/** The live feed's status while the Live scope is on, refreshed every minute. */
+function useLiveStatus(on: boolean): LiveStatus | null {
+  const [status, setStatus] = useState<LiveStatus | null>(null);
+  useEffect(() => {
+    if (!on) { setStatus(null); return; }
+    let stop = false;
+    const tick = () => getLiveStatus().then((s) => !stop && setStatus(s)).catch(() => {});
+    tick();
+    const id = window.setInterval(tick, 60000);
+    return () => { stop = true; clearInterval(id); };
+  }, [on]);
+  return status;
+}
+
 export default function App() {
   const route = useRoute();
   const wake = useWake();
+  const [wantLive, setWantLive] = useState(false);
+  const scope: Scope = wantLive && wake === "live" ? "live" : "demo";
+  const status = useLiveStatus(scope === "live");
   const [drawer, setDrawer] = useState(false);
   const [footer, setFooter] = useState("");
   const close = useCallback(() => setDrawer(false), []);
@@ -50,16 +67,26 @@ export default function App() {
             <a key={p} href={href(p)} aria-current={page === key ? "page" : undefined}>{label}</a>
           ))}
           <button className="link" aria-expanded={drawer} onClick={() => setDrawer(true)}>{S.nav.ask}</button>
+          <button className="link" aria-pressed={scope === "live"} disabled={wake !== "live"}
+                  title={wake === "live" ? undefined : S.live.needsServer} onClick={() => setWantLive(!wantLive)}>
+            {S.live.toggle}
+          </button>
         </nav>
       </header>
       <div className="banner" data-state={wake} role="status">{S.wake[wake]}</div>
+      <div className="banner" data-state={scope === "live" ? (status?.stale ? "waking" : "live") : "demo"} role="status">
+        {scope === "demo" ? S.live.demo
+          : !status ? S.live.loading
+          : status.source === "harvest" ? S.live.harvest
+          : S.live.polled(Math.floor((status.age_s ?? 0) / 60), status.alerts ?? 0, status.closed.length, status.stale)}
+      </div>
       <main id="main" tabIndex={-1}>
-        {page === "station" ? <Station route={route} live={wake === "live"} />
-          : page === "repairs" ? <Repairs />
+        {page === "station" ? <Station key={scope} route={route} live={wake === "live"} scope={scope} />
+          : page === "repairs" ? <Repairs key={scope} scope={scope} />
           : page === "about" ? <About />
-          : <Landing />}
+          : <Landing key={scope} scope={scope} />}
       </main>
-      {drawer && <AgentDrawer live={wake === "live"} onClose={close} />}
+      {drawer && <AgentDrawer live={wake === "live"} scope={scope} onClose={close} />}
       <footer className="site"><p>{footer}</p></footer>
     </AnnouncerProvider>
   );

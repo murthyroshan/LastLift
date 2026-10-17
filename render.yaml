@@ -18,7 +18,7 @@ services:
       - key: ACTIONS_MODE
         value: draft
       - key: LIVE_FEED
-        value: "off"
+        value: "on"
       - key: GROQ_MODEL
         value: qwen/qwen3.8-27b
       - key: GROQ_FALLBACK_MODEL
@@ -29,6 +29,10 @@ services:
         value: murthyroshan/lastlift-ops
       - key: LIVE_DAILY_LLM_CAP
         value: "150"
+      - key: LLM_DAILY_TOKEN_BUDGET
+        value: "400000"
+      - key: LIVE_POLL_S
+        value: "60"
       - key: ALLOWED_ORIGINS
         sync: false
       - key: GROQ_API_KEY

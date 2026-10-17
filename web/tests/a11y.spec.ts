@@ -76,3 +76,33 @@ for (const path of ["/#/", "/#/station/place-alfcl?dir=exit", "/#/repairs"]) {
     await noSeriousAxeIssues(page);
   });
 }
+
+test("the Live toggle needs the server and says so", async ({ page }) => {
+  await page.goto("/#/");
+  const toggle = page.getByRole("button", { name: "Live" });
+  await expect(toggle).toBeDisabled();
+  await expect(page.getByText(/frozen demo alerts/)).toBeVisible();
+});
+
+test("Live scope reads the API and shows the feed status", async ({ page }) => {
+  const { readFileSync } = await import("node:fs");
+  const mirrored = JSON.parse(readFileSync("public/m/state.json", "utf-8"));
+  const ok = (body: unknown) => ({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+  const asked: string[] = [];
+  await page.route(/\/healthz$/, (r) => r.fulfill(ok({ ok: true })));
+  await page.route(/\/v1\/live$/, (r) => r.fulfill(ok({ feed: "on", source: "mbta_api", age_s: 30, stale: false,
+    state_version: 2, closed: ["885"], alerts: 4, last_ok_at: null, last_error: null })));
+  await page.route(/\/v1\/tools\/(current_closures|repair_priority)$/, (r) => {
+    const name = r.request().url().split("/").pop()!;
+    asked.push(`${name}:${JSON.parse(r.request().postData() ?? "{}").scope}`);
+    return r.fulfill(ok(name === "current_closures" ? mirrored.closures : mirrored.priority));
+  });
+  await page.goto("/#/");
+  const toggle = page.getByRole("button", { name: "Live" });
+  await expect(toggle).toBeEnabled();
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByText(/MBTA alerts polled under a minute ago/)).toBeVisible();
+  expect(asked).toContain("current_closures:live");
+  await noSeriousAxeIssues(page);
+});

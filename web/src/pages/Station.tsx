@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { getStation, getWhatIf, type StationBundle, type StationGraph, type WhatIfBundle } from "../api";
+import { getStationFor, getWhatIf, type Scope, type StationBundle, type StationGraph, type WhatIfBundle } from "../api";
 import { useAnnounce } from "../components/Announcer";
 import { KState } from "../components/KState";
 import { XRay } from "../components/XRay";
@@ -8,7 +8,7 @@ import { S } from "../strings.en";
 
 type Dir = "board" | "exit";
 
-export function Station({ route, live }: { route: Route; live: boolean }) {
+export function Station({ route, live, scope }: { route: Route; live: boolean; scope: Scope }) {
   const id = route.parts[1];
   const dir: Dir = route.query.get("dir") === "exit" ? "exit" : "board";
   const [bundle, setBundle] = useState<StationBundle | null>(null);
@@ -20,8 +20,8 @@ export function Station({ route, live }: { route: Route; live: boolean }) {
 
   useEffect(() => {
     setBundle(null); setMissing(false); setSim(null); setSelected(null);
-    getStation(id).then(setBundle).catch(() => setMissing(true));
-  }, [id]);
+    getStationFor(id, scope).then(setBundle).catch(() => setMissing(true));
+  }, [id, scope]);
 
   const base: StationGraph | undefined = bundle?.graph[dir];
   const shown: StationGraph | undefined = (sim?.data.graph[dir] as StationGraph | undefined) ?? base;
@@ -58,7 +58,7 @@ export function Station({ route, live }: { route: Route; live: boolean }) {
 
   async function simulate(fid: string) {
     setSimError("");
-    const data = await getWhatIf(id, fid, live).catch(() => null);
+    const data = await getWhatIf(id, fid, live, scope).catch(() => null);
     if (!data || !data.graph[dir]) { setSimError(data ? data.whatif.summary : S.whatif.needsLive); return; }
     setSim({ fid, data });
     announce(S.whatif.announce(data.whatif.summary));

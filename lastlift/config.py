@@ -46,6 +46,8 @@ class Settings:
     live_feed: str
     allowed_origins: tuple[str, ...]
     live_daily_llm_cap: int
+    llm_daily_token_budget: int
+    live_poll_s: int
 
     def graph(self, name: str) -> str:
         """Full graph name, e.g. graph('base') -> 'dev_ll_base' locally, 'll_base' in production."""
@@ -74,6 +76,8 @@ def load_settings() -> Settings:
         live_feed=_get(f, "LIVE_FEED", "off"),
         allowed_origins=tuple(o.strip() for o in _get(f, "ALLOWED_ORIGINS", "http://localhost:5173").split(",") if o.strip()),
         live_daily_llm_cap=int(_get(f, "LIVE_DAILY_LLM_CAP", "150")),
+        llm_daily_token_budget=int(_get(f, "LLM_DAILY_TOKEN_BUDGET", "400000")),
+        live_poll_s=int(_get(f, "LIVE_POLL_S", "60")),
     )
 
 

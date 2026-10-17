@@ -1,15 +1,21 @@
 """The agent loop. Tools come only from the MCP server, through an in-memory MCP client (list_tools / call_tool);
 the agent never imports or calls the tool registry itself.
 
-  live:      Groq qwen with parallel tool calls, at most MAX_ROUNDS tool rounds, then a final call with
-             tool_choice "none" to write the answer; the answer must pass the grounding validator.
+  live:      the provider chain (llm.py: qwen -> gpt-oss-120b -> Gemini flash-lite) with parallel tool calls, at
+             most MAX_ROUNDS tool rounds, then a final call with tool_choice "none" to write the answer; the answer
+             must pass the grounding validator. Every tier switch is an "error" event with stage "llm_failover".
   otherwise: the rule-based router chooses the tools.
 Any LLM failure, budget exhaustion or grounding failure falls back to the deterministic template over the
 tool results already gathered (or the router's, if none were gathered). Every step is emitted as an event
 (contracts/ask_events.schema.json): the SSE stream, the recorder and the tests all consume the same events.
+
+Tracing follows W3C Trace Context: a caller's `traceparent` header joins its trace, otherwise a new trace id is
+made; the run, each tool call and each LLM call get their own span ids, carried on the events.
 """
 import asyncio
 import json
+import re
+import secrets
 import time
 
 from fastmcp import Client
@@ -32,13 +38,26 @@ SYSTEM = (
     "Check mbta.com/alerts/access."
 )
 _llm_calls_today = {"day": None, "n": 0}
+_TRACEPARENT = re.compile(r"^00-([0-9a-f]{32})-([0-9a-f]{16})-[0-9a-f]{2}$")
+
+
+def parse_traceparent(header: str | None) -> tuple[str, str | None]:
+    """(trace_id, parent_span_id) from a W3C traceparent header; a fresh trace id if it is absent or invalid."""
+    m = _TRACEPARENT.match((header or "").strip().lower())
+    if m and set(m.group(1)) != {"0"} and set(m.group(2)) != {"0"}:
+        return m.group(1), m.group(2)
+    return secrets.token_hex(16), None
+
+
+def _span_id() -> str:
+    return secrets.token_hex(8)
 
 
 def _budget_ok() -> bool:
     day = time.strftime("%Y-%m-%d")
     if _llm_calls_today["day"] != day:
         _llm_calls_today.update(day=day, n=0)
-    return _llm_calls_today["n"] < settings.live_daily_llm_cap
+    return _llm_calls_today["n"] < settings.live_daily_llm_cap and llm.budget_left() > 0
 
 
 def _spend():
@@ -69,10 +88,13 @@ def _compact(env: dict, limit=2000) -> str:
     return text[:limit]
 
 
-async def ask(question: str, scope: str = "demo", mode: str | None = None, emit=None) -> dict:
+async def ask(question: str, scope: str = "demo", mode: str | None = None, emit=None,
+              traceparent: str | None = None) -> dict:
     mode = mode or settings.llm_mode
     events, results, seq = [], [], 0
     started = time.perf_counter()
+    trace_id, parent_span = parse_traceparent(traceparent)
+    root_span = _span_id()
 
     def send(kind, **payload):
         nonlocal seq
@@ -84,14 +106,16 @@ async def ask(question: str, scope: str = "demo", mode: str | None = None, emit=
             emit(ev)
         return ev
 
-    send("start", question=question, scope=scope, mode=mode)
+    send("start", question=question, scope=scope, mode=mode, trace_id=trace_id, span_id=root_span,
+         **({"parent_span_id": parent_span} if parent_span else {}))
     async with Client(mcp) as client:
         mcp_tools = await client.list_tools()
         params = {t.name: set((t.input_schema or {}).get("properties", {})) for t in mcp_tools}
 
         async def call(name, args):
             args = {k: v for k, v in (args or {}).items() if k != "scope"}
-            send("tool_call", tool=name, args=dict(args))
+            span = _span_id()
+            send("tool_call", tool=name, args=dict(args), span_id=span)
             if "scope" in params.get(name, ()):
                 args["scope"] = scope                       # set by the server, never by the model
             res = await client.call_tool(name, args, raise_on_error=False)
@@ -99,18 +123,20 @@ async def ask(question: str, scope: str = "demo", mode: str | None = None, emit=
                                              "summary": f"tool error: {res.content[0].text if res.content else ''}"[:300],
                                              "data": {}, "entities": []}
             results.append(env)
-            send("tool_result", tool=name, ok=env.get("ok"), summary=env.get("summary"), via=env.get("via"),
+            send("tool_result", tool=name, span_id=span, ok=env.get("ok"), summary=env.get("summary"), via=env.get("via"),
                  digest=replay.digest(env), queries=(env.get("evidence") or {}).get("query_ids", []),
                  ms=(env.get("evidence") or {}).get("ms"), entities=env.get("entities", []),
                  highlight=env.get("highlight", {"nodes": [], "edges": []}))
             return env
 
         text, source, problems = None, "template", []
+        chain = llm.Chain(trace_id)
         if mode == "live" and _budget_ok():
             try:
-                text = await _llm_answer(question, client, mcp_tools, call, send)
+                text = await _llm_answer(question, client, mcp_tools, call, send, chain)
                 source = "llm"
             except llm.LLMError as exc:
+                _drain_failovers(chain, send)
                 send("error", stage="llm", message=str(exc)[:200])
         if text is not None:
             problems = grounding.check(text, results)
@@ -124,17 +150,25 @@ async def ask(question: str, scope: str = "demo", mode: str | None = None, emit=
                 await router.run(question, call)
             text = templates.answer(results)
     send("answer", text=text, source=source, grounded=source == "template" or not problems,
-         tools=[r.get("tool") for r in results])
+         tools=[r.get("tool") for r in results], model=chain.models[-1] if source == "llm" and chain.models else None,
+         usage={"input_tokens": chain.tokens["input"], "output_tokens": chain.tokens["output"]})
     send("done", ms=round((time.perf_counter() - started) * 1000, 1))
-    return {"answer": text, "source": source, "events": events, "results": results}
+    return {"answer": text, "source": source, "events": events, "results": results, "trace_id": trace_id}
 
 
-async def _llm_answer(question, client, mcp_tools, call, send) -> str:
+def _drain_failovers(chain, send):
+    while chain.failovers:
+        f = chain.failovers.pop(0)
+        send("error", stage="llm_failover", message=f["message"], from_model=f["from_model"], to_model=f["to_model"])
+
+
+async def _llm_answer(question, client, mcp_tools, call, send, chain) -> str:
     tools_schema = _openai_tools(mcp_tools)
     messages = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": question}]
     for round_no in range(MAX_ROUNDS):
         _spend()
-        msg = await asyncio.to_thread(llm.chat, messages, tools_schema, "auto")
+        msg = await asyncio.to_thread(llm.chat, messages, tools_schema, "auto", chain)
+        _drain_failovers(chain, send)
         calls = msg.get("tool_calls") or []
         if not calls:
             if round_no == 0:
@@ -151,5 +185,6 @@ async def _llm_answer(question, client, mcp_tools, call, send) -> str:
             env = await call(tc["function"]["name"], args)
             messages.append({"role": "tool", "tool_call_id": tc["id"], "content": _compact(env)})
     _spend()
-    final = await asyncio.to_thread(llm.chat, messages, tools_schema, "none")
+    final = await asyncio.to_thread(llm.chat, messages, tools_schema, "none", chain)
+    _drain_failovers(chain, send)
     return (final.get("content") or "").strip()

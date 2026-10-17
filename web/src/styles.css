@@ -57,6 +57,8 @@ footer.site { padding: 1rem; border-top: 1px solid var(--line); color: var(--mut
 .banner[data-state="live"] { border-left: 6px solid var(--k2); }
 .banner[data-state="waking"], .banner[data-state="checking"] { border-left: 6px solid var(--k1); }
 .banner[data-state="offline"] { border-left: 6px solid var(--unknown); }
+.banner[data-state="demo"] { border-left: 6px solid var(--line); }
+button.link[aria-pressed="true"] { font-weight: 700; text-decoration: underline; text-underline-offset: 0.25em; }
 
 h1 { font-size: 2rem; line-height: 1.2; margin: 0.5rem 0; }
 h2 { font-size: 1.4rem; margin: 1.5rem 0 0.5rem; }

@@ -1,19 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
-import { getClaims, getState, getStations } from "../api";
+import { getClaims, getStateFor, getStations, type Scope } from "../api";
 import { href } from "../router";
 import { S } from "../strings.en";
 
-export function Landing() {
+export function Landing({ scope }: { scope: Scope }) {
   const [claims, setClaims] = useState<Record<string, any> | null>(null);
-  const [state, setState] = useState<Awaited<ReturnType<typeof getState>> | null>(null);
+  const [state, setState] = useState<Awaited<ReturnType<typeof getStateFor>> | null>(null);
   const [stations, setStations] = useState<Awaited<ReturnType<typeof getStations>>>([]);
   const [filter, setFilter] = useState("");
 
   useEffect(() => {
     getClaims().then(setClaims).catch(() => {});
-    getState().then(setState).catch(() => {});
+    getStateFor(scope).then(setState).catch(() => {});
     getStations().then(setStations).catch(() => {});
-  }, []);
+  }, [scope]);
 
   const shown = useMemo(() => {
     const f = filter.trim().toLowerCase();

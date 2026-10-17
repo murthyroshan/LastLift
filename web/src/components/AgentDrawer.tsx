@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { askLive, getQueries, getReplay, getReplayIndex } from "../api";
+import { askLive, getQueries, getReplay, getReplayIndex, type Scope } from "../api";
 import { useAnnounce } from "./Announcer";
 import { S } from "../strings.en";
 
 type Ev = Record<string, any>;
 
 /** The agent's run, step by step: every tool call went through MCP; each step's Cypher is one click away. */
-export function AgentDrawer({ live, onClose }: { live: boolean; onClose: () => void }) {
+export function AgentDrawer({ live, scope, onClose }: { live: boolean; scope: Scope; onClose: () => void }) {
   const [index, setIndex] = useState<{ id: string; question: string }[]>([]);
   const [events, setEvents] = useState<Ev[]>([]);
   const [question, setQuestion] = useState("");
@@ -56,10 +56,11 @@ export function AgentDrawer({ live, onClose }: { live: boolean; onClose: () => v
       seen.push(e);
       setEvents([...seen]);
       if (e.type === "done") finish(seen);
-    });
+    }, scope);
   }
 
   const results = events.filter((e) => e.type === "tool_result");
+  const failovers = events.filter((e) => e.type === "error" && e.stage === "llm_failover");
   const answer = events.find((e) => e.type === "answer");
   return (
     <aside className="drawer" aria-labelledby="agent-h">
@@ -105,7 +106,12 @@ export function AgentDrawer({ live, onClose }: { live: boolean; onClose: () => v
       {answer && <>
         <h3>{S.agent.answer}</h3>
         <p>{answer.text}</p>
-        <p className="muted">{answer.source === "llm" ? S.agent.sourceLlm : S.agent.sourceTemplate}</p>
+        <p className="muted">{answer.source === "llm" ? S.agent.sourceLlm : S.agent.sourceTemplate}
+          {answer.source === "llm" && answer.model ? ` (${answer.model})` : ""}</p>
+        {failovers.length > 0 && <ul className="muted">
+          {failovers.map((f, i) => <li key={i}>{S.agent.failover(f.from_model, f.to_model)}</li>)}
+        </ul>}
+        {events[0]?.trace_id && <p className="muted">{S.agent.trace(events[0].trace_id)}</p>}
       </>}
     </aside>
   );

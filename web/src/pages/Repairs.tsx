@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { getEvalRows, getReroute, getState, getStations, getTicket, type Envelope } from "../api";
+import { getEvalRows, getRerouteFor, getStateFor, getStations, getTicketFor, type Envelope, type Scope } from "../api";
 import { href } from "../router";
 import { S } from "../strings.en";
 
-export function Repairs() {
-  const [state, setState] = useState<Awaited<ReturnType<typeof getState>> | null>(null);
+export function Repairs({ scope }: { scope: Scope }) {
+  const [state, setState] = useState<Awaited<ReturnType<typeof getStateFor>> | null>(null);
   const [rows, setRows] = useState<Record<string, string>[]>([]);
   const [ticket, setTicket] = useState<Envelope | null>(null);
   const [names, setNames] = useState<Record<string, string>>({});
@@ -12,18 +12,18 @@ export function Repairs() {
   const dlg = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
-    getState().then((s) => {
+    getStateFor(scope).then((s) => {
       setState(s);
-      const lost = s.closures.data.platforms_lost as { stop_id: string }[];
-      Promise.all(lost.map((p) => getReroute(p.stop_id).catch(() => null)))
+      const lost = s.closures.data.platforms_lost as { stop_id: string; station_id: string }[];
+      Promise.all(lost.map((p) => getRerouteFor(p, scope).catch(() => null)))
         .then((rs) => setReroutes(rs.filter(Boolean) as any));
     }).catch(() => {});
     getEvalRows().then(setRows).catch(() => {});
     getStations().then((ss) => setNames(Object.fromEntries(ss.map((x) => [x.id, x.name])))).catch(() => {});
-  }, []);
+  }, [scope]);
 
   async function openTicket(fid: string) {
-    const t = await getTicket(fid).catch(() => null);
+    const t = await getTicketFor(fid, scope).catch(() => null);
     if (t) { setTicket(t); dlg.current?.showModal(); }
   }
 

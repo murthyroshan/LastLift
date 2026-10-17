@@ -17,6 +17,17 @@ export const S = {
     offline: "The live graph server is not reachable. Everything below is the recorded demo state; simulations of other lifts need it.",
   },
 
+  live: {
+    toggle: "Live",
+    needsServer: "Live needs the graph server to be awake.",
+    demo: "Showing the frozen demo alerts (the judged state). Turn on Live for the MBTA's current alerts.",
+    loading: "Live: reading the current MBTA alerts…",
+    harvest: "Live: the server's live feed is off, so this is the latest committed alert harvest, not this minute's alerts.",
+    polled: (minutes: number, alerts: number, closed: number, stale: boolean) =>
+      `Live: MBTA alerts polled ${minutes ? `${minutes} min` : "under a minute"} ago. Lift alerts: ${alerts}; `
+      + `modelled lifts closed: ${closed}.` + (stale ? " This is stale (no good poll for over five minutes)." : ""),
+  },
+
   home: {
     countLead: (single: number, total: number) => `${single} of ${total}`,
     countText: "step-free platforms in Boston's MBTA station data hang on a single lift.",
@@ -97,6 +108,8 @@ export const S = {
     close: "Close",
     liveOnly: "Live questions need the live graph server; recorded questions always work.",
     running: "Working…",
+    failover: (from: string, to: string) => `${from} was unavailable, so ${to} took over.`,
+    trace: (id: string) => `Trace id ${id}`,
   },
 
   repairs: {
