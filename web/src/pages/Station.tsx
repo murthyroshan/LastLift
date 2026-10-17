@@ -1,13 +1,16 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getStationFor, getWhatIf, type Scope, type StationBundle, type StationGraph, type WhatIfBundle } from "../api";
 import { useAnnounce } from "../components/Announcer";
 import { KState } from "../components/KState";
 import { HistoryPanel } from "../components/HistoryPanel";
 import { ProofPanel } from "../components/ProofPanel";
 import { XRay } from "../components/XRay";
+import { StressMatrix } from "../components/StressMatrix";
+import { ClayModel } from "../components/ClayModel";
+import { simpleOn } from "../lib/display";
+import { realGpu } from "../lib/gpu";
 
-const Station3D = lazy(() => import("../components/three/Station3D").then((m) => ({ default: m.Station3D })));
-const webgl = () => { try { return !!document.createElement("canvas").getContext("webgl2"); } catch { return false; } };
+const webgl = realGpu;   // software renderers start on the plan view, the model one click away
 import { href, type Route } from "../router";
 import { chord, play, setSoundOn, soundOn, type Plan } from "../sonify";
 import { S } from "../strings.en";
@@ -119,7 +122,8 @@ export function Station({ route, live, scope }: { route: Route; live: boolean; s
         <div>
           <p className="eyebrow">{S.station.eyebrow}</p>
           <h1>{red.data.name}</h1>
-          <p className="muted">{S.station.summary(platforms.length, nLost, nSingle, (red.data.closed_here ?? []).join(", "))}</p>
+          <p className="muted">{simpleOn() ? S.simple.summary(platforms.length, nLost, nSingle)
+            : S.station.summary(platforms.length, nLost, nSingle, (red.data.closed_here ?? []).join(", "))}</p>
           {newlyOnly.length > 0 && <ul className="newly">{newlyOnly.map((t) => <li key={t}>{t}</li>)}</ul>}
         </div>
         <div className="tiles" aria-hidden="true">
@@ -164,10 +168,7 @@ export function Station({ route, live, scope }: { route: Route; live: boolean; s
           </div>
           {view === "3d" ? (
             <div className="s3d-frame">
-              <Suspense fallback={<div className="s3d-loading" aria-hidden="true" />}>
-                <Station3D graph={shown} stationName={red.data.name} selected={selected} onPick={pick} routeEdges={routeEdges}
-                           lastLifts={lastLifts} pulse={pulse} simClosed={simClosed} flowKey={flowKey} />
-              </Suspense>
+              <ClayModel stationId={id} dir={dir} selected={selected} closed={[...simClosed]} height="100%" />
             </div>
           ) : (
             <XRay graph={shown} routeEdges={routeEdges} lastLifts={lastLifts} pulse={pulse} simClosed={simClosed}
@@ -246,6 +247,9 @@ export function Station({ route, live, scope }: { route: Route; live: boolean; s
           </section>
         </div>
       </div>
+
+      <StressMatrix board={bundle.graph.board} exit={bundle.graph.exit} name={platformName}
+                    onSimulate={sim ? undefined : (fid) => { void simulate(fid); window.scrollTo({ top: 0, behavior: "smooth" }); }} />
 
       <ProofPanel stationId={id} stop={selected} dir={dir} name={selected ? platformName(selected) : ""} live={live}
                   scope={scope} routes={(base.routes ?? []).filter((r) => r.platform_id === selected)}

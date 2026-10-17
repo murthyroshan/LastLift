@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { getClaims, getContingency, type Scope } from "../api";
 import type { Camera } from "../components/LiveMap";
+import { LineSweep } from "../components/LineSweep";
 import { href } from "../router";
 import { S } from "../strings.en";
 
@@ -101,6 +102,8 @@ export function Network({ scope }: { scope: Scope }) {
             : S.net.mapHelp}</p>
         </section>
       </div>
+
+      <LineSweep />
 
       <div role="tablist" aria-label={S.net.title} className="tabs">
         {TABS.map((t, i) => (

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Clay station viewer</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #F5F3EE; color: #16181D; font-family: Inter, system-ui, sans-serif; }
+  header { padding: 22px 28px 0; display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  h1 { margin: 0; font: 700 40px/1 "Inter Tight", Inter, sans-serif; letter-spacing: -.035em; }
+  #status { color: #6B6F76; font-weight: 500; }
+  #box { height: calc(100vh - 90px); margin: 8px 16px 16px; border-radius: 24px; overflow: hidden;
+    background: radial-gradient(120% 80% at 50% 70%, #FBFAF7 0%, #F5F3EE 55%, #EDEAE3 100%); }
+  /* embed mode: inside the app's station page the frame is the whole canvas */
+  .embed header { display: none; }
+  .embed #box { height: 100vh; margin: 0; border-radius: 0; }
+</style>
+<script type="importmap">
+  { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/",
+      "three/examples/jsm/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/",
+      "postprocessing": "https://cdn.jsdelivr.net/npm/postprocessing@6.36.4/build/index.js",
+      "n8ao": "https://cdn.jsdelivr.net/npm/n8ao@1.9.4/dist/N8AO.js"
+  } }
+</script>
+</head>
+<body>
+<header><h1 id="name">Station</h1><span id="status" role="status" aria-live="polite"></span></header>
+<div id="box"></div>
+<script type="module">
+import { mount } from "/concepts/clay/station.js";
+const q = new URLSearchParams(location.search);
+const id = q.get("id") ?? "place-alfcl";
+if (q.get("embed")) document.documentElement.classList.add("embed");
+const data = await fetch(`/m/station/${id}.json`).then((r) => r.json());
+document.querySelector("#name").textContent = data.redundancy.data.name;
+const say = (s) => document.querySelector("#status").textContent = s.k === null ? "Click a platform or a lift."
+  : s.atGrade ? `${s.platform}: no lift needed` : s.k === 0 ? `${s.platform}: no step-free way out`
+  : s.k === 1 ? `${s.platform}: depends on lift ${s.lastLifts.join(" and ")}` : `${s.platform}: ${s.k} independent ways out`;
+const api = await mount(document.querySelector("#box"), id, { data, dir: q.get("dir") ?? "exit", onChange: say,
+  ...(q.get("pick") ? { select: q.get("pick") } : {}) });
+for (const f of (q.get("close") ?? "").split(",").filter(Boolean)) api.toggle(f);
+say(api.station.summary);
+window.__api = api;
+// the app drives the model: { select: platformId | null } and { closed: [lift ids] } (same origin only)
+const closedNow = new Set((q.get("close") ?? "").split(",").filter(Boolean));
+window.addEventListener("message", (e) => {
+  if (e.origin !== location.origin || !e.data || typeof e.data !== "object") return;
+  if ("select" in e.data) api.select(e.data.select);
+  if (Array.isArray(e.data.closed)) {
+    const want = new Set(e.data.closed.map(String));
+    for (const f of [...closedNow]) if (!want.has(f)) { api.toggle(f); closedNow.delete(f); }
+    for (const f of want) if (!closedNow.has(f)) { api.toggle(f); closedNow.add(f); }
+  }
+});
+</script>
+</body>
+</html>

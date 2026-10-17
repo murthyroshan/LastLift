@@ -1,0 +1,1604 @@
+{
+ "lifts": [
+  {
+   "facility_id": "931",
+   "label": "Airport Elevator 931 (Wonderland platform to paid pedestrian bridge)",
+   "station_id": "place-aport",
+   "station": "Airport",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "932",
+   "label": "Airport Elevator 932 (Bowdoin platform to paid pedestrian bridge)",
+   "station_id": "place-aport",
+   "station": "Airport",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "955",
+   "label": "Airport Elevator 955 (Bremen Street lobby to unpaid pedestrian bridge)",
+   "station_id": "place-aport",
+   "station": "Airport",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "956",
+   "label": "Airport Elevator 956 (Busway lobby to unpaid pedestrian bridge)",
+   "station_id": "place-aport",
+   "station": "Airport",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "813",
+   "label": "Alewife Elevator 813 (Platform to main lobby)",
+   "station_id": "place-alfcl",
+   "station": "Alewife",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "814",
+   "label": "Alewife Elevator 814 (Main lobby to street, parking garage)",
+   "station_id": "place-alfcl",
+   "station": "Alewife",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "815",
+   "label": "Alewife Elevator 815 (Main lobby to street, parking garage)",
+   "station_id": "place-alfcl",
+   "station": "Alewife",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "961",
+   "label": "Alewife Elevator 961 (Platform to Russell Field, Rindge Avenue lobby)",
+   "station_id": "place-alfcl",
+   "station": "Alewife",
+   "status": "closed",
+   "last_lift": false
+  },
+  {
+   "facility_id": "872",
+   "label": "Andrew Elevator 872 (Lobby to street)",
+   "station_id": "place-andrw",
+   "station": "Andrew",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "879",
+   "label": "Andrew Elevator 879 (Ashmont/Braintree platform to lobby)",
+   "station_id": "place-andrw",
+   "station": "Andrew",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "880",
+   "label": "Andrew Elevator 880 (Alewife platform to lobby)",
+   "station_id": "place-andrw",
+   "station": "Andrew",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "913",
+   "label": "Aquarium Elevator 913 (Wonderland platform to State Street lobby)",
+   "station_id": "place-aqucl",
+   "station": "Aquarium",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "914",
+   "label": "Aquarium Elevator 914 (Bowdoin platform to State Street lobby)",
+   "station_id": "place-aqucl",
+   "station": "Aquarium",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "915",
+   "label": "Aquarium Elevator 915 (State Street lobby to street)",
+   "station_id": "place-aqucl",
+   "station": "Aquarium",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "923",
+   "label": "Aquarium Elevator 923 (Bowdoin platform to Atlantic Avenue lobby)",
+   "station_id": "place-aqucl",
+   "station": "Aquarium",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "924",
+   "label": "Aquarium Elevator 924 (Wonderland platform to Atlantic Avenue lobby)",
+   "station_id": "place-aqucl",
+   "station": "Aquarium",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "925",
+   "label": "Aquarium Elevator 925 (Atlantic Avenue lobby to Long Wharf)",
+   "station_id": "place-aqucl",
+   "station": "Aquarium",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "962",
+   "label": "Arlington Elevator 962 (Copley & West platform to lobby)",
+   "station_id": "place-armnl",
+   "station": "Arlington",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "963",
+   "label": "Arlington Elevator 963 (Park Street & North platform to lobby)",
+   "station_id": "place-armnl",
+   "station": "Arlington",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "964",
+   "label": "Arlington Elevator 964 (Lobby to Boylston Street)",
+   "station_id": "place-armnl",
+   "station": "Arlington",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "968",
+   "label": "Ashmont Elevator 968 (Alewife platform to Peabody Square lobby)",
+   "station_id": "place-asmnl",
+   "station": "Ashmont",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "969",
+   "label": "Ashmont Elevator 969 (Alewife platform to Mattapan Line lobby)",
+   "station_id": "place-asmnl",
+   "station": "Ashmont",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "970",
+   "label": "Ashmont Elevator 970 (Ashmont platform to Mattapan Line lobby, busway)",
+   "station_id": "place-asmnl",
+   "station": "Ashmont",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "716",
+   "label": "Assembly Elevator 716 (Foley Street to unpaid lobby)",
+   "station_id": "place-astao",
+   "station": "Assembly",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "717",
+   "label": "Assembly Elevator 717 (Platform to Foley Street paid lobby)",
+   "station_id": "place-astao",
+   "station": "Assembly",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "718",
+   "label": "Assembly Elevator 718 (Revolution Drive to unpaid lobby)",
+   "station_id": "place-astao",
+   "station": "Assembly",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "719",
+   "label": "Assembly Elevator 719 (Platform to Revolution Drive paid lobby)",
+   "station_id": "place-astao",
+   "station": "Assembly",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "853",
+   "label": "Back Bay Elevator 853 (Orange Line platform to lobby)",
+   "station_id": "place-bbsta",
+   "station": "Back Bay",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "854",
+   "label": "Back Bay Elevator 854 (Commuter Rail track 2 to lobby)",
+   "station_id": "place-bbsta",
+   "station": "Back Bay",
+   "status": "closed",
+   "last_lift": false
+  },
+  {
+   "facility_id": "855",
+   "label": "Back Bay Elevator 855 (Commuter Rail tracks 1 and 3 to lobby)",
+   "station_id": "place-bbsta",
+   "station": "Back Bay",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "856",
+   "label": "Back Bay Elevator 856 (Commuter Rail tracks 5 and 7 to lobby)",
+   "station_id": "place-bbsta",
+   "station": "Back Bay",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "769",
+   "label": "Ball Square Elevator 769 (Platform to Broadway lobby)",
+   "station_id": "place-balsq",
+   "station": "Ball Square",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "886",
+   "label": "Beachmont Elevator 886 (Bowdoin platform to lobby)",
+   "station_id": "place-bmmnl",
+   "station": "Beachmont",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "887",
+   "label": "Beachmont Elevator 887 (Wonderland platform to lobby)",
+   "station_id": "place-bmmnl",
+   "station": "Beachmont",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "729",
+   "label": "Braintree Elevator 729 (Busway to Commuter Rail platform, parking garage)",
+   "station_id": "place-brntn",
+   "station": "Braintree",
+   "status": "unknown",
+   "last_lift": false
+  },
+  {
+   "facility_id": "730",
+   "label": "Braintree Elevator 730 (Busway to Commuter Rail platform, parking garage)",
+   "station_id": "place-brntn",
+   "station": "Braintree",
+   "status": "unknown",
+   "last_lift": false
+  },
+  {
+   "facility_id": "811",
+   "label": "Braintree Elevator 811 (Red Line platform to lobby)",
+   "station_id": "place-brntn",
+   "station": "Braintree",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "867",
+   "label": "Broadway Elevator 867 (Platform to lobby)",
+   "station_id": "place-brdwy",
+   "station": "Broadway",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "868",
+   "label": "Broadway Elevator 868 (Lobby to street)",
+   "station_id": "place-brdwy",
+   "station": "Broadway",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "860",
+   "label": "Central Elevator 860 (Alewife platform to Massachusetts Avenue)",
+   "station_id": "place-cntsq",
+   "station": "Central",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "861",
+   "label": "Central Elevator 861 (Ashmont/Braintree platform to Massachusetts Avenue)",
+   "station_id": "place-cntsq",
+   "station": "Central",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "951",
+   "label": "Charles/MGH Elevator 951 (Ashmont/Braintree platform to lobby)",
+   "station_id": "place-chmnl",
+   "station": "Charles/MGH",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "952",
+   "label": "Charles/MGH Elevator 952 (Alewife platform to lobby)",
+   "station_id": "place-chmnl",
+   "station": "Charles/MGH",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "876",
+   "label": "Chinatown Elevator 876 (Oak Grove platform to Washington St, Essex St)",
+   "station_id": "place-chncl",
+   "station": "Chinatown",
+   "status": "closed",
+   "last_lift": false
+  },
+  {
+   "facility_id": "922",
+   "label": "Chinatown Elevator 922 (Forest Hills platform to Boylston St, Washington St)",
+   "station_id": "place-chncl",
+   "station": "Chinatown",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "933",
+   "label": "Community College Elevator 933 (Paid lobby to platform)",
+   "station_id": "place-ccmnl",
+   "station": "Community College",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "976",
+   "label": "Copley Elevator 976 (Park Street & North platform to Boylston Street)",
+   "station_id": "place-coecl",
+   "station": "Copley",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "977",
+   "label": "Copley Elevator 977 (Kenmore & West, Heath Street platform to Boylston Street)",
+   "station_id": "place-coecl",
+   "station": "Copley",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "937",
+   "label": "Courthouse Elevator 937 (South Station platform to lobby)",
+   "station_id": "place-crtst",
+   "station": "Courthouse",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "938",
+   "label": "Courthouse Elevator 938 (Airport/Design Center/Chelsea platform to lobby)",
+   "station_id": "place-crtst",
+   "station": "Courthouse",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "939",
+   "label": "Courthouse Elevator 939 (Lobby to Seaport Boulevard, Thomson Place)",
+   "station_id": "place-crtst",
+   "station": "Courthouse",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "940",
+   "label": "Courthouse Elevator 940 (Lobby to Seaport Boulevard, Fan Pier Boulevard)",
+   "station_id": "place-crtst",
+   "station": "Courthouse",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "816",
+   "label": "Davis Elevator 816 (Platform to lobby)",
+   "station_id": "place-davis",
+   "station": "Davis",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "817",
+   "label": "Davis Elevator 817 (Lobby to College Avenue)",
+   "station_id": "place-davis",
+   "station": "Davis",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "804",
+   "label": "Park Street Elevator 804 (Government Center & North lobby to Tremont Street, Winter Street)",
+   "station_id": "place-dwnxg",
+   "station": "Downtown Crossing",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "808",
+   "label": "Park Street Elevator 808 (Red Line center platform to Government Center & North platform, Winter Street Concourse)",
+   "station_id": "place-dwnxg",
+   "station": "Downtown Crossing",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "812",
+   "label": "Park Street Elevator 812 (Green Line underpass to Government Center & North platform)",
+   "station_id": "place-dwnxg",
+   "station": "Downtown Crossing",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "823",
+   "label": "Park Street Elevator 823 (Green Line underpass to Copley & West platform)",
+   "station_id": "place-dwnxg",
+   "station": "Downtown Crossing",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "869",
+   "label": "Downtown Crossing Elevator 869 (Alewife platform to Summer Street Concourse)",
+   "station_id": "place-dwnxg",
+   "station": "Downtown Crossing",
+   "status": "closed",
+   "last_lift": false
+  },
+  {
+   "facility_id": "870",
+   "label": "Downtown Crossing Elevator 870 (Ashmont/Braintree platform to Summer Street Concourse)",
+   "station_id": "place-dwnxg",
+   "station": "Downtown Crossing",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "891",
+   "label": "Downtown Crossing Elevator 891 (Oak Grove platform to Franklin Street)",
+   "station_id": "place-dwnxg",
+   "station": "Downtown Crossing",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "892",
+   "label": "Downtown Crossing Elevator 892 (Forest Hills platform to Washington Street, Winter Street)",
+   "station_id": "place-dwnxg",
+   "station": "Downtown Crossing",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "978",
+   "label": "Park Street Elevator 978 (Copley & West platform to Boston Common)",
+   "station_id": "place-dwnxg",
+   "station": "Downtown Crossing",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "979",
+   "label": "Park Street Elevator 979 (Red Line center platform to Copley & West platform)",
+   "station_id": "place-dwnxg",
+   "station": "Downtown Crossing",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "998",
+   "label": "Downtown Crossing Elevator 998 (Oak Grove platform to Alewife platform)",
+   "station_id": "place-dwnxg",
+   "station": "Downtown Crossing",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "999",
+   "label": "Downtown Crossing Elevator 999 (Oak Grove platform to Alewife platform)",
+   "station_id": "place-dwnxg",
+   "station": "Downtown Crossing",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "778",
+   "label": "East Taunton Elevator 778 (Parking to pedestrian bridge)",
+   "station_id": "place-NBM-0374",
+   "station": "East Taunton",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "779",
+   "label": "East Taunton Elevator 779 (Platform to pedestrian bridge)",
+   "station_id": "place-NBM-0374",
+   "station": "East Taunton",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "957",
+   "label": "Fields Corner Elevator 957 (Paid lobby to Alewife platform)",
+   "station_id": "place-fldcr",
+   "station": "Fields Corner",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "958",
+   "label": "Fields Corner Elevator 958 (Paid lobby to Ashmont platform)",
+   "station_id": "place-fldcr",
+   "station": "Fields Corner",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "724",
+   "label": "Forest Hills Elevator 724 (Orange Line platform to Southwest Corridor Park lobby)",
+   "station_id": "place-forhl",
+   "station": "Forest Hills",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "841",
+   "label": "Forest Hills Elevator 841 (Commuter Rail platform to lobby)",
+   "station_id": "place-forhl",
+   "station": "Forest Hills",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "842",
+   "label": "Forest Hills Elevator 842 (Orange Line platform to main upper lobby)",
+   "station_id": "place-forhl",
+   "station": "Forest Hills",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "843",
+   "label": "Forest Hills Elevator 843 (Lower busway to upper lobby)",
+   "station_id": "place-forhl",
+   "station": "Forest Hills",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "765",
+   "label": "Gilman Square Elevator 765 (Platform to Medford Street lobby)",
+   "station_id": "place-gilmn",
+   "station": "Gilman Square",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "766",
+   "label": "Gilman Square Elevator 766 (Platform to School Street lobby)",
+   "station_id": "place-gilmn",
+   "station": "Gilman Square",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "720",
+   "label": "Government Center Elevator 720 (Green Line platform to street)",
+   "station_id": "place-gover",
+   "station": "Government Center",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "721",
+   "label": "Government Center Elevator 721 (Green Line platform to street)",
+   "station_id": "place-gover",
+   "station": "Government Center",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "722",
+   "label": "Government Center Elevator 722 (Blue Line platform to Green Line platform)",
+   "station_id": "place-gover",
+   "station": "Government Center",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "723",
+   "label": "Government Center Elevator 723 (Blue Line platform to Green Line platform)",
+   "station_id": "place-gover",
+   "station": "Government Center",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "844",
+   "label": "Green Street Elevator 844 (Platform to paid lobby)",
+   "station_id": "place-grnst",
+   "station": "Green Street",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "821",
+   "label": "Harvard Elevator 821 (Lobby to Harvard Square)",
+   "station_id": "place-harsq",
+   "station": "Harvard",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "973",
+   "label": "Harvard Elevator 973 (Upper busway to Brattle Square)",
+   "station_id": "place-harsq",
+   "station": "Harvard",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "903",
+   "label": "Haymarket Elevator 903 (Oak Grove platform to Congress Street lobby)",
+   "station_id": "place-haecl",
+   "station": "Haymarket",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "904",
+   "label": "Haymarket Elevator 904 (Forest Hills platform to Congress Street lobby)",
+   "station_id": "place-haecl",
+   "station": "Haymarket",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "905",
+   "label": "Haymarket Elevator 905 (Underpass to Forest Hills platform)",
+   "station_id": "place-haecl",
+   "station": "Haymarket",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "906",
+   "label": "Haymarket Elevator 906 (Underpass to Green Line platforms, busway)",
+   "station_id": "place-haecl",
+   "station": "Haymarket",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "907",
+   "label": "Haymarket Elevator 907 (Underpass to Oak Grove platform)",
+   "station_id": "place-haecl",
+   "station": "Haymarket",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "908",
+   "label": "Haymarket Elevator 908 (Green Line lobby to busway, Sudbury Street, New Chardon Street)",
+   "station_id": "place-haecl",
+   "station": "Haymarket",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "830",
+   "label": "JFK/UMass Elevator 830 (Braintree branch platform to lobby)",
+   "station_id": "place-jfk",
+   "station": "JFK/UMass",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "831",
+   "label": "JFK/UMass Elevator 831 (Ashmont branch platform to lobby)",
+   "station_id": "place-jfk",
+   "station": "JFK/UMass",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "846",
+   "label": "Jackson Square Elevator 846 (Platform to paid lobby)",
+   "station_id": "place-jaksn",
+   "station": "Jackson Square",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "756",
+   "label": "Kendall/MIT Elevator 756 (Ashmont/Braintree platform to Main Street)",
+   "station_id": "place-knncl",
+   "station": "Kendall/MIT",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "757",
+   "label": "Kendall/MIT Elevator 757 (Ashmont/Braintree platform to Main Street)",
+   "station_id": "place-knncl",
+   "station": "Kendall/MIT",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "777",
+   "label": "Kendall/MIT Elevator 777 (Alewife platform to Main Street)",
+   "station_id": "place-knncl",
+   "station": "Kendall/MIT",
+   "status": "closed",
+   "last_lift": false
+  },
+  {
+   "facility_id": "866",
+   "label": "Kendall/MIT Elevator 866 (Alewife platform to Main Street)",
+   "station_id": "place-knncl",
+   "station": "Kendall/MIT",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "948",
+   "label": "Kenmore Elevator 948 (Lobby to Commonwealth Avenue)",
+   "station_id": "place-kencl",
+   "station": "Kenmore",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "971",
+   "label": "Kenmore Elevator 971 (Westbound platform to lobby)",
+   "station_id": "place-kencl",
+   "station": "Kenmore",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "972",
+   "label": "Kenmore Elevator 972 (Park Street & North platform to lobby, busway)",
+   "station_id": "place-kencl",
+   "station": "Kenmore",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "762",
+   "label": "Lechmere Elevator 762 (Platform to North First Street lobby)",
+   "station_id": "place-lech",
+   "station": "Lechmere",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "763",
+   "label": "Lechmere Elevator 763 (Platform to North First Street lobby)",
+   "station_id": "place-lech",
+   "station": "Lechmere",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "764",
+   "label": "Lechmere Elevator 764 (Platform to O'Brien Highway lobby)",
+   "station_id": "place-lech",
+   "station": "Lechmere",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "767",
+   "label": "Magoun Square Elevator 767 (Platform to lobby)",
+   "station_id": "place-mgngl",
+   "station": "Magoun Square",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "768",
+   "label": "Magoun Square Elevator 768 (Platform to lobby)",
+   "station_id": "place-mgngl",
+   "station": "Magoun Square",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "944",
+   "label": "Malden Center Elevator 944 (Lobby to Commuter Rail platform)",
+   "station_id": "place-mlmnl",
+   "station": "Malden Center",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "945",
+   "label": "Malden Center Elevator 945 (Lobby to Orange Line platform)",
+   "station_id": "place-mlmnl",
+   "station": "Malden Center",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "852",
+   "label": "Massachusetts Avenue Elevator 852 (Platform to paid lobby)",
+   "station_id": "place-masta",
+   "station": "Massachusetts Avenue",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "965",
+   "label": "Maverick Elevator 965 (Platform to Maverick Square, busway)",
+   "station_id": "place-mvbcl",
+   "station": "Maverick",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "966",
+   "label": "Maverick Elevator 966 (Platform to Lewis Courtyard)",
+   "station_id": "place-mvbcl",
+   "station": "Maverick",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "770",
+   "label": "Medford/Tufts Elevator 770 (Platform to lobby)",
+   "station_id": "place-mdftf",
+   "station": "Medford/Tufts",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "772",
+   "label": "Medford/Tufts Elevator 772 (Platform to lobby)",
+   "station_id": "place-mdftf",
+   "station": "Medford/Tufts",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "739",
+   "label": "North Quincy Elevator 739 (Pick-up/drop-off area and northern lobby to parking garage)",
+   "station_id": "place-nqncy",
+   "station": "North Quincy",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "740",
+   "label": "North Quincy Elevator 740 (Pick-up/drop-off area and northern lobby to parking garage)",
+   "station_id": "place-nqncy",
+   "station": "North Quincy",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "897",
+   "label": "North Quincy Elevator 897 (Hancock Street parking to northern lobby)",
+   "station_id": "place-nqncy",
+   "station": "North Quincy",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "898",
+   "label": "North Quincy Elevator 898 (Newport Avenue to northern lobby)",
+   "station_id": "place-nqncy",
+   "station": "North Quincy",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "899",
+   "label": "North Quincy Elevator 899 (Platform to northern lobby)",
+   "station_id": "place-nqncy",
+   "station": "North Quincy",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "900",
+   "label": "North Quincy Elevator 900 (Platform to main lobby, busway)",
+   "station_id": "place-nqncy",
+   "station": "North Quincy",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "731",
+   "label": "North Station Elevator 731 (Passageway to Causeway Street)",
+   "station_id": "place-north",
+   "station": "North Station",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "732",
+   "label": "North Station Elevator 732 (Passageway to Commuter Rail, TD Garden)",
+   "station_id": "place-north",
+   "station": "North Station",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "909",
+   "label": "North Station Elevator 909 (Orange Line, Green Line lobby to Valenti Way)",
+   "station_id": "place-north",
+   "station": "North Station",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "910",
+   "label": "North Station Elevator 910 (Lobby to Forest Hills, Copley & West platform)",
+   "station_id": "place-north",
+   "station": "North Station",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "911",
+   "label": "North Station Elevator 911 (Oak Grove platform to paid lobby)",
+   "station_id": "place-north",
+   "station": "North Station",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "912",
+   "label": "North Station Elevator 912 (Orange Line, Green Line lobby to Causeway Street)",
+   "station_id": "place-north",
+   "station": "North Station",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "743",
+   "label": "Oak Grove Elevator 743 (Orange Line platform to paid lobby)",
+   "station_id": "place-ogmnl",
+   "station": "Oak Grove",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "744",
+   "label": "Oak Grove Elevator 744 (Washington Street to lobby)",
+   "station_id": "place-ogmnl",
+   "station": "Oak Grove",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "745",
+   "label": "Oak Grove Elevator 745 (Busway, parking lot to lobby)",
+   "station_id": "place-ogmnl",
+   "station": "Oak Grove",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "746",
+   "label": "Oak Grove Elevator 746 (Orange Line platform to paid lobby)",
+   "station_id": "place-ogmnl",
+   "station": "Oak Grove",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "712",
+   "label": "Orient Heights Elevator 712 (Bowdoin platform to paid pedestrian bridge)",
+   "station_id": "place-orhte",
+   "station": "Orient Heights",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "713",
+   "label": "Orient Heights Elevator 713 (Bennington Street Busway to unpaid pedestrian bridge)",
+   "station_id": "place-orhte",
+   "station": "Orient Heights",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "714",
+   "label": "Orient Heights Elevator 714 (Wonderland platform to paid pedestrian bridge)",
+   "station_id": "place-orhte",
+   "station": "Orient Heights",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "715",
+   "label": "Orient Heights Elevator 715 (Saratoga Street Busway to unpaid pedestrian bridge)",
+   "station_id": "place-orhte",
+   "station": "Orient Heights",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "982",
+   "label": "Porter Elevator 982 (Lobby to Somerville Avenue & Mass Avenue)",
+   "station_id": "place-portr",
+   "station": "Porter",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "983",
+   "label": "Porter Elevator 983 (Red Line platforms to lobby)",
+   "station_id": "place-portr",
+   "station": "Porter",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "985",
+   "label": "Porter Elevator 985 (Lobby to Somerville Avenue)",
+   "station_id": "place-portr",
+   "station": "Porter",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "986",
+   "label": "Porter Elevator 986 (Commuter Rail platform to lobby)",
+   "station_id": "place-portr",
+   "station": "Porter",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "987",
+   "label": "Porter Elevator 987 (Red Line platforms to lobby)",
+   "station_id": "place-portr",
+   "station": "Porter",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "917",
+   "label": "Prudential Elevator 917 (Lobby to Huntington Avenue)",
+   "station_id": "place-prmnl",
+   "station": "Prudential",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "920",
+   "label": "Prudential Elevator 920 (Heath Street platform to lobby)",
+   "station_id": "place-prmnl",
+   "station": "Prudential",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "921",
+   "label": "Prudential Elevator 921 (Lechmere platform to lobby)",
+   "station_id": "place-prmnl",
+   "station": "Prudential",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "736",
+   "label": "Quincy Adams Elevator 736 (Lobby to platform)",
+   "station_id": "place-qamnl",
+   "station": "Quincy Adams",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "805",
+   "label": "Quincy Adams Elevator 805 (Lobby to platform)",
+   "station_id": "place-qamnl",
+   "station": "Quincy Adams",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "806",
+   "label": "Quincy Adams Elevator 806 (Lobby to parking garage)",
+   "station_id": "place-qamnl",
+   "station": "Quincy Adams",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "807",
+   "label": "Quincy Adams Elevator 807 (Lobby to parking garage)",
+   "station_id": "place-qamnl",
+   "station": "Quincy Adams",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "810",
+   "label": "Quincy Center Elevator 810 (Red Line platform to lobby)",
+   "station_id": "place-qnctr",
+   "station": "Quincy Center",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "896",
+   "label": "Quincy Center Elevator 896 (Commuter Rail platform to lobby)",
+   "station_id": "place-qnctr",
+   "station": "Quincy Center",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "884",
+   "label": "Revere Beach Elevator 884 (Bowdoin platform to lobby)",
+   "station_id": "place-rbmnl",
+   "station": "Revere Beach",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "885",
+   "label": "Revere Beach Elevator 885 (Wonderland platform to lobby)",
+   "station_id": "place-rbmnl",
+   "station": "Revere Beach",
+   "status": "closed",
+   "last_lift": false
+  },
+  {
+   "facility_id": "847",
+   "label": "Roxbury Crossing Elevator 847 (Platform to paid lobby)",
+   "station_id": "place-rcmnl",
+   "station": "Roxbury Crossing",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "728",
+   "label": "Ruggles Elevator 728 (Lobby to lower busway center platform)",
+   "station_id": "place-rugg",
+   "station": "Ruggles",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "848",
+   "label": "Ruggles Elevator 848 (Lobby to lower busway side platform)",
+   "station_id": "place-rugg",
+   "station": "Ruggles",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "849",
+   "label": "Ruggles Elevator 849 (Commuter Rail tracks 1 and 3 to lobby)",
+   "station_id": "place-rugg",
+   "station": "Ruggles",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "850",
+   "label": "Ruggles Elevator 850 (Orange Line platform to upper lobby)",
+   "station_id": "place-rugg",
+   "station": "Ruggles",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "851",
+   "label": "Ruggles Elevator 851 (Forsyth Street to upper lobby)",
+   "station_id": "place-rugg",
+   "station": "Ruggles",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "946",
+   "label": "Savin Hill Elevator 946 (Platform to paid lobby)",
+   "station_id": "place-shmnl",
+   "station": "Savin Hill",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "947",
+   "label": "Savin Hill Elevator 947 (Sydney Street to unpaid lobby)",
+   "station_id": "place-shmnl",
+   "station": "Savin Hill",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "980",
+   "label": "Science Park/West End Elevator 980 (Copley & West platform to lobby)",
+   "station_id": "place-spmnl",
+   "station": "Science Park/West End",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "981",
+   "label": "Science Park/West End Elevator 981 (Lechmere & North platform to lobby)",
+   "station_id": "place-spmnl",
+   "station": "Science Park/West End",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "953",
+   "label": "Shawmut Elevator 953 (Alewife platform to lobby)",
+   "station_id": "place-smmnl",
+   "station": "Shawmut",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "954",
+   "label": "Shawmut Elevator 954 (Ashmont platform to lobby)",
+   "station_id": "place-smmnl",
+   "station": "Shawmut",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "6476",
+   "label": "South Station Elevator 6476 (Red Line, Silver Line SL1/SL2/SL3 lobby to Commuter Rail lobby)",
+   "station_id": "place-sstat",
+   "station": "South Station",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "753",
+   "label": "South Station Elevator 753 (Bus Terminal to Commuter Rail concourse)",
+   "station_id": "place-sstat",
+   "station": "South Station",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "754",
+   "label": "South Station Elevator 754 (Bus Terminal to Commuter Rail concourse)",
+   "station_id": "place-sstat",
+   "station": "South Station",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "901",
+   "label": "South Station Elevator 901 (Ashmont/Braintree platform to Silver Line drop-off platform and lobby)",
+   "station_id": "place-sstat",
+   "station": "South Station",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "918",
+   "label": "South Station Elevator 918 (Ashmont/Braintree platform to Airport/Design Center/Chelsea platform and lobby)",
+   "station_id": "place-sstat",
+   "station": "South Station",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "919",
+   "label": "South Station Elevator 919 (Alewife platform to Airport/Design Center/Chelsea platform)",
+   "station_id": "place-sstat",
+   "station": "South Station",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "926",
+   "label": "South Station Elevator 926 (Subway Lobby to Atlantic Avenue, Summer Street)",
+   "station_id": "place-sstat",
+   "station": "South Station",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "927",
+   "label": "South Station Elevator 927 (Alewife platform to Silver Line Drop-off platform)",
+   "station_id": "place-sstat",
+   "station": "South Station",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "949",
+   "label": "South Station Elevator 949 (Lobby to Dewey Square)",
+   "station_id": "place-sstat",
+   "station": "South Station",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "nofac-node-sstat-busgroundelev-bottom",
+   "label": "Elevator nofac-node-sstat-busgroundelev-bottom",
+   "station_id": "place-sstat",
+   "station": "South Station",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "nofac-node-sstat-busrotundanorthelev-bottom",
+   "label": "Elevator nofac-node-sstat-busrotundanorthelev-bottom",
+   "station_id": "place-sstat",
+   "station": "South Station",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "nofac-node-sstat-busrotundasouthelev-bottom",
+   "label": "Elevator nofac-node-sstat-busrotundasouthelev-bottom",
+   "station_id": "place-sstat",
+   "station": "South Station",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "802",
+   "label": "State Elevator 802 (Oak Grove platform to Forest Hills, Wonderland platforms)",
+   "station_id": "place-state",
+   "station": "State",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "803",
+   "label": "State Elevator 803 (Forest Hills platform to Washington Street, Milk Street)",
+   "station_id": "place-state",
+   "station": "State",
+   "status": "closed",
+   "last_lift": false
+  },
+  {
+   "facility_id": "967",
+   "label": "State Elevator 967 (Oak Grove platform to Forest Hills, Wonderland platforms)",
+   "station_id": "place-state",
+   "station": "State",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "974",
+   "label": "State Elevator 974 (Bowdoin platform to Congress Street, 60 State Street)",
+   "station_id": "place-state",
+   "station": "State",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "975",
+   "label": "State Elevator 975 (Wonderland platform to Congress Street, 53 State Street)",
+   "station_id": "place-state",
+   "station": "State",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "845",
+   "label": "Stony Brook Elevator 845 (Platform to paid lobby)",
+   "station_id": "place-sbmnl",
+   "station": "Stony Brook",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "840",
+   "label": "Sullivan Square Elevator 840 (Center platform to lobby)",
+   "station_id": "place-sull",
+   "station": "Sullivan Square",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "881",
+   "label": "Sullivan Square Elevator 881 (Oak Grove platform to lobby)",
+   "station_id": "place-sull",
+   "station": "Sullivan Square",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "857",
+   "label": "Tufts Medical Center Elevator 857 (Lobby to Washington Street)",
+   "station_id": "place-tumnl",
+   "station": "Tufts Medical Center",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "858",
+   "label": "Tufts Medical Center Elevator 858 (Oak Grove platform to Washington Street lobby)",
+   "station_id": "place-tumnl",
+   "station": "Tufts Medical Center",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "859",
+   "label": "Tufts Medical Center Elevator 859 (Forest Hills platform to Washington Street lobby)",
+   "station_id": "place-tumnl",
+   "station": "Tufts Medical Center",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "771",
+   "label": "Union Square Elevator 771 (Platform to Prospect Street)",
+   "station_id": "place-unsqu",
+   "station": "Union Square",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "864",
+   "label": "Wellington Elevator 864 (Oak Grove platform to lobby)",
+   "station_id": "place-welln",
+   "station": "Wellington",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "865",
+   "label": "Wellington Elevator 865 (Forest Hills platform to lobby)",
+   "station_id": "place-welln",
+   "station": "Wellington",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "733",
+   "label": "Wollaston Elevator 733 (Parking lot lobby to pedestrian bridge)",
+   "station_id": "place-wlsta",
+   "station": "Wollaston",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "734",
+   "label": "Wollaston Elevator 734 (Newport Ave lobby to platform)",
+   "station_id": "place-wlsta",
+   "station": "Wollaston",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "735",
+   "label": "Wollaston Elevator 735 (Platform to pedestrian bridge)",
+   "station_id": "place-wlsta",
+   "station": "Wollaston",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "701",
+   "label": "Wonderland Elevator 701 (Main lobby to garage)",
+   "station_id": "place-wondl",
+   "station": "Wonderland",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "702",
+   "label": "Wonderland Elevator 702 (Main lobby to garage)",
+   "station_id": "place-wondl",
+   "station": "Wonderland",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "703",
+   "label": "Wonderland Elevator 703 (Main lobby to garage)",
+   "station_id": "place-wondl",
+   "station": "Wonderland",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "708",
+   "label": "Wonderland Elevator 708 (Main lobby to pedestrian bridge)",
+   "station_id": "place-wondl",
+   "station": "Wonderland",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "709",
+   "label": "Wonderland Elevator 709 (North Shore Road Busway to pedestrian plaza)",
+   "station_id": "place-wondl",
+   "station": "Wonderland",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "710",
+   "label": "Wonderland Elevator 710 (Wonderland platform to pedestrian plaza)",
+   "station_id": "place-wondl",
+   "station": "Wonderland",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "711",
+   "label": "Wonderland Elevator 711 (Ocean Avenue to pedestrian plaza)",
+   "station_id": "place-wondl",
+   "station": "Wonderland",
+   "status": "closed",
+   "last_lift": false
+  },
+  {
+   "facility_id": "889",
+   "label": "Wood Island Elevator 889 (Bowdoin platform to pedestrian bridge)",
+   "station_id": "place-wimnl",
+   "station": "Wood Island",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "890",
+   "label": "Wood Island Elevator 890 (Wonderland platform to pedestrian bridge)",
+   "station_id": "place-wimnl",
+   "station": "Wood Island",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "934",
+   "label": "World Trade Center Elevator 934 (Lobby to World Trade Center Avenue)",
+   "station_id": "place-wtcst",
+   "station": "World Trade Center",
+   "status": "open",
+   "last_lift": false
+  },
+  {
+   "facility_id": "935",
+   "label": "World Trade Center Elevator 935 (South Station platform to lobby)",
+   "station_id": "place-wtcst",
+   "station": "World Trade Center",
+   "status": "open",
+   "last_lift": true
+  },
+  {
+   "facility_id": "936",
+   "label": "World Trade Center Elevator 936 (Airport/Design Center/Chelsea platform to lobby)",
+   "station_id": "place-wtcst",
+   "station": "World Trade Center",
+   "status": "open",
+   "last_lift": true
+  }
+ ]
+}

@@ -76,3 +76,32 @@ export function soundOn(): boolean {
 export function setSoundOn(on: boolean): void {
   try { window.localStorage.setItem("lastlift.sound", on ? "on" : "off"); } catch { /* storage unavailable */ }
 }
+
+export type Bin = "grade" | "many" | "one" | "lost" | "none";
+
+/** One short step of the city sweep (about half a second): two tones for routes to spare, one trembling tone for a
+ *  single lift, the falling earcon for no route, a soft tick where no lift is needed, silence where there is no data. */
+export async function playStep(bin: Bin, volume = 0.6): Promise<void> {
+  if (bin === "none") return;
+  ctx = ctx ?? new AudioContext();
+  if (ctx.state === "suspended") await ctx.resume();
+  const now = ctx.currentTime, end = now + 0.5;
+  const master = ctx.createGain();
+  master.gain.value = Math.max(0, Math.min(1, volume));
+  master.connect(ctx.destination);
+  const tone = (f: number, start: number, stop: number, level: number, tremolo = false, type: OscillatorType = "sine") => {
+    const o = ctx!.createOscillator(), g = ctx!.createGain();
+    o.type = type; o.frequency.value = f;
+    g.gain.setValueAtTime(0, start); g.gain.linearRampToValueAtTime(level, start + 0.03); g.gain.linearRampToValueAtTime(0, stop);
+    if (tremolo) {
+      const lfo = ctx!.createOscillator(), depth = ctx!.createGain();
+      lfo.frequency.value = 7; depth.gain.value = level * 0.6;
+      lfo.connect(depth).connect(g.gain); lfo.start(start); lfo.stop(stop);
+    }
+    o.connect(g).connect(master); o.start(start); o.stop(stop + 0.02);
+  };
+  if (bin === "many") { tone(FREQS[0], now, end, 0.08); tone(FREQS[1], now, end, 0.08); }
+  if (bin === "one") tone(FREQS[0], now, end, 0.14, true);
+  if (bin === "lost") { tone(196, now, now + 0.22, 0.22); tone(147, now + 0.25, now + 0.47, 0.22); }
+  if (bin === "grade") tone(880, now, now + 0.12, 0.06, false, "triangle");
+}

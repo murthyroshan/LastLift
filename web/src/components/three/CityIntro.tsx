@@ -6,6 +6,7 @@ import * as THREE from "three";
 import { MOTION_WINDOW, palette, story, useCityData, type CityData } from "./city/core";
 import { Scene } from "./city/Scene";
 import "./cityintro.css";
+import { realGpu } from "../../lib/gpu";
 
 /* User-facing copy. No digits in literals: every number comes from the data. */
 const COPY = {
@@ -159,7 +160,7 @@ export function CityIntro() {
         <a className="ci-skip" href="#ci-end">{COPY.skip}</a>
         <div className="ci-stage">
           <div className="ci-canvas" aria-hidden="true">
-            {data && (
+            {data && realGpu() && (
               <Canvas frameloop={onScreen ? "demand" : "never"} dpr={dpr}
                       camera={{ fov: 38, near: 0.1, far: 5000, position: [30, 17, 52] }}
                       gl={{ antialias: false, powerPreference: "high-performance", toneMapping: THREE.NoToneMapping }}>

@@ -1,0 +1,80 @@
+{
+ "agencies": [
+  {
+   "assessable": true,
+   "at_grade": 199,
+   "country": "US",
+   "facility_ids": true,
+   "falkordb": {
+    "checked": 331,
+    "equal": 331
+   },
+   "id": "mdb-437",
+   "license": "https://www.mass.gov/files/documents/2017/10/27/develop_license_agree_0.pdf",
+   "lift_dependent": 168,
+   "lift_units": 197,
+   "no_route": 2,
+   "platforms": 386,
+   "provider": "Massachusetts Bay Transportation Authority (MBTA)",
+   "readiness": "A",
+   "single_lift": 89,
+   "single_lift_share": 0.53,
+   "stations_without_entrance_flags": 0,
+   "top_stations": [
+    {
+     "lifts": 4,
+     "single_lift_platforms": 7,
+     "station": "Back Bay"
+    },
+    {
+     "lifts": 2,
+     "single_lift_platforms": 4,
+     "station": "JFK/UMass"
+    },
+    {
+     "lifts": 3,
+     "single_lift_platforms": 4,
+     "station": "Kenmore"
+    },
+    {
+     "lifts": 5,
+     "single_lift_platforms": 4,
+     "station": "Ruggles"
+    },
+    {
+     "lifts": 1,
+     "single_lift_platforms": 3,
+     "station": "Braintree"
+    }
+   ],
+   "two_plus": 77
+  }
+ ],
+ "aggregate": {
+  "assessable": 10,
+  "falkordb_checked": 2884,
+  "falkordb_equal": 2884,
+  "feeds": 14,
+  "grades": {
+   "A": 1,
+   "B": 9,
+   "C": 4
+  },
+  "lift_dependent": 1619,
+  "named": 1,
+  "platforms": 3640,
+  "shares": [
+   0.0,
+   0.111,
+   0.5,
+   0.5,
+   0.53,
+   0.8,
+   0.876,
+   0.913,
+   1.0,
+   1.0
+  ],
+  "single_lift": 1254
+ }
+}

@@ -29,7 +29,7 @@ export function CommandPalette({ open, setOpen, actions }: { open: boolean; setO
   const go = (path: string) => { window.location.hash = href(path).slice(1); setOpen(false); };
   const pages: [string, string, keyof typeof I][] = [
     ["/", S.nav.home, "story"], ["/console", S.nav.console, "command"], ["/network", S.nav.network, "network"],
-    ["/repairs", S.nav.repairs, "repairs"], ["/approvals", S.nav.ops, "ops"], ["/about", S.nav.about, "about"]];
+    ["/repairs", S.nav.repairs, "repairs"], ["/sandbox", S.nav.sandbox, "lift"], ["/history", S.nav.history, "story"], ["/approvals", S.nav.ops, "ops"], ["/atlas", S.nav.atlas, "network"], ["/about", S.nav.about, "about"]];
 
   return (
     <Command.Dialog open={open} onOpenChange={setOpen} label={S.palette.label} className="cmdk" overlayClassName="cmdk-overlay">

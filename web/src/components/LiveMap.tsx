@@ -209,8 +209,18 @@ export function LiveMap({ camera = CAMERAS.overview, highlight = null, arcLifts 
         html: `<strong>${object.name}</strong><br/>${object.single ? `${object.single} single-lift platform${object.single > 1 ? "s" : ""}` : "no single-lift platform"}${object.closed?.length ? `<br/>closed: lift ${object.closed.join(", ")}` : ""}`,
         className: "deck-tip",
       } : null : undefined,
-      onClick: interactive ? ({ object }: any) => {
-        if (object?.data) window.location.hash = href(`/station/${object.id}`).slice(1);
+      onClick: interactive ? ({ object, x, y }: any) => {
+        if (!object?.data) return;
+        // UI10: a dot at the click point carries the shared view-transition name, so the browser morphs it into the
+        // station's x-ray card on the next page
+        const r = box.current?.getBoundingClientRect();
+        if (r && typeof x === "number") {
+          const dot = document.createElement("div");
+          dot.className = "vt-dot";
+          dot.style.left = `${r.left + x}px`; dot.style.top = `${r.top + y}px`;
+          document.body.appendChild(dot);
+        }
+        window.location.hash = href(`/station/${object.id}`).slice(1);
       } : undefined,
     } as any);
   }, [rows, links, highlight, arcs, rise, labels, pulse, closedHere, interactive, scale]);

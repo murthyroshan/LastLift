@@ -24,8 +24,8 @@ test("landing works from the mirror", async ({ page }) => {
 test("station view, linked selection and what-if work from the mirror", async ({ page }) => {
   await page.goto("/#/station/place-alfcl?dir=exit");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Alewife");
-  await page.getByRole("button", { name: "Red Line" }).click();
-  await expect(page.getByRole("button", { name: "Red Line" })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Red Line", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Red Line", exact: true })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: /Simulate lift 813 closing/ }).click();
   await expect(page.getByRole("region", { name: /SIMULATED/ })).toBeVisible();
   await noSeriousAxeIssues(page);
@@ -53,6 +53,8 @@ test("the agent drawer plays a recorded run with its Cypher", async ({ page }) =
 
 test("keyboard only: skip link, then reach a station", async ({ page }) => {
   await page.goto("/#/");
+  await expect(page.getByRole("link", { name: "Skip to content" })).toBeAttached();
+  await page.waitForLoadState("networkidle");
   await page.keyboard.press("Tab");
   await expect(page.getByRole("link", { name: "Skip to content" })).toBeFocused();
   await page.goto("/#/about");
@@ -204,7 +206,7 @@ test("present mode: help, beats and the caption frame are keyboard driven", asyn
   await expect(page.locator(".present-frame")).toBeVisible();
 });
 
-const MATRIX = ["/#/", "/#/console", "/#/network", "/#/repairs", "/#/approvals", "/#/station/place-alfcl?dir=exit", "/#/about"];
+const MATRIX = ["/#/", "/#/console", "/#/network", "/#/repairs", "/#/approvals", "/#/station/place-alfcl?dir=exit", "/#/atlas", "/#/sandbox?close=813,891", "/#/history", "/#/about"];
 for (const scheme of ["light", "dark"] as const) {
   for (const width of [320, 1280]) {
     test(`axe matrix: every page, ${scheme}, ${width} px`, async ({ page }) => {
@@ -227,7 +229,7 @@ test("sound: off by default, never plays before a gesture, and every sound has a
   const toggle = page.getByRole("button", { name: "Sound", exact: true });
   await expect(toggle).toHaveAttribute("aria-pressed", "false");
   await expect(page.getByRole("button", { name: "Play this platform's sound" })).toBeDisabled();
-  await page.getByRole("button", { name: "Red Line" }).click();
+  await page.getByRole("button", { name: "Red Line", exact: true }).click();
   await toggle.click();
   await page.getByRole("button", { name: "Play this platform's sound" }).click();
   await expect(page.getByText(/One trembling tone|Tones playing/).first()).toBeAttached();
@@ -263,4 +265,74 @@ test("eyes-free mode: Alt+E, a recorded answer is spoken, walk, why, stop, and s
   await expect(page.locator('[aria-live="assertive"]')).not.toBeEmpty();
   expect(await page.evaluate(() => (window as any).__spoken.length)).toBe(before);
   await noSeriousAxeIssues(page);
+});
+
+test("hear a line: silent until Play, each station highlighted and announced, Stop ends it", async ({ page }) => {
+  await page.addInitScript(() => { (window as any).__audio = 0; const A = window.AudioContext;
+    (window as any).AudioContext = function (this: any) { (window as any).__audio++; return new A(); } as any; });
+  await page.goto("/#/network");
+  const sweep = page.locator("section.sweep");
+  await expect(sweep.getByRole("heading", { name: "Hear a line" })).toBeVisible();
+  expect(await page.evaluate(() => (window as any).__audio)).toBe(0);
+  await sweep.getByRole("button", { name: "Play the line" }).click();
+  await expect(sweep.locator('li[aria-current="step"]')).toHaveCount(1, { timeout: 5000 });
+  await expect(page.locator('[role="status"]').filter({ hasText: /: (one lift|lift routes to spare|access lost|no lift needed|no layout data)\./ }).first()).toBeAttached();
+  await sweep.getByRole("button", { name: "Stop" }).click();
+  await expect(sweep.locator('li[aria-current="step"]')).toHaveCount(0);
+  await noSeriousAxeIssues(page);
+});
+
+test("atlas: the MBTA row under the generic rules equals LastLift's count", async ({ page }) => {
+  await page.goto("/#/atlas");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Can this run in my city?");
+  await expect(page.getByText(/comes out at (\d+) single-lift platforms; LastLift's own model says \1\./)).toBeVisible();
+  await noSeriousAxeIssues(page);
+});
+
+test("N-1 matrix: recomputed in the browser and equal to FalkorDB's certified counts", async ({ page }) => {
+  await page.goto("/#/station/place-alfcl?view=plan");
+  const chip = page.locator(".matrix .chip").first();
+  await expect(chip).toContainText(/matches FalkorDB's certified count for (\d+) of \1 platform-directions/);
+  await page.getByRole("button", { name: /^Close lift 813: Red Line, getting on/ }).click();
+  await expect(page.getByRole("region", { name: /SIMULATED/ })).toBeVisible();
+  await noSeriousAxeIssues(page);
+});
+
+test("what-if sandbox: a shared link closes two lifts and lists what breaks", async ({ page }) => {
+  await page.goto("/#/sandbox?close=813,891");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Close any lifts and see what breaks");
+  await expect(page.locator(".sandbox-chips li")).toHaveCount(2);
+  await expect(page.getByText(/Closing lift 813, 891: \d+ platform-directions lose step-free access/).first()).toBeVisible();
+  await expect(page.getByRole("table").first()).toBeVisible();
+  await noSeriousAxeIssues(page);
+});
+
+test("time machine: a keyboard slider with a spoken value, the worst day and its closures", async ({ page }) => {
+  await page.goto("/#/history");
+  const slider = page.getByRole("slider", { name: "Day" });
+  await expect(slider).toHaveAttribute("aria-valuetext", /lifts closed/);
+  await slider.focus(); await page.keyboard.press("ArrowLeft");
+  await page.getByRole("button", { name: /^Worst day/ }).click();
+  await expect(page.getByRole("heading", { name: /Closures that day/ })).toBeVisible();
+  await noSeriousAxeIssues(page);
+});
+
+test("display panel: high contrast and simple language apply and persist", async ({ page }) => {
+  await page.goto("/#/station/place-alfcl?view=plan");
+  await page.getByRole("button", { name: "Display" }).click();
+  await page.getByLabel("High contrast").check();
+  await page.getByLabel("Simple language").check();
+  await expect(page.locator("html")).toHaveAttribute("data-contrast", "more");
+  await expect(page.getByText(/This station has \d+ platforms/)).toBeVisible();
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-simple", "on");
+  await noSeriousAxeIssues(page);
+});
+
+test("station: the 3D model mounts on request and stays out of the accessibility tree", async ({ page }) => {
+  await page.goto("/#/station/place-alfcl?dir=exit");
+  await page.getByRole("button", { name: "Model", exact: true }).click();
+  const frame = page.locator(".s3d-frame iframe.clay-frame");
+  await expect(frame).toHaveAttribute("aria-hidden", "true");
+  await expect(frame).toHaveAttribute("src", /concepts\/clay\/demo\.html\?id=place-alfcl/);
 });

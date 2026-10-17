@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Alewife frame renderer (HQ raster)</title>
+<style>html,body{margin:0;background:#F5F3EE}canvas{display:block}#post{display:none}</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/",
+  "three/examples/jsm/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/",
+  "three-mesh-bvh": "https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.8.3/build/index.module.js"
+} }
+</script>
+</head>
+<body>
+<canvas id="post"></canvas>
+<script type="module">
+// Frames for the scroll sequence: the same scene as render-pt.html (HDRI studio, physical materials, cyclorama), drawn
+// with a high-quality raster pipeline (image-based light, soft shadows, GTAO ambient occlusion, bokeh depth of field on
+// the close-up), because path tracing at clean sample counts is not practical on an integrated GPU.
+// window.renderFrame(i) is deterministic and returns { desktop, mobile, anchors }.
+import * as THREE from "three";
+import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { GTAOPass } from "three/addons/postprocessing/GTAOPass.js";
+import { BokehPass } from "three/addons/postprocessing/BokehPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+import { RectAreaLightUniformsLib } from "three/addons/lights/RectAreaLightUniformsLib.js";
+RectAreaLightUniformsLib.init();
+
+const N = 120, W = 1920, H = 1200, MW = 960, MH = 600;
+const P = { bg: "#F5F3EE", ink: "#16181D", amber: "#F5A524", red: "#E5484D", route: "#3E7BFA", teal: "#2FB5A0" };
+const params = new URLSearchParams(location.search);
+const station = params.get("id") || "place-alfcl";
+const A = "/concepts/assets/";
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.VSMShadowMap;
+renderer.setPixelRatio(1); renderer.setSize(W, H);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.NeutralToneMapping; renderer.toneMappingExposure = Number(params.get("exp") || 1.12);
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(P.bg);
+const env = await new RGBELoader().loadAsync(A + "studio_small_09_1k.hdr");
+env.mapping = THREE.EquirectangularReflectionMapping;
+scene.environment = env; scene.environmentIntensity = Number(params.get("env") || 0.75);
+scene.environmentRotation = new THREE.Euler(0, 1.1, 0);
+
+const camera = new THREE.PerspectiveCamera(30, W / H, 0.1, 500);
+
+const tl = new THREE.TextureLoader();
+const loadTex = async (f, srgb, rep = [1, 1]) => { const t = await tl.loadAsync(A + f); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(...rep);
+  if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; };
+const [oakD, oakR] = await Promise.all([loadTex("white_oak_veneer_diff_1k.jpg", true, [1, 1]), loadTex("white_oak_veneer_rough_1k.jpg", false, [1, 1])]);
+
+const phys = (o) => new THREE.MeshPhysicalMaterial(o);
+const M = {
+  concrete: phys({ color: "#ece7df", roughness: 0.55, clearcoat: 0.4, clearcoatRoughness: 0.2 }),
+  concreteDark: phys({ color: "#d6cfc3", roughness: 0.7 }),
+  cyc: phys({ color: "#f3f0ea", roughness: 0.95 }),
+  clay: phys({ color: "#FAF8F4", roughness: 0.7 }),
+  sand: phys({ color: "#E7E1D6", roughness: 0.8 }),
+  stone: phys({ color: "#CFC8BB", roughness: 0.9 }),
+  steel: phys({ color: "#cdd1d6", metalness: 1, roughness: 0.3 }),
+  darkSteel: phys({ color: "#3a3e45", metalness: 0.85, roughness: 0.38 }),
+  ink: phys({ color: P.ink, roughness: 0.45 }),
+  glass: phys({ color: "#ffffff", transmission: 1, roughness: 0.02, ior: 1.5, thickness: 0.04, metalness: 0 }),
+  frosted: phys({ color: "#f4f8ff", transmission: 1, roughness: 0.32, ior: 1.45, thickness: 0.05 }),
+  tinted: phys({ color: "#c9d8ee", transmission: 0.9, roughness: 0.05, ior: 1.5, thickness: 0.03 }),
+  tactile: phys({ color: "#E9B949", roughness: 0.7 }),
+  oak: phys({ color: "#ffffff", map: oakD, roughnessMap: oakR, roughness: 0.6 }),
+  light: new THREE.MeshStandardMaterial({ color: "#ffffff", emissive: "#fff6ea", emissiveIntensity: 2 }),
+  gravel: phys({ color: "#8e877c", roughness: 1 }),
+  leaf: phys({ color: "#dcd6c8", roughness: 0.85 }),
+};
+const ease = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+const span = (f, a, b) => Math.min(1, Math.max(0, (f - a) / (b - a)));
+const lerp = (a, b, t) => a + (b - a) * t;
+const rbox = (w, h, d, r, m, seg = 3) => new THREE.Mesh(new RoundedBoxGeometry(w, h, d, seg, Math.max(0.001, Math.min(r, w / 2 - 1e-3, h / 2 - 1e-3, d / 2 - 1e-3))), m);
+const box = (w, h, d, m) => new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m);
+const cyl = (r, h, m, seg = 32, rt = r) => new THREE.Mesh(new THREE.CylinderGeometry(rt, r, h, seg), m);
+const textTex = (text, { w = 1024, h = 256, bg = P.ink, fg = "#ffffff", size = 150, weight = 700 } = {}) => {
+  const c = document.createElement("canvas"); c.width = w; c.height = h; const g = c.getContext("2d");
+  g.fillStyle = bg; g.fillRect(0, 0, w, h); g.fillStyle = fg; g.font = `${weight} ${size}px Inter, 'Segoe UI', Arial, sans-serif`;
+  g.textBaseline = "middle"; g.fillText(text, h * 0.35, h / 2 + 6);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; };
+const sign = (text, w, h) => { const t = textTex(text); const m = new THREE.MeshStandardMaterial({ map: t, emissiveMap: t, emissive: "#ffffff", emissiveIntensity: 0.35, roughness: 0.4 });
+  const g = new THREE.Group(); const panel = box(w, h, 0.05, m); g.add(panel); const frame = box(w + 0.06, h + 0.06, 0.03, M.darkSteel); frame.position.z = -0.03; g.add(frame); return g; };
+
+/* ------------------------------------------------------------------ studio: a cyclorama sweep and a soft box */
+{
+  const shape = new THREE.Shape();
+  shape.moveTo(90, -0.01); shape.lineTo(-8, -0.01); shape.absarc(-8, 42, 42.01, -Math.PI / 2, Math.PI, true); shape.lineTo(-50.01, 140); shape.lineTo(-52, 140); shape.lineTo(-52, -1); shape.lineTo(90, -1);
+  const geo = new THREE.ExtrudeGeometry(shape, { depth: 240, bevelEnabled: false, curveSegments: 48 });
+  geo.translate(0, 0, -120);
+  const cycMesh = new THREE.Mesh(geo, M.cyc); cycMesh.rotation.y = Math.PI / 2; cycMesh.receiveShadow = true; scene.add(cycMesh);
+  const key = new THREE.DirectionalLight("#fff3e2", 2.0); key.position.set(-16, 28, 16); key.castShadow = true;
+  key.shadow.mapSize.set(4096, 4096); key.shadow.radius = 18; key.shadow.blurSamples = 25; key.shadow.bias = -0.0004; key.shadow.normalBias = 0.02;
+  Object.assign(key.shadow.camera, { left: -16, right: 16, top: 18, bottom: -10, near: 1, far: 90 }); scene.add(key, key.target);
+  scene.add(new THREE.HemisphereLight("#ffffff", "#d9d2c6", 0.35));
+  const soft = new THREE.RectAreaLight("#fff3e2", Number(params.get("key") || 3.2), 16, 12); soft.position.set(-16, 26, 16); soft.lookAt(0, 3, 0); scene.add(soft);
+  const fill = new THREE.RectAreaLight("#e8eeff", 0.7, 12, 10); fill.position.set(18, 14, 18); fill.lookAt(0, 3, 0); scene.add(fill);
+}
+
+/* ------------------------------------------------------------------ graph → four levels */
+const data = await (await fetch(`/m/station/${station}.json`)).json();
+const graph = data.graph.exit;
+const levelOf = (n) => { const r = n.rank; if (r == null) return 3; if (r === 0) return 0; if (r === 1) return 1; return r <= 4 ? 2 : 3; };
+const nodes = graph.nodes.map((n) => ({ ...n, lv: levelOf(n) }));
+const byId = new Map(nodes.map((n) => [n.id, n]));
+const nbr = new Map();
+for (const e of graph.edges) for (const [a, b] of [[e.source, e.target], [e.target, e.source]]) { if (!nbr.has(a)) nbr.set(a, new Set()); nbr.get(a).add(b); }
+const SW = 11.2, SD = 5.4, ST = 0.46, L = 4;
+const rows = [0, 1, 2, 3].map((lv) => nodes.filter((n) => n.lv === lv).sort((a, b) => (a.rank ?? 9) - (b.rank ?? 9) || a.id.localeCompare(b.id)));
+const order = new Map(); rows.forEach((row) => row.forEach((n, i) => order.set(n.id, (i + 0.5) / row.length)));
+for (let it = 0; it < 8; it++) for (const ri of [1, 2, 3, 2, 1]) {
+  const row = rows[ri], inRow = new Set(row.map((x) => x.id));
+  const bc = new Map(row.map((n) => { const ns = [...(nbr.get(n.id) ?? [])].filter((m) => !inRow.has(m) && order.has(m));
+    return [n.id, ns.length ? ns.reduce((s, m) => s + order.get(m), 0) / ns.length : order.get(n.id)]; }));
+  row.sort((p, q) => bc.get(p.id) - bc.get(q.id) || p.id.localeCompare(q.id)); row.forEach((n, i) => order.set(n.id, (i + 0.5) / row.length));
+}
+const place = new Map();
+for (const row of rows) {
+  const kinds = (k) => row.filter((n) => n.kind === k);
+  const spread = (list, z, x0 = -SW / 2 + 1.1, x1 = SW / 2 - 1.1) => list.forEach((n, i) => place.set(n.id, { x: list.length === 1 ? (x0 + x1) / 2 : lerp(x0, x1, (i + 0.5) / list.length), z }));
+  spread(kinds("street"), 0.2); spread(kinds("entrance"), 1.6); spread(kinds("gate"), -0.2, -2.6, 1.6); spread(kinds("area"), -0.9);
+  const plats = kinds("platform"), bus = plats.filter((n) => /Busway|Berth/i.test(n.label)), trk = plats.filter((n) => !bus.includes(n));
+  spread(bus, -1.0, -SW / 2 + 0.9, SW / 2 - 0.9); spread(trk, -0.45, -2.8, 3.2);
+}
+{ const lifts = nodes.filter((n) => n.kind === "lift").sort((p, q) => order.get(p.id) - order.get(q.id) || p.id.localeCompare(q.id));
+  lifts.forEach((n, i) => place.set(n.id, { x: lifts.length === 1 ? 0 : lerp(-SW / 2 + 1.6, SW / 2 - 1.6, i / (lifts.length - 1)), z: 1.15 })); }
+
+/* ------------------------------------------------------------------ the model */
+const model = new THREE.Group(); scene.add(model);
+const stretchers = [];              // groups whose height follows the level spacing (stairs, escalators)
+const bench = () => { const g = new THREE.Group(); const seat = rbox(1.2, 0.07, 0.36, 0.02, M.oak); seat.position.y = 0.34; g.add(seat);
+  const back = rbox(1.2, 0.28, 0.05, 0.02, M.oak); back.position.set(0, 0.52, -0.16); g.add(back);
+  for (const x of [-0.5, 0.5]) { const leg = box(0.05, 0.34, 0.32, M.darkSteel); leg.position.set(x, 0.17, 0); g.add(leg); } return g; };
+const stairs = (w = 1.3, steps = 12) => { const g = new THREE.Group(), run = 2.2 / steps;
+  for (let k = 0; k < steps; k++) { const hgt = (k + 1) / steps; const s = box(w, hgt, run, M.concrete); s.position.set(0, hgt / 2, -k * run); g.add(s); }
+  for (const x of [-w / 2 - 0.04, w / 2 + 0.04]) { const rail = box(0.04, 0.04, 2.5, M.steel); rail.rotation.x = Math.atan2(1, 2.2); rail.position.set(x, 0.65, -1.1); g.add(rail); }
+  return g; };
+const escalator = (w = 1.1) => { const g = new THREE.Group(); const len = Math.hypot(1, 2.4), ang = Math.atan2(1, 2.4);
+  const truss = box(w, 0.12, len, M.steel); truss.rotation.x = ang; truss.position.set(0, 0.5, -1.2); g.add(truss);
+  const tread = box(w - 0.12, 0.02, len, M.darkSteel); tread.rotation.x = ang; tread.position.set(0, 0.57, -1.2); g.add(tread);
+  for (const x of [-w / 2, w / 2]) { const bal = box(0.03, 0.32, len, M.glass); bal.rotation.x = ang; bal.position.set(x, 0.75, -1.2); g.add(bal);
+    const rail = box(0.06, 0.05, len, M.ink); rail.rotation.x = ang; rail.position.set(x, 0.93, -1.2); g.add(rail); }
+  return g; };
+
+const levels = [0, 1, 2, 3].map((lv) => {
+  const g = new THREE.Group(); model.add(g);
+  const slab = rbox(SW, ST, SD, 0.12, M.concrete, 4); g.add(slab);
+  const edge = rbox(SW + 0.02, 0.06, SD + 0.02, 0.03, M.darkSteel, 2); edge.position.y = ST / 2 - 0.02; edge.scale.set(1, 1, 1); g.add(edge);
+  edge.material = M.steel; edge.position.y = -ST / 2 + 0.03;
+  for (const z of [-1.4, 0, 1.4]) { const strip = box(SW - 1.4, 0.03, 0.12, M.light); strip.position.set(0, -ST / 2 - 0.016, z); g.add(strip); }   // ceiling light strips
+  const props = new THREE.Group(); props.position.y = ST / 2; g.add(props);
+  const row = rows[lv];
+  if (lv === 0) {
+    for (let k = -5; k <= 5; k++) { const seam = box(0.025, 0.006, SD - 0.4, M.stone); seam.position.set(k * 0.95, 0.003, 0); props.add(seam); }
+    const s = row.find((n) => n.kind === "street"); const p = s ? place.get(s.id) : { x: 0, z: 0 };
+    const plaza = cyl(1.7, 0.05, M.sand, 96); plaza.position.set(p.x, 0.025, p.z); props.add(plaza);
+    for (let k = 0; k < 12; k++) { const a = (k / 12) * Math.PI * 2; const b = cyl(0.07, 0.48, M.steel, 24, 0.06); b.position.set(p.x + Math.cos(a) * 1.45, 0.24, p.z + Math.sin(a) * 1.45); props.add(b); }
+    const canopy = rbox(3.8, 0.06, 1.7, 0.02, M.frosted); canopy.position.set(p.x - 3.4, 1.42, -1.2); props.add(canopy);
+    const frame = rbox(3.9, 0.08, 1.8, 0.02, M.darkSteel); frame.position.set(p.x - 3.4, 1.36, -1.2); frame.scale.set(1, 1, 1); props.add(frame);
+    for (const dx of [-1.7, 1.7]) for (const dz of [-0.75, 0.75]) { const leg = cyl(0.04, 1.36, M.darkSteel, 12); leg.position.set(p.x - 3.4 + dx, 0.68, -1.2 + dz); props.add(leg); }
+    for (const [x, z] of [[3.6, -1.5], [4.7, -0.6], [-4.7, 1.6]]) { const pot = rbox(0.95, 0.5, 0.95, 0.06, M.oak); pot.position.set(x, 0.25, z); props.add(pot);
+      const crown = new THREE.Mesh(new THREE.IcosahedronGeometry(0.62, 3), M.leaf); crown.scale.set(1, 0.9, 1); crown.position.set(x, 1.15, z); props.add(crown);
+      const trunk = cyl(0.06, 0.5, M.oak, 12); trunk.position.set(x, 0.65, z); props.add(trunk); }
+    const totem = sign("Alewife", 0.9, 0.22); totem.rotation.y = 0; totem.position.set(p.x + 2.6, 1.25, 1.7); props.add(totem);
+    const post = box(0.06, 1.1, 0.06, M.darkSteel); post.position.set(p.x + 2.6, 0.55, 1.68); props.add(post);
+    const b1 = bench(); b1.position.set(-1.5, 0, 1.9); props.add(b1); const b2 = bench(); b2.position.set(1.6, 0, -2.0); b2.rotation.y = Math.PI; props.add(b2);
+  }
+  if (lv === 1) {
+    for (const n of row.filter((x) => x.kind === "entrance")) { const p = place.get(n.id); const pav = new THREE.Group();
+      const base = rbox(1.1, 0.06, 0.9, 0.02, M.stone); base.position.y = 0.03; pav.add(base);
+      const walls = rbox(0.96, 0.66, 0.76, 0.02, M.glass); walls.position.y = 0.39; pav.add(walls);
+      for (const [x, z] of [[-0.48, -0.38], [0.48, -0.38], [-0.48, 0.38], [0.48, 0.38]]) { const col = box(0.04, 0.68, 0.04, M.darkSteel); col.position.set(x, 0.38, z); pav.add(col); }
+      const roof = rbox(1.24, 0.09, 1.02, 0.03, M.clay); roof.position.y = 0.77; pav.add(roof);
+      const door = box(0.34, 0.5, 0.02, M.ink); door.position.set(0, 0.31, 0.39); pav.add(door);
+      pav.position.set(p.x, 0, p.z); props.add(pav); }
+    const sg = sign("Red Line  ↓", 1.6, 0.3); sg.position.set(-2.5, 1.0, -0.6); props.add(sg);
+    for (const x of [-3.3, -1.7]) { const leg = box(0.04, 1.0, 0.04, M.darkSteel); leg.position.set(x, 0.5, -0.62); props.add(leg); }
+  }
+  if (lv === 2) {
+    for (const n of row.filter((x) => x.kind === "gate")) { const p = place.get(n.id);
+      for (let k = -2; k <= 2; k++) { const cab = rbox(0.12, 0.62, 0.7, 0.02, M.steel); cab.position.set(p.x + k * 0.36, 0.31, p.z); props.add(cab);
+        const top = box(0.13, 0.02, 0.5, M.ink); top.position.set(p.x + k * 0.36, 0.63, p.z); props.add(top);
+        if (k < 2) { const flap = box(0.18, 0.32, 0.015, M.tinted); flap.position.set(p.x + k * 0.36 + 0.18, 0.42, p.z); props.add(flap); } } }
+    row.filter((x) => x.kind === "platform").forEach((n, i) => { const p = place.get(n.id);
+      const island = rbox(1.22, 0.14, 0.7, 0.04, M.concreteDark); island.position.set(p.x, 0.07, p.z); props.add(island);
+      const strip = box(1.18, 0.012, 0.08, M.tactile); strip.position.set(p.x, 0.146, p.z + 0.3); props.add(strip);
+      if (i % 2 === 0) { const bus = new THREE.Group(); const body = rbox(1.3, 0.5, 0.58, 0.14, M.clay); body.position.y = 0.33; bus.add(body);
+        const win = rbox(1.1, 0.16, 0.6, 0.04, M.tinted); win.position.y = 0.43; bus.add(win);
+        for (const x of [-0.4, 0.4]) for (const z of [-0.26, 0.26]) { const wh = cyl(0.09, 0.06, M.ink, 16); wh.rotation.x = Math.PI / 2; wh.position.set(x, 0.09, z); bus.add(wh); }
+        bus.position.set(p.x, 0, p.z - 0.66); props.add(bus); } });
+    const bb = bench(); bb.position.set(3.4, 0, 0.9); props.add(bb);
+    const sg = sign("Busway", 1.0, 0.24); sg.position.set(4.2, 1.0, -0.2); props.add(sg);
+    const leg = box(0.04, 0.9, 0.04, M.darkSteel); leg.position.set(4.2, 0.45, -0.22); props.add(leg);
+  }
+  if (lv === 3) {
+    const bed = box(SW - 0.8, 0.06, 1.1, M.gravel); bed.position.set(0, 0.03, -1.65); props.add(bed);
+    for (let k = -14; k <= 14; k++) { const tie = box(0.08, 0.03, 0.9, M.darkSteel); tie.position.set(k * 0.36, 0.075, -1.65); props.add(tie); }
+    for (const zz of [-1.9, -1.4]) { const rail = box(SW - 1, 0.05, 0.05, M.steel); rail.position.set(0, 0.11, zz); props.add(rail); }
+    const pl = rbox(SW - 1.0, 0.24, 1.3, 0.04, M.concreteDark); pl.position.set(0, 0.12, -0.45); props.add(pl);
+    const tac = box(SW - 1.1, 0.012, 0.12, M.tactile); tac.position.set(0, 0.246, -1.03); props.add(tac);
+    for (let k = 0; k < 3; k++) { const car = new THREE.Group();
+      const body = rbox(2.35, 0.72, 0.8, 0.2, M.steel); body.position.y = 0.46; car.add(body);
+      const win = rbox(2.0, 0.22, 0.82, 0.05, M.tinted); win.position.y = 0.58; car.add(win);
+      const roof = rbox(2.3, 0.05, 0.7, 0.02, M.clay); roof.position.y = 0.84; car.add(roof);
+      for (const dx of [-0.55, 0.55]) { const door = box(0.36, 0.48, 0.82, M.darkSteel); door.position.set(dx, 0.42, 0); door.scale.z = 1.002; car.add(door); }
+      car.position.set(-2.45 + k * 2.45, 0.1, -1.65); props.add(car); }
+    for (const x of [-3.6, 3.6]) { const b = bench(); b.position.set(x, 0.24, 0.0); props.add(b); }
+    const sg = sign("Alewife", 1.2, 0.26); sg.position.set(0.2, 1.05, -0.2); props.add(sg);
+    for (const x of [-0.4, 0.8]) { const leg = box(0.04, 0.85, 0.04, M.darkSteel); leg.position.set(x, 0.62, -0.22); props.add(leg); }
+  }
+  if (lv >= 1) {                                     // a stair flight up to the level above, and an escalator on the deeper levels
+    const st = stairs(); st.position.set(-SW / 2 + 1.2, 0, 2.3); g.add(st); stretchers.push({ g: st, lv });
+    if (lv >= 2) { const es = escalator(); es.position.set(SW / 2 - 1.4, 0, 2.3); g.add(es); stretchers.push({ g: es, lv }); }
+  }
+  return { g, props, lv };
+});
+
+/* lift shafts: clear glass tubes with steel mullions and a car with a coloured status band */
+const shafts = nodes.filter((n) => n.kind === "lift").map((n) => {
+  const lvs = [n.lv, ...[...(nbr.get(n.id) ?? [])].map((m) => byId.get(m)?.lv).filter((v) => v != null)];
+  let top = Math.min(...lvs), bot = Math.max(...lvs); if (top === bot) { if (top > 0) top -= 1; else bot += 1; }
+  const grp = new THREE.Group(); model.add(grp);
+  const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.58, 0.58, 1, 64, 1, true), M.glass);
+  const ringT = new THREE.Mesh(new THREE.TorusGeometry(0.58, 0.045, 12, 64), M.steel), ringB = ringT.clone();
+  ringT.rotation.x = ringB.rotation.x = Math.PI / 2;
+  const mullions = [0, 1, 2, 3].map((k) => { const m = box(0.04, 1, 0.04, M.steel); const a = (k / 4) * Math.PI * 2 + Math.PI / 4; m.position.set(Math.cos(a) * 0.58, 0, Math.sin(a) * 0.58); return m; });
+  const car = new THREE.Group();
+  const cab = rbox(0.7, 0.86, 0.7, 0.06, M.steel); car.add(cab);
+  const band = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.1, 0.72), new THREE.MeshStandardMaterial({ color: P.teal, emissive: P.teal, emissiveIntensity: 1.2, roughness: 0.4 }));
+  band.position.y = 0.33; car.add(band);
+  const panel = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.02), new THREE.MeshStandardMaterial({ color: "#2a2d33", emissive: "#000000", emissiveIntensity: 0, roughness: 0.3 }));
+  panel.position.set(0, -0.05, 0.36); car.add(panel);
+  [tube, ringT, ringB, ...mullions, car].forEach((m) => grp.add(m));
+  const p = place.get(n.id);
+  return { n, fid: n.facility_id, top, bot, grp, tube, ringT, ringB, mullions, car, band, panel, x: p.x, z: p.z,
+    last: !!(n.last_lift && n.last_lift.length), closed: n.status === "closed" };
+});
+const s961 = shafts.find((s) => s.closed), s813 = shafts.find((s) => s.last);
+
+const routeSeq = (() => {
+  const r = (graph.routes || []).find((x) => s813 && x.lifts?.includes(s813.fid)) || (graph.routes || [])[0];
+  if (!r) return [];
+  const edges = new Map(graph.edges.map((e) => [e.id, e])); const seq = [];
+  r.edge_ids.forEach((id, i) => { const e = edges.get(id); if (!e) return; if (!i) seq.push(e.source); seq.push(e.target); });
+  return seq.filter((id, i) => id !== seq[i - 1]);
+})();
+const routeMat = new THREE.MeshStandardMaterial({ color: P.route, emissive: P.route, emissiveIntensity: 3.2, roughness: 0.3 });
+let routeMesh = null;
+
+model.traverse((m) => { if (m.isMesh) { m.castShadow = !(m.material && m.material.transmission > 0.5); m.receiveShadow = true; } });
+
+/* ------------------------------------------------------------------ pose */
+const levelY = (lv, gap) => (L - 1 - lv) * (ST + gap) + ST / 2 + 0.05;
+let look = new THREE.Vector3(), focus = 20, aperture = 0;
+
+function pose(f) {
+  // 0-24 turn into view · 22-54 take apart · 56-72 961 closes · 74-94 close on 813, route draws · 96-119 settle to the hero view
+  const tRot = ease(span(f, 0, 26)), tExp = ease(span(f, 22, 54)), t961 = ease(span(f, 56, 70)), t813 = ease(span(f, 74, 88));
+  const tClose = ease(span(f, 72, 84)) * (1 - ease(span(f, 94, 106))), tBack = ease(span(f, 96, 119));
+  const gap = lerp(lerp(0.02, 2.5, tExp), 1.85, tBack);
+  model.rotation.y = lerp(lerp(-1.25, -0.5, tRot), -0.62, tBack) + 0.12 * (f / (N - 1)) * (1 - tBack);
+
+  for (const lv of levels) {
+    lv.g.position.y = levelY(lv.lv, gap);
+    const grow = lv.lv === 0 ? 1 : ease(span(f, 22 + lv.lv * 3, 44 + lv.lv * 3));
+    lv.props.scale.set(1, Math.max(1e-4, grow), 1); lv.props.visible = grow > 1e-3;
+  }
+  const reveal = ease(span(f, 30, 48));
+  for (const st of stretchers) {                     // stairs reach from this level's floor to the underside of the level above
+    const h = Math.max(1e-3, (ST + gap) - ST);
+    st.g.position.y = ST / 2; st.g.scale.set(1, h * reveal + 1e-4, 1); st.g.visible = reveal > 0.02 && gap > 0.3;
+  }
+  for (const s of shafts) {
+    const y0 = levelY(s.bot, gap) + ST / 2, y1 = levelY(s.top, gap) + ST / 2 + 0.95, h = Math.max(0.05, y1 - y0);
+    s.grp.visible = reveal > 1e-3;
+    s.grp.position.set(s.x, (y0 + y1) / 2, s.z); s.grp.rotation.set(0, 0, 0);
+    s.tube.scale.set(1, h, 1); s.mullions.forEach((m) => m.scale.set(1, h, 1));
+    s.ringT.position.y = h / 2; s.ringB.position.y = -h / 2;
+    s.grp.scale.set(lerp(0.5, 1, reveal), 1, lerp(0.5, 1, reveal));
+    s.car.position.y = lerp(-h / 2 + 0.5, h / 2 - 1.0, 0.5 + 0.3 * Math.sin((f / N) * Math.PI * 2 + s.x * 1.7));
+    s.band.material.color.set(P.teal); s.band.material.emissive.set(P.teal); s.band.material.emissiveIntensity = 1.2;
+    s.panel.material.emissive.set("#000"); s.panel.material.emissiveIntensity = 0;
+    if (s === s961) {
+      s.band.material.color.set(P.teal).lerp(new THREE.Color(P.red), t961); s.band.material.emissive.copy(s.band.material.color);
+      s.band.material.emissiveIntensity = lerp(1.2, 2.2, t961);
+      s.panel.material.emissive.set(P.red); s.panel.material.emissiveIntensity = 0.8 * t961;
+      const drop = ease(span(f, 62, 74)) * (1 - tBack);
+      s.grp.position.y -= drop * 0.7; s.grp.position.x += drop * 0.6; s.grp.position.z += drop * 1.7; s.grp.rotation.z = -drop * 0.42; s.grp.rotation.x = drop * 0.3;
+      s.car.position.y = lerp(s.car.position.y, -h / 2 + 0.5, t961);
+    }
+    if (s === s813) {
+      s.band.material.color.set(P.teal).lerp(new THREE.Color(P.amber), t813); s.band.material.emissive.copy(s.band.material.color);
+      s.band.material.emissiveIntensity = lerp(1.2, 8, t813);
+      s.panel.material.emissive.set(P.amber); s.panel.material.emissiveIntensity = 7 * t813;
+    }
+  }
+  model.updateMatrixWorld(true);
+
+  if (routeMesh) { model.remove(routeMesh); routeMesh.geometry.dispose(); routeMesh = null; }
+  const k = ease(span(f, 78, 94));
+  if (routeSeq.length && k > 0 && s813) {
+    const pts = [];
+    for (const id of routeSeq) {
+      const n = byId.get(id); if (!n) continue;
+      if (n.kind === "lift") { const b = levelY(s813.bot, gap) + ST / 2 + 0.35, t = levelY(s813.top, gap) + ST / 2 + 0.35;
+        pts.push(new THREE.Vector3(s813.x, b, s813.z - 0.9), new THREE.Vector3(s813.x, b + 0.25, s813.z), new THREE.Vector3(s813.x, t - 0.25, s813.z), new THREE.Vector3(s813.x, t, s813.z - 0.9)); }
+      else if (n.kind !== "area") { const p = place.get(id); pts.push(new THREE.Vector3(p.x, levelY(n.lv, gap) + ST / 2 + 0.35, p.z)); }
+    }
+    const clean = pts.filter((p, i) => i === 0 || p.distanceTo(pts[i - 1]) > 0.15);
+    if (clean.length > 1) {
+      const curve = new THREE.CatmullRomCurve3(clean, false, "centripetal", 0.25);
+      // the path tracer ignores draw ranges, so build only the drawn part of the route
+      const part = new THREE.CatmullRomCurve3(Array.from({ length: 160 }, (_, j) => curve.getPoint((j / 159) * Math.max(0.01, k))));
+      routeMesh = new THREE.Mesh(new THREE.TubeGeometry(part, 260, 0.07, 12, false), routeMat); routeMesh.castShadow = true; model.add(routeMesh);
+    }
+  }
+  model.updateMatrixWorld(true);
+
+  // camera: fit the model, then push in on 813 for the close-up, then settle into the 3/4 hero view
+  const stackH = levelY(0, gap) + 1.6;
+  const vfov = THREE.MathUtils.degToRad(camera.fov);
+  const fitH = Math.max(stackH * 1.15 + 1.6, 7.5), fitW = SW * lerp(lerp(1.95, 1.55, tExp), 1.8, tBack);
+  let dist = Math.max(fitH / (2 * Math.tan(vfov / 2)), fitW / (2 * Math.tan(vfov / 2) * camera.aspect)) * 1.14;
+  look.set(0, stackH * 0.46, 0);
+  if (s813) { const c = s813.car.getWorldPosition(new THREE.Vector3()); look.lerp(c, 0.55 * tClose); }
+  dist *= lerp(1, 0.7, tClose);
+  const elev = THREE.MathUtils.degToRad(lerp(lerp(lerp(32, 15, tExp), 12, tClose), 25, tBack)), az = THREE.MathUtils.degToRad(-6 - 10 * tClose);
+  camera.position.set(look.x + dist * Math.cos(elev) * Math.sin(az), look.y + dist * Math.sin(elev), look.z + dist * Math.cos(elev) * Math.cos(az));
+  camera.lookAt(look);
+  camera.setViewOffset(W, H, -W * 0.15 * (1 - tBack) * (1 - tClose * 0.7), -H * 0.085, W, H);
+  focus = camera.position.distanceTo(look); aperture = 0.0022 * tClose;
+  camera.updateProjectionMatrix(); camera.updateMatrixWorld(true);
+  return { tClose };
+}
+
+/* ------------------------------------------------------------------ raster pipeline */
+const composer = new EffectComposer(renderer);
+composer.setPixelRatio(1); composer.setSize(W, H);
+composer.addPass(new RenderPass(scene, camera));
+const ao = new GTAOPass(scene, camera, W, H);
+ao.updateGtaoMaterial({ radius: 0.5, distanceExponent: 1.4, thickness: 1.2, scale: 1.1, samples: 16 });
+ao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 6, rings: 2, samples: 16 }); ao.blendIntensity = 0.9; composer.addPass(ao);
+const bokeh = new BokehPass(scene, camera, { focus: 20, aperture: 0, maxblur: 0.008 }); composer.addPass(bokeh);
+composer.addPass(new OutputPass());
+
+const post = document.getElementById("post"), pctx = post.getContext("2d");
+let seed = 1;
+const rand = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+const grain = (() => { const c = document.createElement("canvas"); c.width = c.height = 256; const g = c.getContext("2d"); const img = g.createImageData(256, 256);
+  for (let i = 0; i < img.data.length; i += 4) { const v = 128 + (rand() - 0.5) * 255; img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255; }
+  g.putImageData(img, 0, 0); return c; })();
+// 3x3 median per channel: removes the isolated speckles a low sample count leaves, keeps edges
+function median3(img) {
+  const { width: w, height: h, data: d } = img, out = new Uint8ClampedArray(d), v = new Uint8Array(9);
+  for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+    const o = (y * w + x) * 4;
+    for (let c = 0; c < 3; c++) {
+      let k = 0;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) v[k++] = d[o + (dy * w + dx) * 4 + c];
+      for (let i = 1; i < 9; i++) { const t = v[i]; let j = i - 1; while (j >= 0 && v[j] > t) { v[j + 1] = v[j]; j--; } v[j + 1] = t; }
+      out[o + c] = v[4];
+    }
+  }
+  return new ImageData(out, w, h);
+}
+let cleaned = null;
+function finish(f, w, h) {
+  post.width = w; post.height = h;
+  if (w === W) { pctx.drawImage(renderer.domElement, 0, 0, w, h); cleaned = median3(pctx.getImageData(0, 0, w, h)); }
+  if (w === W) pctx.putImageData(cleaned, 0, 0);
+  else { const t = document.createElement("canvas"); t.width = W; t.height = H; t.getContext("2d").putImageData(cleaned, 0, 0);
+    pctx.imageSmoothingQuality = "high"; pctx.drawImage(t, 0, 0, w, h); }
+  pctx.globalAlpha = 0.045; pctx.globalCompositeOperation = "overlay";              // film grain, shifted per frame
+  const ox = (f * 97) % 256, oy = (f * 57) % 256;
+  for (let y = -oy; y < h; y += 256) for (let x = -ox; x < w; x += 256) pctx.drawImage(grain, x, y);
+  pctx.globalAlpha = 1; pctx.globalCompositeOperation = "source-over";
+  const e = Math.round(Math.min(w, h) * 0.07);                                       // feather the edges into the page colour
+  const fade = (x0, y0, x1, y1, rx, ry, rw, rh) => { const g = pctx.createLinearGradient(x0, y0, x1, y1);
+    g.addColorStop(0, "rgba(245,243,238,1)"); g.addColorStop(1, "rgba(245,243,238,0)"); pctx.fillStyle = g; pctx.fillRect(rx, ry, rw, rh); };
+  fade(0, 0, 0, e, 0, 0, w, e); fade(0, h, 0, h - e, 0, h - e, w, e); fade(0, 0, e, 0, 0, 0, e, h); fade(w, 0, w - e, 0, w - e, 0, e, h);
+  return post.toDataURL("image/webp", Number(params.get("q") || 0.78));
+}
+
+const anchorOf = (obj) => { if (!obj) return null; const v = obj.getWorldPosition(new THREE.Vector3()).project(camera);
+  return [+((v.x + 1) / 2).toFixed(4), +((1 - v.y) / 2).toFixed(4), v.z < 1 ? 1 : 0]; };
+
+window.renderFrame = async (i) => {
+  pose(i);
+  bokeh.enabled = aperture > 1e-5; bokeh.uniforms.focus.value = focus; bokeh.uniforms.aperture.value = aperture;
+  composer.render();
+  const desktop = finish(i, W, H), mobile = finish(i, MW, MH);
+  const anchors = { "961": s961 && s961.grp.visible ? anchorOf(s961.car) : null, "813": s813 && s813.grp.visible ? anchorOf(s813.car) : null };
+  return { desktop, mobile, anchors, samples: 0 };
+};
+window.N = N; window.ready = true;
+</script>
+</body>
+</html>

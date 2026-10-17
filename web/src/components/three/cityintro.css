@@ -7,7 +7,8 @@
   margin: -1.25rem -1.25rem 0; isolation: isolate;   /* cancels main's padding; render outside main for full bleed */
 }
 .ci-dusk { --ci-glass: rgb(26 33 58 / 0.6); --ci-muted: #c9d2e3; }
-.ci-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; z-index: 0; background: #05070c; }
+.ci-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; z-index: 0;
+  background: radial-gradient(60% 50% at 70% 45%, rgb(245 165 36 / 0.22), transparent 70%), radial-gradient(70% 60% at 20% 80%, rgb(62 123 250 / 0.18), transparent 70%), linear-gradient(180deg, #0b1324, #05070c); }
 .ci-dusk .ci-stage { background: #2b3557; }
 .ci-canvas, .ci-canvas canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .ci-shade { position: absolute; inset: 0; pointer-events: none;

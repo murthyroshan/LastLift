@@ -12,8 +12,13 @@ import { Repairs } from "./pages/Repairs";
 import { Station } from "./pages/Station";
 import { Lab } from "./pages/lab/Lab";
 import { Console } from "./pages/Console";
+import { AtlasPage } from "./pages/Atlas";
+import { Sandbox } from "./pages/Sandbox";
+import { TimeMachine } from "./pages/TimeMachine";
 import { CommandPalette } from "./components/CommandPalette";
 import { I } from "./components/icons";
+import { DisplayPanel } from "./components/DisplayPanel";
+import { applyDisplay, loadDisplay, type Display } from "./lib/display";
 import { href, useRoute } from "./router";
 import { S } from "./strings.en";
 
@@ -73,9 +78,17 @@ export default function App() {
   const page = route.parts[0] ?? "";
   const cinematic = page === "";
   const [palette, setPalette] = useState(false);
+  const [display, setDisplay] = useState<Display>(loadDisplay);
+  const [displayOpen, setDisplayOpen] = useState(false);
+  const [displayVersion, setDisplayVersion] = useState(0);
+  const changeDisplay = (d: Display) => { applyDisplay(d); setDisplay(d); setDisplayVersion((v) => v + 1); };
+  const closeDisplay = useCallback(() => {
+    setDisplayOpen(false);
+    document.querySelector<HTMLElement>(".display-trigger")?.focus();
+  }, []);
   const nav: [string, string, string, keyof typeof I][] = [
     ["/", S.nav.home, "", "story"], ["/console", S.nav.console, "console", "command"], ["/network", S.nav.network, "network", "network"],
-    ["/repairs", S.nav.repairs, "repairs", "repairs"], ["/approvals", S.nav.ops, "approvals", "ops"], ["/about", S.nav.about, "about", "about"]];
+    ["/repairs", S.nav.repairs, "repairs", "repairs"], ["/sandbox", S.nav.sandbox, "sandbox", "lift"], ["/history", S.nav.history, "history", "story"], ["/approvals", S.nav.ops, "approvals", "ops"], ["/atlas", S.nav.atlas, "atlas", "network"], ["/about", S.nav.about, "about", "about"]];
   const actions = [
     { id: "ask", label: S.nav.ask, run: () => setDrawer(true) },
     { id: "eyes", label: S.eyes.toggle, run: () => setEyes((v) => !v) },
@@ -110,6 +123,8 @@ export default function App() {
           <div className="nav-tools">
             <button className="link" aria-expanded={drawer} onClick={() => setDrawer(true)}><I.agent /><span>{S.nav.ask}</span></button>
             <button className="link" aria-pressed={eyes} onClick={() => setEyes(!eyes)}><I.ear /><span>{S.eyes.toggle}</span></button>
+            <button className="link display-trigger" aria-expanded={displayOpen} onClick={() => setDisplayOpen(!displayOpen)}>
+              <I.about /><span>{S.display.button}</span></button>
             <button className="link" aria-pressed={scope === "live"} disabled={wake !== "live"}
                     title={wake === "live" ? undefined : S.live.needsServer} onClick={() => setWantLive(!wantLive)}>
               <span className="live-dot" aria-hidden="true" /><span>{S.live.toggle}</span>
@@ -121,19 +136,23 @@ export default function App() {
           </div>
         </header>
         <div className="shell-main">
-          <main id="main" tabIndex={-1}>
+          <main id="main" tabIndex={-1} key={displayVersion}>
             {page === "station" ? <Station key={scope} route={route} live={wake === "live"} scope={scope} />
               : page === "console" ? <Console key={scope} scope={scope} />
               : page === "repairs" ? <Repairs key={scope} scope={scope} live={wake === "live"} />
               : page === "network" || page === "contingency" ? <Network key={scope} scope={scope} />
               : page === "approvals" ? <Approvals key={scope} scope={scope} live={wake === "live"} />
               : page === "about" ? <About />
+              : page === "atlas" ? <AtlasPage />
+              : page === "history" ? <TimeMachine />
+              : page === "sandbox" ? <Sandbox key={scope} route={route} live={wake === "live"} scope={scope} />
               : page === "lab" ? <Lab route={route} />
               : <Landing key={scope} scope={scope} />}
           </main>
           <footer className="site"><p>{footer}</p></footer>
         </div>
       </div>
+      {displayOpen && <DisplayPanel value={display} onChange={changeDisplay} onClose={closeDisplay} />}
       <CommandPalette open={palette} setOpen={setPalette} actions={actions} />
       {drawer && <AgentDrawer live={wake === "live"} scope={scope} onClose={close} />}
       {eyes && <EyesFree live={wake === "live"} onClose={closeEyes} />}

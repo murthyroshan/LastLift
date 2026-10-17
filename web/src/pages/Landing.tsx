@@ -1,19 +1,23 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
-import { getStateFor, getStations, type Scope } from "../api";
+import { useEffect, useMemo, useState } from "react";
+import { getClaims, getStateFor, getStations, type Scope } from "../api";
+import { ClayModel } from "../components/ClayModel";
 import { TheCount } from "../components/TheCount";
+import { realGpu } from "../lib/gpu";
 import { href } from "../router";
 import { S } from "../strings.en";
 
-const CityIntro = lazy(() => import("../components/three/CityIntro").then((m) => ({ default: m.CityIntro })));
+const BASE = import.meta.env.BASE_URL;
 
 export function Landing({ scope }: { scope: Scope }) {
   const [state, setState] = useState<Awaited<ReturnType<typeof getStateFor>> | null>(null);
   const [stations, setStations] = useState<Awaited<ReturnType<typeof getStations>>>([]);
+  const [claims, setClaims] = useState<Record<string, any> | null>(null);
   const [filter, setFilter] = useState("");
 
   useEffect(() => {
     getStateFor(scope).then(setState).catch(() => {});
     getStations().then(setStations).catch(() => {});
+    getClaims().then(setClaims).catch(() => {});
   }, [scope]);
 
   const shown = useMemo(() => {
@@ -27,9 +31,25 @@ export function Landing({ scope }: { scope: Scope }) {
   const c = state?.closures.data;
   return (
     <>
-      <Suspense fallback={<div className="ci-fallback" aria-hidden="true" />}>
-        <CityIntro />
-      </Suspense>
+      <section className="hero-light" aria-labelledby="hero-h">
+        <div className="hero-copy">
+          <p className="eyebrow">{S.home.eyebrow}</p>
+          <h1 id="hero-h">{S.tagline}</h1>
+          {claims && <>
+            <p className="count ci-count">{S.home.countLead(claims.platforms_single_lift, claims.platforms_step_free)}</p>
+            <p className="hero-line">{S.home.countText}</p>
+          </>}
+          <div className="hero-ctas">
+            <a className="btn primary" href={`${BASE}concepts/sequence.html`}>{S.hero.story} <span aria-hidden="true">→</span></a>
+            <a className="btn" href={`${BASE}concepts/world.html`}>{S.hero.walk}</a>
+            <a className="btn" href={href("/console")}>{S.hero.console}</a>
+          </div>
+        </div>
+        <div className="hero-model">
+          {realGpu() ? <ClayModel stationId="place-alfcl" dir="exit" selected="70061" height="100%" />
+            : <img src={`${BASE}concepts/sequence/frames/f119.webp`} alt="" />}
+        </div>
+      </section>
       <div className="after-intro">
       {c && (
         <section className="block" aria-labelledby="now-h">

@@ -1,4 +1,8 @@
 {
+ "atlas_assessable": 10,
+ "atlas_falkordb_checked": 2884,
+ "atlas_falkordb_equal": 2884,
+ "atlas_feeds": 14,
  "audit_items": 8,
  "audit_validator_version": "8.0.1",
  "checker_accepted": 333,

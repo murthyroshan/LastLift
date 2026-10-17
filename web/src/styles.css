@@ -4,13 +4,14 @@
 
 /* Tokens (master plan 6.2). "Good" is blue, never green; state always has glyph + number + word. */
 :root {
-  --bg: #f4f6f9; --fg: #10151c; --muted: #4a5361; --line: #d3d9e1; --panel: #ffffff; --panel-2: #eaeef3;
-  --k0: #b42318; --k1: #8a5300; --k1-fill: #f5b83d; --k2: #0b5cad; --k3plus: #08306b;
-  --unknown: #5b6370; --sim: #6b3fa0; --lastlift: #8a5300;
-  --route-a: #0072b2; --route-b: #007a5a; --route-c: #a8457f; --on-k2: #ffffff;
-  --focus-inner: #ffffff; --focus-outer: #0b0c0c;
+  --bg: #f5f3ee; --fg: #16181d; --muted: #5d6169; --line: #e0dbd1; --panel: #ffffff; --panel-2: #efebe4;
+  --k0: #c42b32; --k1: #8a5300; --k1-fill: #f5a524; --k2: #2457c5; --k3plus: #183f93;
+  --unknown: #6b6f76; --sim: #6b3fa0; --lastlift: #8a5300; --ok: #1e9e8a;
+  --route-a: #3e7bfa; --route-b: #1e9e8a; --route-c: #c2477f; --on-k2: #ffffff;
+  --focus-inner: #ffffff; --focus-outer: #16181d;
   --font: "Atkinson Hyperlegible Next", system-ui, sans-serif;
   --mono: "Atkinson Hyperlegible Mono", ui-monospace, monospace;
+  --display: "Inter Tight", "Atkinson Hyperlegible Next", system-ui, sans-serif;
   --r1: 6px; --r2: 10px; --r3: 16px;
   --dur-xs: 100ms; --dur-sm: 200ms; --dur-md: 400ms; --dur-lg: 900ms; --pulse: 1000ms;
   --ease: cubic-bezier(.2, 0, 0, 1); --ease-out: cubic-bezier(0, 0, .2, 1);
@@ -45,7 +46,7 @@
 html { scroll-padding-top: 6rem; }
 body {
   margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font);
-  font-size: 17px; line-height: 1.5; font-variant-numeric: tabular-nums slashed-zero;
+  font-size: 1.0625rem; line-height: 1.5; font-variant-numeric: tabular-nums slashed-zero;
   -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
 }
 a { color: var(--k2); text-underline-offset: 0.18em; }
@@ -493,7 +494,7 @@ ol.transcript { max-height: 40vh; overflow: auto; padding-left: 1.25rem; }
 .maplibregl-ctrl-group button + button { border-top-color: var(--line) !important; }
 .maplibregl-ctrl-attrib { background: color-mix(in srgb, var(--panel) 80%, transparent) !important; color: var(--muted); }
 .maplibregl-ctrl-attrib a { color: var(--muted) !important; }
-@media (prefers-color-scheme: dark) { .maplibregl-ctrl-group button .maplibregl-ctrl-icon { filter: invert(1); } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .maplibregl-ctrl-group button .maplibregl-ctrl-icon { filter: invert(1); } }
 @media (max-width: 1024px) {
   :root { --map-h: 56vh; }
   .story-fade { background: linear-gradient(0deg, var(--bg) 0, transparent 30%); }

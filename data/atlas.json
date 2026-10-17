@@ -1,0 +1,574 @@
+{
+ "agencies": [
+  {
+   "assessable": true,
+   "at_grade": 0,
+   "at_grade_beside_lifts": 0,
+   "country": "US",
+   "elevator_pathways": 4,
+   "facility_ids": false,
+   "falkordb": {
+    "checked": 8,
+    "equal": 8
+   },
+   "id": "mdb-205",
+   "license": "",
+   "lift_dependent": 4,
+   "lift_units": 4,
+   "marked_not_accessible": 0,
+   "no_accessible_entrance": 0,
+   "no_route": 0,
+   "platforms": 4,
+   "provider": "Metro Transit",
+   "readiness": "B",
+   "single_lift": 0,
+   "single_lift_share": 0.0,
+   "stations_without_entrance_flags": 2,
+   "top_stations": [],
+   "two_plus": 4
+  },
+  {
+   "assessable": true,
+   "at_grade": 199,
+   "at_grade_beside_lifts": 136,
+   "country": "US",
+   "elevator_pathways": 490,
+   "facility_ids": true,
+   "falkordb": {
+    "checked": 331,
+    "equal": 331
+   },
+   "id": "mdb-437",
+   "license": "https://www.mass.gov/files/documents/2017/10/27/develop_license_agree_0.pdf",
+   "lift_dependent": 168,
+   "lift_units": 197,
+   "marked_not_accessible": 13,
+   "no_accessible_entrance": 6,
+   "no_route": 2,
+   "platforms": 386,
+   "provider": "Massachusetts Bay Transportation Authority (MBTA)",
+   "readiness": "A",
+   "single_lift": 89,
+   "single_lift_share": 0.53,
+   "stations_without_entrance_flags": 0,
+   "top_stations": [
+    {
+     "lifts": 4,
+     "single_lift_platforms": 7,
+     "station": "Back Bay"
+    },
+    {
+     "lifts": 2,
+     "single_lift_platforms": 4,
+     "station": "JFK/UMass"
+    },
+    {
+     "lifts": 3,
+     "single_lift_platforms": 4,
+     "station": "Kenmore"
+    },
+    {
+     "lifts": 5,
+     "single_lift_platforms": 4,
+     "station": "Ruggles"
+    },
+    {
+     "lifts": 1,
+     "single_lift_platforms": 3,
+     "station": "Braintree"
+    }
+   ],
+   "two_plus": 77
+  },
+  {
+   "assessable": true,
+   "at_grade": 0,
+   "at_grade_beside_lifts": 0,
+   "country": "US",
+   "elevator_pathways": 33,
+   "facility_ids": false,
+   "falkordb": {
+    "checked": 52,
+    "equal": 52
+   },
+   "id": "mdb-470",
+   "license": "",
+   "lift_dependent": 26,
+   "lift_units": 26,
+   "marked_not_accessible": 0,
+   "no_accessible_entrance": 0,
+   "no_route": 0,
+   "platforms": 26,
+   "provider": "Maryland Transit Administration Metro Subway",
+   "readiness": "B",
+   "single_lift": 26,
+   "single_lift_share": 1.0,
+   "stations_without_entrance_flags": 0,
+   "top_stations": [
+    {
+     "lifts": 2,
+     "single_lift_platforms": 2,
+     "station": "CHARLES CENTER METRO"
+    },
+    {
+     "lifts": 2,
+     "single_lift_platforms": 2,
+     "station": "LEXINGTON MARKET METRO"
+    },
+    {
+     "lifts": 1,
+     "single_lift_platforms": 2,
+     "station": "MILFORD MILL METRO"
+    },
+    {
+     "lifts": 2,
+     "single_lift_platforms": 2,
+     "station": "MONDAWMIN METRO"
+    },
+    {
+     "lifts": 1,
+     "single_lift_platforms": 2,
+     "station": "OLD COURT METRO"
+    }
+   ],
+   "two_plus": 0
+  },
+  {
+   "assessable": true,
+   "at_grade": 40,
+   "at_grade_beside_lifts": 40,
+   "country": "US",
+   "elevator_pathways": 27,
+   "facility_ids": false,
+   "falkordb": {
+    "checked": 26,
+    "equal": 26
+   },
+   "id": "mdb-502",
+   "license": "https://www3.septa.org/developer/",
+   "lift_dependent": 14,
+   "lift_units": 26,
+   "marked_not_accessible": 8,
+   "no_accessible_entrance": 0,
+   "no_route": 1,
+   "platforms": 62,
+   "provider": "Southeastern Pennsylvania Transportation Authority (SEPTA)",
+   "readiness": "B",
+   "single_lift": 7,
+   "single_lift_share": 0.5,
+   "stations_without_entrance_flags": 0,
+   "top_stations": [
+    {
+     "lifts": 3,
+     "single_lift_platforms": 4,
+     "station": "Olney Transit Center"
+    },
+    {
+     "lifts": 1,
+     "single_lift_platforms": 2,
+     "station": "NRG Station"
+    },
+    {
+     "lifts": 2,
+     "single_lift_platforms": 1,
+     "station": "69th Street Transit Center"
+    }
+   ],
+   "two_plus": 6
+  },
+  {
+   "assessable": true,
+   "at_grade": 38,
+   "at_grade_beside_lifts": 4,
+   "country": "CA",
+   "elevator_pathways": 55,
+   "facility_ids": false,
+   "falkordb": {
+    "checked": 44,
+    "equal": 44
+   },
+   "id": "mdb-714",
+   "license": "https://data.strathcona.ca/Transportation/Transit-Bus-Schedule-GTFS-Data-Feed-Zip-File/2ek5-rxs5/data?no_mobile=true",
+   "lift_dependent": 22,
+   "lift_units": 26,
+   "marked_not_accessible": 0,
+   "no_accessible_entrance": 0,
+   "no_route": 0,
+   "platforms": 60,
+   "provider": "Edmonton Transit System",
+   "readiness": "B",
+   "single_lift": 22,
+   "single_lift_share": 1.0,
+   "stations_without_entrance_flags": 29,
+   "top_stations": [
+    {
+     "lifts": 1,
+     "single_lift_platforms": 2,
+     "station": "Bay Enterprise Station"
+    },
+    {
+     "lifts": 1,
+     "single_lift_platforms": 2,
+     "station": "Belvedere Station"
+    },
+    {
+     "lifts": 4,
+     "single_lift_platforms": 2,
+     "station": "Central Station"
+    },
+    {
+     "lifts": 2,
+     "single_lift_platforms": 2,
+     "station": "Century Park Station"
+    },
+    {
+     "lifts": 7,
+     "single_lift_platforms": 2,
+     "station": "Churchill Station Underground"
+    }
+   ],
+   "two_plus": 0
+  },
+  {
+   "assessable": true,
+   "at_grade": 1159,
+   "at_grade_beside_lifts": 123,
+   "country": "DE",
+   "elevator_pathways": 1528,
+   "facility_ids": false,
+   "falkordb": {
+    "checked": 1670,
+    "equal": 1670
+   },
+   "id": "mdb-782",
+   "license": "http://vbb.de/vbbgtfs",
+   "lift_dependent": 951,
+   "lift_units": 589,
+   "marked_not_accessible": 0,
+   "no_accessible_entrance": 527,
+   "no_route": 116,
+   "platforms": 2637,
+   "provider": "Verkehrsverbund Berlin-Brandenburg (VBB)",
+   "readiness": "B",
+   "single_lift": 761,
+   "single_lift_share": 0.8,
+   "stations_without_entrance_flags": 577,
+   "top_stations": [
+    {
+     "lifts": 6,
+     "single_lift_platforms": 12,
+     "station": "S+U Gesundbrunnen Bhf (Berlin)"
+    },
+    {
+     "lifts": 2,
+     "single_lift_platforms": 10,
+     "station": "S Olympiastadion (Berlin)"
+    },
+    {
+     "lifts": 6,
+     "single_lift_platforms": 10,
+     "station": "S+U Friedrichstr. Bhf (Berlin)"
+    },
+    {
+     "lifts": 6,
+     "single_lift_platforms": 10,
+     "station": "S+U Zoologischer Garten Bhf (Berlin)"
+    },
+    {
+     "lifts": 7,
+     "single_lift_platforms": 9,
+     "station": "Cottbus, Hauptbahnhof"
+    }
+   ],
+   "two_plus": 74
+  },
+  {
+   "assessable": false,
+   "at_grade": 89,
+   "at_grade_beside_lifts": 0,
+   "country": "PE",
+   "elevator_pathways": 0,
+   "facility_ids": false,
+   "falkordb": {},
+   "id": "mdb-1985",
+   "license": "",
+   "lift_dependent": 0,
+   "lift_units": 0,
+   "marked_not_accessible": 0,
+   "no_accessible_entrance": 0,
+   "no_route": 0,
+   "platforms": 89,
+   "provider": "Aeroexpreso",
+   "readiness": "C",
+   "single_lift": 0,
+   "single_lift_share": null,
+   "stations_without_entrance_flags": 0,
+   "top_stations": [],
+   "two_plus": 0
+  },
+  {
+   "assessable": true,
+   "at_grade": 23,
+   "at_grade_beside_lifts": 5,
+   "country": "RO",
+   "elevator_pathways": 184,
+   "facility_ids": false,
+   "falkordb": {
+    "checked": 190,
+    "equal": 190
+   },
+   "id": "mdb-2098",
+   "license": "",
+   "lift_dependent": 104,
+   "lift_units": 45,
+   "marked_not_accessible": 0,
+   "no_accessible_entrance": 0,
+   "no_route": 9,
+   "platforms": 127,
+   "provider": "Asociația de Dezvoltare Intercomunitară pentru Transport Public București – Ilfov (TPBI)",
+   "readiness": "B",
+   "single_lift": 95,
+   "single_lift_share": 0.913,
+   "stations_without_entrance_flags": 59,
+   "top_stations": [
+    {
+     "lifts": 1,
+     "single_lift_platforms": 4,
+     "station": "Basarab"
+    },
+    {
+     "lifts": 1,
+     "single_lift_platforms": 4,
+     "station": "Piața Unirii"
+    },
+    {
+     "lifts": 1,
+     "single_lift_platforms": 4,
+     "station": "Piața Victoriei"
+    },
+    {
+     "lifts": 1,
+     "single_lift_platforms": 3,
+     "station": "Nicolae Grigorescu"
+    },
+    {
+     "lifts": 1,
+     "single_lift_platforms": 2,
+     "station": "1 Decembrie 1918"
+    }
+   ],
+   "two_plus": 0
+  },
+  {
+   "assessable": true,
+   "at_grade": 0,
+   "at_grade_beside_lifts": 0,
+   "country": "ES",
+   "elevator_pathways": 5,
+   "facility_ids": false,
+   "falkordb": {
+    "checked": 4,
+    "equal": 4
+   },
+   "id": "mdb-2141",
+   "license": "https://www.tib.org/en/sobre-ctm/portal-de-transparencia/dades-obertes",
+   "lift_dependent": 2,
+   "lift_units": 4,
+   "marked_not_accessible": 0,
+   "no_accessible_entrance": 0,
+   "no_route": 0,
+   "platforms": 2,
+   "provider": "Consorcio de Transportes de Mallorca",
+   "readiness": "B",
+   "single_lift": 1,
+   "single_lift_share": 0.5,
+   "stations_without_entrance_flags": 0,
+   "top_stations": [
+    {
+     "lifts": 4,
+     "single_lift_platforms": 1,
+     "station": "Estació Intermodal"
+    }
+   ],
+   "two_plus": 1
+  },
+  {
+   "assessable": true,
+   "at_grade": 5,
+   "at_grade_beside_lifts": 0,
+   "country": "BG",
+   "elevator_pathways": 18,
+   "facility_ids": false,
+   "falkordb": {
+    "checked": 12,
+    "equal": 12
+   },
+   "id": "mdb-2848",
+   "license": "https://www.sofiatraffic.bg/bg/info-center/gtfs-danni",
+   "lift_dependent": 45,
+   "lift_units": 12,
+   "marked_not_accessible": 0,
+   "no_accessible_entrance": 0,
+   "no_route": 39,
+   "platforms": 50,
+   "provider": "Urban Mobility Center - Sofia Traffic",
+   "readiness": "B",
+   "single_lift": 5,
+   "single_lift_share": 0.111,
+   "stations_without_entrance_flags": 50,
+   "top_stations": [
+    {
+     "lifts": 1,
+     "single_lift_platforms": 1,
+     "station": "ИСКЪРСКО ШОСЕ"
+    },
+    {
+     "lifts": 1,
+     "single_lift_platforms": 1,
+     "station": "МАРИЯ ЛУИЗА"
+    },
+    {
+     "lifts": 1,
+     "single_lift_platforms": 1,
+     "station": "МИЗИЯ / НБУ"
+    },
+    {
+     "lifts": 1,
+     "single_lift_platforms": 1,
+     "station": "ОПЪЛЧЕНСКА"
+    },
+    {
+     "lifts": 2,
+     "single_lift_platforms": 1,
+     "station": "Софийски Университет \"Св. Климент Охридски\""
+    }
+   ],
+   "two_plus": 1
+  },
+  {
+   "assessable": true,
+   "at_grade": 0,
+   "at_grade_beside_lifts": 0,
+   "country": "CL",
+   "elevator_pathways": 509,
+   "facility_ids": false,
+   "falkordb": {
+    "checked": 547,
+    "equal": 547
+   },
+   "id": "mdb-3357",
+   "license": "https://www.dtpm.cl/index.php/gtfs-vigente",
+   "lift_dependent": 283,
+   "lift_units": 442,
+   "marked_not_accessible": 3,
+   "no_accessible_entrance": 0,
+   "no_route": 18,
+   "platforms": 286,
+   "provider": "Red Metropolitana de Movilida, EFE Trenes de Chile, Bus de Acercamiento Aeropuerto, Metro de Santiago",
+   "readiness": "B",
+   "single_lift": 248,
+   "single_lift_share": 0.876,
+   "stations_without_entrance_flags": 0,
+   "top_stations": [
+    {
+     "lifts": 4,
+     "single_lift_platforms": 4,
+     "station": "Baquedano"
+    },
+    {
+     "lifts": 8,
+     "single_lift_platforms": 4,
+     "station": "La Cisterna"
+    },
+    {
+     "lifts": 7,
+     "single_lift_platforms": 4,
+     "station": "Los Héroes"
+    },
+    {
+     "lifts": 4,
+     "single_lift_platforms": 4,
+     "station": "Plaza Egaña"
+    },
+    {
+     "lifts": 5,
+     "single_lift_platforms": 4,
+     "station": "Puente Cal y Canto"
+    }
+   ],
+   "two_plus": 17
+  },
+  {
+   "assessable": false,
+   "at_grade": 425,
+   "at_grade_beside_lifts": 0,
+   "country": "IN",
+   "elevator_pathways": 0,
+   "facility_ids": false,
+   "falkordb": {},
+   "id": "mdb-3360",
+   "license": "https://opendata.iiitd.edu.in/terms",
+   "lift_dependent": 0,
+   "lift_units": 0,
+   "marked_not_accessible": 0,
+   "no_accessible_entrance": 0,
+   "no_route": 0,
+   "platforms": 425,
+   "provider": "Chennai Transport Corporation",
+   "readiness": "C",
+   "single_lift": 0,
+   "single_lift_share": null,
+   "stations_without_entrance_flags": 104,
+   "top_stations": [],
+   "two_plus": 0
+  },
+  {
+   "assessable": false,
+   "at_grade": 1987,
+   "at_grade_beside_lifts": 0,
+   "country": "FR",
+   "elevator_pathways": 0,
+   "facility_ids": false,
+   "falkordb": {},
+   "id": "tdg-67595",
+   "license": "https://opendatacommons.org/licenses/odbl/1.0/",
+   "lift_dependent": 0,
+   "lift_units": 0,
+   "marked_not_accessible": 751,
+   "no_accessible_entrance": 0,
+   "no_route": 0,
+   "platforms": 2738,
+   "provider": "SNCF",
+   "readiness": "C",
+   "single_lift": 0,
+   "single_lift_share": null,
+   "stations_without_entrance_flags": 761,
+   "top_stations": [],
+   "two_plus": 0
+  },
+  {
+   "assessable": false,
+   "at_grade": 608,
+   "at_grade_beside_lifts": 0,
+   "country": "FR",
+   "elevator_pathways": 0,
+   "facility_ids": false,
+   "falkordb": {},
+   "id": "tdg-80921",
+   "license": "https://wiki.lafabriquedesmobilites.fr/wiki/Licence_Mobilit%C3%A9s",
+   "lift_dependent": 0,
+   "lift_units": 0,
+   "marked_not_accessible": 751,
+   "no_accessible_entrance": 0,
+   "no_route": 0,
+   "platforms": 1359,
+   "provider": "Île-de-France Mobilités",
+   "readiness": "C",
+   "single_lift": 0,
+   "single_lift_share": null,
+   "stations_without_entrance_flags": 761,
+   "top_stations": [],
+   "two_plus": 0
+  }
+ ]
+}

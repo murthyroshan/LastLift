@@ -19,6 +19,7 @@ for (const spec of routes) {
   await page.waitForTimeout(Number(process.env.WAIT ?? 5000));
   for (const m of mods) {
     const k = m.slice(0, m.indexOf("=")), v = m.slice(m.indexOf("=") + 1);
+    if (k === "show") { await page.locator(v).first().scrollIntoViewIfNeeded().catch(() => {}); await page.waitForTimeout(800); }
     if (k === "scroll") { await page.mouse.wheel(0, Number(v)); await page.waitForTimeout(3500); }
     if (k === "click") { await page.click(v).catch((e) => errors.push(`click ${v}: ${e}`.slice(0, 200))); await page.waitForTimeout(3500); }
   }

@@ -102,6 +102,11 @@ export const stressTest = (budget: number) => tool("stress_test", { budget });
 
 /** The Count (every platform's bin, baseline and now) and the network map (stations, ride links). */
 export const getSystem = () => mirror<{ platforms: any[] }>("system.json");
+export const getDays = () => mirror<any>("history/days.json");
+export const getLifts = () => mirror<{ lifts: any[] }>("lifts.json");
+export const whatIfClose = (facilityIds: string[], scope: Scope) => tool("what_if_close", { facility_ids: facilityIds, scope });
+export const getAtlas = () => mirror<any>("atlas.json");
+export const getLines = () => mirror<{ lines: { route_id: string; name: string; toward: string; stations: string[] }[] }>("lines.json");
 export const getMap = () => mirror<{ stations: any[]; links: any[] }>("map.json");
 
 /** The operations agents: a mirrored demo tick, the live inbox, and human decisions (Idempotency-Key per click). */

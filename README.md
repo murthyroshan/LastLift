@@ -156,10 +156,15 @@ Point any MCP client that supports streamable HTTP at the endpoint:
 
 All thirteen tools are read-only (`readOnlyHint`), with an output schema; `what_if_close` works on a throwaway copy. The server also offers resources (`lastlift://model`, `lastlift://stations/{id}` and its Mermaid drawing `graph.mmd`, `lastlift://lifts/{id}/dossier.md`, `lastlift://incidents/open`, `lastlift://runs/{id}`, `lastlift://eval/latest`) and prompts (`triage_closure`, `station_briefing`, `plan_step_free_trip`, `explain_certificate`). The free host sleeps when idle, so the first call may take a minute.
 
+## Does it travel? The Step-Free Atlas
+
+The same rules, with no agency-specific handling, run on every transit agency that publishes GTFS-Pathways with open access in the Mobility Database catalogue: 14 feeds, of which 10 model their lifts well enough to assess. Only the needed files are fetched, by HTTP range reads on each zip ([`ingest/atlas_fetch.py`](ingest/atlas_fetch.py)). Every lift-dependent platform-direction is solved exactly in Python and again with FalkorDB's `algo.maxFlow` in a temporary graph that is deleted afterwards: 2884 of 2884 agree ([`scripts/atlas_sweep.py`](scripts/atlas_sweep.py)). Run on the MBTA's feed, the generic rules give the same 89 single-lift platforms as LastLift's own model. Each agency gets a data-readiness grade; agencies are named on the site only after their data licence has been checked ([`data/atlas_licences.json`](data/atlas_licences.json)).
+
 ## Built for the people it is about
 
 - Every state is shown as a glyph, a number and a word, never colour alone; "good" is blue, never green.
 - The station drawing is decorative for assistive technology; the platform, lift and route tables say the same in words.
+- Hear it: a station's routes play as a chord (one tone per independent route, a trembling tone when one lift is left), and "Hear a line" plays a whole line station by station; every sound has a text twin and nothing plays before you press play.
 - Atkinson Hyperlegible type, a two-tone focus ring, 44-pixel targets, reflow at 320 pixels, reduced-motion and forced-colours support.
 - CI runs axe on every core screen in light and dark themes with the API blocked, plus keyboard-only and 320-pixel checks (`web/tests/a11y.spec.ts`).
 - Wording rules and exact disclaimers are enforced by a lint ([`lastlift/wording.py`](lastlift/wording.py)); see [`docs/ETHICS.md`](docs/ETHICS.md). Not yet reviewed by disabled riders; designed for that review.

@@ -124,6 +124,19 @@ def build(feed_dir):
     return stops, paths, edges, lift_fac, stations, has_fac
 
 
+def merge(edges):
+    """One edge per (from, to) pair with the capacities summed (capped at BIG): FalkorDB's max-flow takes no parallel
+    edges, and both solvers must see the same network. Lift edges are already unique per lift unit."""
+    out = {}
+    for eid, u, v, cap in edges:
+        if (u, v) in out:
+            e = out[(u, v)]
+            out[(u, v)] = (e[0], u, v, min(BIG, e[3] + cap))
+        else:
+            out[(u, v)] = (eid, u, v, cap)
+    return list(out.values())
+
+
 def sweep_agency(feed_dir, check):
     stops, paths, edges, lift_fac, stations, has_fac = build(feed_dir)
     c = Counter()
@@ -140,8 +153,8 @@ def sweep_agency(feed_dir, check):
         else:
             src = [e for e, f in zip(s["entrances"], flags) if f == "1"]
         es = edges.get(st, [])
-        adj = es + [(f"S{i}", "STREET", e, BIG) for i, e in enumerate(src)] + [(f"T{i}", e, "STREET", BIG)
-                                                                              for i, e in enumerate(src)]
+        adj = merge(es + [(f"S{i}", "STREET", e, BIG) for i, e in enumerate(src)]
+                    + [(f"T{i}", e, "STREET", BIG) for i, e in enumerate(src)])
         lifts_here = set(lift_fac.get(st, {}).values())
         station_k1 = 0
         before = c["at_grade"]
@@ -213,6 +226,32 @@ def falkordb_checker():
     return check, lambda: db.client().select_graph(name).delete() if name in db.client().list_graphs() else None
 
 
+LICENCES = ROOT / "data" / "atlas_licences.json"     # the author's licence check: id -> include | exclude | unchecked
+
+
+def write_public(rows):
+    """web/public/m/atlas.json: named rows only for agencies whose licence the author marked "include" (MBTA, our own
+    source, is included); every other agency is counted in the aggregates without its name."""
+    gate = json.loads(LICENCES.read_text(encoding="utf-8")) if LICENCES.is_file() else {}
+    keep = ("platforms", "single_lift", "two_plus", "at_grade", "no_route", "lift_dependent", "single_lift_share",
+            "lift_units", "readiness", "assessable", "falkordb", "stations_without_entrance_flags", "facility_ids")
+    named = [{"id": r["id"], "provider": r["provider"], "country": r["country"], "license": r["license"],
+              **{k: r[k] for k in keep}, "top_stations": r["top_stations"]}
+             for r in rows if gate.get(r["id"]) == "include"]
+    assessed = [r for r in rows if r["assessable"]]
+    agg = {"feeds": len(rows), "assessable": len(assessed), "named": len(named),
+           "platforms": sum(r["platforms"] for r in assessed),
+           "lift_dependent": sum(r["lift_dependent"] for r in assessed),
+           "single_lift": sum(r["single_lift"] for r in assessed),
+           "falkordb_checked": sum(r["falkordb"].get("checked", 0) for r in rows),
+           "falkordb_equal": sum(r["falkordb"].get("equal", 0) for r in rows),
+           "grades": {g: sum(1 for r in rows if r["readiness"] == g) for g in ("A", "B", "C")},
+           "shares": sorted(r["single_lift_share"] for r in assessed if r["single_lift_share"] is not None)}
+    out = ROOT / "web" / "public" / "m" / "atlas.json"
+    out.write_text(json.dumps({"aggregate": agg, "agencies": named}, indent=1, sort_keys=True, ensure_ascii=False) + "\n",
+                   encoding="utf-8", newline="\n")
+
+
 def main():
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     only = [a for a in sys.argv[1:] if not a.startswith("--")]
@@ -237,12 +276,14 @@ def main():
         return 0
     (ROOT / "data" / "atlas.json").write_text(json.dumps({"agencies": rows}, indent=1, sort_keys=True,
                                                          ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
+    write_public(rows)
     claims_path = ROOT / "claims.json"
     claims = {k: v for k, v in json.loads(claims_path.read_text(encoding="utf-8")).items() if not k.startswith("atlas_")}
     claims.update({"atlas_feeds": len(rows), "atlas_assessable": sum(1 for r in rows if r["assessable"]),
                    "atlas_falkordb_checked": sum(r["falkordb"].get("checked", 0) for r in rows),
                    "atlas_falkordb_equal": sum(r["falkordb"].get("equal", 0) for r in rows)})
     claims_path.write_text(json.dumps(claims, indent=1, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
+    (ROOT / "web" / "public" / "claims.json").write_bytes(claims_path.read_bytes())
     return 0
 
 

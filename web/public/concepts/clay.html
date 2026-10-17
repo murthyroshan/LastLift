@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LastLift — Clay concept</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #F5F3EE; --ground: #EDEAE3; --ink: #16181D; --muted: #6B6F76; --hair: rgba(22,24,29,.08);
+    --last: #F5A524; --last-ink: #B86E00; --closed: #E5484D; --route: #3E7BFA; --working: #2FB5A0;
+    --glass: rgba(255,255,255,.35);
+    --spring: cubic-bezier(.34, 1.56, .64, 1); --ease: cubic-bezier(.2, 0, 0, 1);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); }
+  body { font-family: Inter, system-ui, sans-serif; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; overflow-x: clip; }
+  a { color: inherit; }
+  .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  .nav { position: fixed; inset: 0 0 auto 0; z-index: 20; height: 56px; display: flex; align-items: center; gap: 28px;
+    padding: 0 max(22px, calc(50vw - 540px)); background: rgba(245,243,238,.72);
+    backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid var(--hair); }
+  .brand { display: inline-flex; align-items: center; gap: 9px; font: 700 18px/1 "Inter Tight", Inter, sans-serif; letter-spacing: -.02em; text-decoration: none; }
+  .brand i { width: 20px; height: 20px; border-radius: 6px; background: var(--last); position: relative; box-shadow: inset 0 -2px 0 rgba(0,0,0,.08); }
+  .brand i::before, .brand i::after { content: ""; position: absolute; left: 6px; border: 4px solid transparent; }
+  .brand i::before { top: 3px; border-bottom: 5px solid #fff; border-top: 0; }
+  .brand i::after { bottom: 3px; border-top: 5px solid #fff; border-bottom: 0; }
+  .nav nav { display: flex; gap: 26px; margin-left: auto; font-size: 13.5px; color: #3b3e45; }
+  .nav nav a { text-decoration: none; opacity: .82; transition: opacity .2s; }
+  .nav nav a:hover { opacity: 1; }
+
+  /* pill buttons: magnetic hover, spring press, shine sweep */
+  .btn { --mx: 0px; --my: 0px; --s: 1; position: relative; overflow: hidden; isolation: isolate; display: inline-flex; align-items: center; gap: 8px;
+    height: 50px; padding: 0 26px; border-radius: 999px; font: 600 16.5px/1 Inter, sans-serif; letter-spacing: -.01em; text-decoration: none;
+    cursor: pointer; border: 0; color: #fff; background: var(--ink);
+    transform: translate(var(--mx), var(--my)) scale(var(--s)); transition: transform .5s var(--spring), box-shadow .3s var(--ease), background .3s;
+    box-shadow: 0 10px 28px rgba(22,24,29,.18); }
+  .btn::after { content: ""; position: absolute; inset: -2px; z-index: -1; pointer-events: none;
+    background: linear-gradient(105deg, transparent 32%, rgba(255,255,255,.35) 48%, transparent 64%); transform: translateX(-130%); }
+  .btn:hover::after { transform: translateX(130%); transition: transform .9s var(--ease); }
+  .btn:hover { box-shadow: 0 14px 38px rgba(22,24,29,.24); }
+  .btn:active { --s: .955; transition-duration: .12s; }
+  .btn.line { color: var(--ink); background: rgba(255,255,255,.55); box-shadow: inset 0 0 0 1.5px var(--ink); }
+  .btn.line::after { background: linear-gradient(105deg, transparent 32%, rgba(22,24,29,.08) 48%, transparent 64%); }
+  .btn.small { height: 34px; padding: 0 16px; font-size: 13.5px; box-shadow: none; }
+  .btn:focus-visible, a:focus-visible, button:focus-visible { outline: 3px solid var(--route); outline-offset: 3px; }
+
+  .story { position: relative; }
+  .stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden;
+    background: var(--bg); }
+  .stage canvas { display: block; width: 100%; height: 100%; touch-action: pan-y; cursor: grab; }
+  .stage canvas.dragging { cursor: grabbing; } .stage canvas.hot { cursor: pointer; }
+  .labels { position: absolute; inset: 0; pointer-events: none; }
+  .tag { position: absolute; transform: translate(-50%, calc(-100% - 14px)) scale(.94); white-space: nowrap; font: 600 13px Inter, sans-serif;
+    padding: 7px 13px; border-radius: 999px; background: rgba(255,255,255,.92); backdrop-filter: blur(12px);
+    box-shadow: 0 8px 28px rgba(22,24,29,.1), 0 0 0 1px rgba(22,24,29,.05); opacity: 0; transition: opacity .3s var(--ease), transform .45s var(--spring); }
+  .tag.show { opacity: 1; transform: translate(-50%, calc(-100% - 14px)) scale(1); }
+  .tag.left { transform: translate(calc(-100% - 10px), -50%) scale(.94); } .tag.left.show { transform: translate(calc(-100% - 10px), -50%) scale(1); }
+  .tag.right { transform: translate(10px, -50%) scale(.94); } .tag.right.show { transform: translate(10px, -50%) scale(1); }
+  .tag small { color: var(--muted); font-weight: 500; margin-left: 6px; }
+  .tag .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 7px; vertical-align: 1px; background: var(--working); }
+  .tag[data-s="closed"] .dot { background: var(--closed); } .tag[data-s="last"] .dot { background: var(--last); }
+
+  .steps { position: relative; margin-top: -100vh; margin-top: -100svh; pointer-events: none; }
+  .step { height: 100vh; height: 100svh; display: flex; justify-content: center; }
+  .step.hero, .step.last { height: 115vh; }
+  .copy { position: sticky; top: calc(56px + 7vh); height: max-content; text-align: center; padding: 18px 28px 26px; max-width: 1000px;
+    opacity: 0; transform: translateY(22px); transition: opacity .6s var(--ease), transform .9s var(--ease); }
+  .copy::before { content: ""; position: absolute; inset: -40px -140px; z-index: -1; pointer-events: none;
+    background: radial-gradient(closest-side, rgba(245,243,238,.94), rgba(245,243,238,.6) 60%, rgba(245,243,238,0)); }
+  .step.on .copy { opacity: 1; transform: none; }
+  .ch { display: inline-block; opacity: 0; transform: translateY(.45em) rotate(4deg); filter: blur(6px);
+    transition: opacity .5s var(--ease), transform .8s var(--spring), filter .6s var(--ease); transition-delay: calc(var(--i) * 18ms); }
+  .step.on .ch { opacity: 1; transform: none; filter: none; }
+  .w { display: inline-block; white-space: nowrap; }
+  .copy a, .copy button { pointer-events: auto; }
+  .eyebrow { font: 600 17px/1.2 Inter, sans-serif; color: var(--muted); margin: 0 0 12px; }
+  .eyebrow b { color: var(--last-ink); }
+  h1, h2 { margin: 0; font-family: "Inter Tight", Inter, sans-serif; font-weight: 700; letter-spacing: -.045em; line-height: .97; }
+  h1 { font-size: clamp(60px, 10.5vw, 150px); }
+  h1 .n { color: var(--last); }
+  h1 .of { color: #C9C5BC; font-weight: 600; }
+  h2 { font-size: clamp(38px, 6vw, 86px); letter-spacing: -.04em; }
+  h2 .last { color: var(--last); } h2 .closed { color: var(--closed); }
+  .sub { font: 500 clamp(18px, 1.85vw, 23px)/1.3 Inter, sans-serif; color: var(--muted); margin: 16px auto 0; max-width: 36ch; letter-spacing: -.01em; }
+  .sub strong { color: var(--ink); font-weight: 600; }
+  .ctas { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 28px; }
+
+  .hud { position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 10px;
+    pointer-events: none; transition: opacity .5s var(--ease), transform .6s var(--spring); }
+  .hud.off { opacity: 0; transform: translate(-50%, 12px); }
+  .hud.off .lifts { pointer-events: none; }
+  .status { font: 600 15px Inter, sans-serif; padding: 9px 16px; border-radius: 999px; background: rgba(255,255,255,.88);
+    backdrop-filter: blur(14px); box-shadow: 0 8px 28px rgba(22,24,29,.08), 0 0 0 1px rgba(22,24,29,.05); display: inline-flex; align-items: center; gap: 8px; }
+  .status i { width: 9px; height: 9px; border-radius: 50%; background: var(--route); transition: background .4s; }
+  .status[data-s="one"] i { background: var(--last); } .status[data-s="none"] i { background: var(--closed); }
+  .lifts { pointer-events: auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; padding: 5px; border-radius: 999px;
+    background: var(--glass); backdrop-filter: blur(14px); box-shadow: inset 0 0 0 1px rgba(62,123,250,.12), 0 6px 20px rgba(22,24,29,.05); }
+  .lifts .btn { color: var(--ink); background: rgba(255,255,255,.85); }
+  .lifts .btn[aria-pressed="true"] { color: #fff; background: var(--closed); }
+  .lifts .lbl { font: 500 12.5px Inter, sans-serif; color: var(--muted); align-self: center; padding: 0 6px 0 10px; }
+  .hint { font: 500 12px Inter, sans-serif; color: var(--muted); }
+
+  footer { text-align: center; padding: 56px 22px 64px; font: 400 12px Inter, sans-serif; color: var(--muted); border-top: 1px solid var(--hair); }
+
+  @media (max-width: 760px) {
+    .nav nav { display: none; }
+    .nav > .btn { margin-left: auto; }
+    .copy { top: calc(56px + 3vh); padding: 12px 18px; }
+    .eyebrow { font-size: 15px; }
+    .btn { height: 46px; font-size: 15.5px; padding: 0 20px; }
+    .lifts .lbl, .hint { display: none; }
+    .hud { bottom: 14px; width: calc(100% - 24px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ch { opacity: 1; transform: none; filter: none; transition: none; }
+    .copy, .tag, .btn, .hud { transition: none !important; }
+    .copy { transform: none; } .btn::after { display: none; }
+  }
+</style>
+<script type="importmap">
+  { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/",
+      "three/examples/jsm/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/",
+      "postprocessing": "https://cdn.jsdelivr.net/npm/postprocessing@6.36.4/build/index.js",
+      "n8ao": "https://cdn.jsdelivr.net/npm/n8ao@1.9.4/dist/N8AO.js"
+  } }
+</script>
+</head>
+<body>
+<header class="nav">
+  <a class="brand" href="/#/"><i aria-hidden="true"></i>LastLift</a>
+  <nav aria-label="Main">
+    <a href="/#/console">Command</a><a href="/#/network">Network</a><a href="/#/repairs">Repairs</a><a href="/#/about">How it works</a>
+  </nav>
+  <a class="btn small magnet" href="/#/console">Open the app</a>
+</header>
+
+<main>
+  <section class="story" aria-label="LastLift in five steps">
+    <div class="stage">
+      <canvas id="c" aria-hidden="true"></canvas>
+      <div class="labels" aria-hidden="true"><div class="tag left" id="tagA"></div><div class="tag right" id="tagB"></div><div class="tag" id="tagH"></div></div>
+      <div class="hud off" id="hud">
+        <div class="status" id="status" role="status" aria-live="polite"><i aria-hidden="true"></i><span id="statusText"></span></div>
+        <div class="lifts" role="group" aria-label="Close or reopen a lift at Alewife">
+          <span class="lbl" aria-hidden="true">Close a lift</span><span id="liftButtons" style="display:contents"></span>
+        </div>
+        <div class="hint" aria-hidden="true">Drag to turn the station · click a lift to close it</div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <section class="step hero" data-step="0">
+        <div class="copy">
+          <p class="eyebrow">Boston’s step-free network, <b>checked</b>.</p>
+          <h1><span class="n" data-k="single" aria-hidden="true">89</span> <span class="of" aria-hidden="true">of</span> <span data-k="total" aria-hidden="true">366</span><span class="vh" data-k="countText">89 of 366</span></h1>
+          <p class="sub">step-free platforms hang on <strong>a single lift</strong>.</p>
+        </div>
+      </section>
+      <section class="step" data-step="1">
+        <div class="copy">
+          <p class="eyebrow">Alewife, today</p>
+          <h2>One lift <span class="closed">closes</span>.</h2>
+          <p class="sub">Lift <span data-k="closedLift">961</span> is out of service.</p>
+        </div>
+      </section>
+      <section class="step" data-step="2">
+        <div class="copy">
+          <p class="eyebrow">What’s left</p>
+          <h2>Now everything<br />depends on <span class="last" data-k="lastLift">813</span>.</h2>
+          <p class="sub">The only step-free way out for <strong><span data-k="lastFor">3</span> platforms</strong>.</p>
+        </div>
+      </section>
+      <section class="step" data-step="3">
+        <div class="copy">
+          <p class="eyebrow">The whole network</p>
+          <h2><span class="last" data-k="netSpof">15</span> lifts can cut off<br />a whole station.</h2>
+          <p class="sub">Lift <span data-k="arcLift">816</span> at <span data-k="arcStation">Davis</span> alone carries <strong><span data-k="arcJourneys">176</span> of <span data-k="odPairs">7,832</span></strong> journeys.</p>
+        </div>
+      </section>
+      <section class="step last" data-step="4">
+        <div class="copy">
+          <p class="eyebrow">Proved, not estimated</p>
+          <h2><span data-k="cert">734</span> of <span data-k="calls">734</span><br />numbers proved.</h2>
+          <p class="sub">Every count is a max-flow inside FalkorDB, checked by an independent proof.</p>
+          <div class="ctas">
+            <a class="btn magnet" href="/#/console">Explore the network</a>
+            <a class="btn line magnet" href="/#/station/place-alfcl?dir=exit">Open Alewife</a>
+            <a class="btn line magnet" href="/concepts/world.html">Walk through Alewife</a>
+          </div>
+        </div>
+      </section>
+    </div>
+  </section>
+</main>
+<footer>MBTA open data (GTFS pathways and alerts) · Graph and proofs in FalkorDB · Station model drawn from the published layout.</footer>
+
+<script type="module">
+import * as THREE from "three";
+import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
+import { TOKENS, buildStation, loadLook, makeEffects, makeRenderer, makeScene } from "/concepts/clay/station.js";
+
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const $ = (s) => document.querySelector(s);
+const setK = (k, v) => document.querySelectorAll(`[data-k="${k}"]`).forEach((el) => (el.textContent = v));
+const fmt = (n) => Number(n).toLocaleString("en-US");
+const { clamp, lerp, smoothstep: sstep } = THREE.MathUtils;
+
+/* ---------------------------------------------------------------- data */
+const get = (u) => fetch(u).then((r) => (r.ok ? r.json() : Promise.reject(u)));
+const [claims, state, cont, stationData, map] = await Promise.all([
+  get("/claims.json"), get("/m/state.json"), get("/m/contingency.json"), get("/m/station/place-alfcl.json"), get("/m/map.json")]);
+const graph = stationData.graph.exit;
+const lastEntry = state.closures.data.newly_last_lift.find((x) => x.station_id === "place-alfcl") ?? state.closures.data.newly_last_lift[0];
+const lastFid = lastEntry?.facility_id ?? "813";
+const closedFid = graph.nodes.find((n) => n.kind === "lift" && n.status === "closed")?.facility_id ?? "961";
+const redLine = graph.nodes.find((n) => n.kind === "platform" && /Red Line/.test(n.label))?.id ?? "70061";
+const arc = cont.network_spof.find((x) => x.station_id === "place-davis") ?? cont.network_spof[0];
+const nameOf = Object.fromEntries(map.stations.map((s) => [s.id, s.name]));
+setK("single", claims.platforms_single_lift); setK("total", claims.platforms_step_free);
+setK("countText", `${claims.platforms_single_lift} of ${claims.platforms_step_free}`);
+setK("netSpof", claims.net_spof_lifts); setK("cert", fmt(claims.falkordb_certified)); setK("calls", fmt(claims.maxflow_calls));
+setK("odPairs", fmt(claims.net_od_pairs)); setK("closedLift", closedFid); setK("lastLift", lastFid);
+setK("lastFor", new Set((lastEntry?.now_sole_link_for ?? []).map((s) => s.split(" ")[0])).size || 3);
+if (arc) { setK("arcLift", arc.facility_id); setK("arcStation", nameOf[arc.station_id] ?? "Davis"); setK("arcJourneys", fmt(arc.od_cut)); }
+
+/* ---------------------------------------------------------------- scene */
+const canvas = $("#c");
+const renderer = makeRenderer(canvas);
+const look = await loadLook(renderer);
+const { scene } = makeScene(renderer, look, 9);
+const camera = new THREE.PerspectiveCamera(38, 1, 0.3, 600);   // a ~35 mm lens
+const fx = makeEffects(renderer, scene, camera);
+const world = new THREE.Group(); scene.add(world);
+const station = buildStation(graph, { dir: "exit", look });
+const centre = station.bounds.getCenter(new THREE.Vector3());
+station.group.position.set(-centre.x, 0, -centre.z);
+const holder = new THREE.Group(); holder.add(station.group); world.add(holder);
+const toWorld = (v) => holder.localToWorld(station.group.localToWorld(v.clone()));
+const lifts = [...station.lifts.values()];
+
+/* the network as clay dots, for the pull-back */
+const net = new THREE.Group(); world.add(net);
+const kx = Math.cos(42.35 * Math.PI / 180);
+const dataSt = map.stations.filter((s) => s.data);
+const cx = dataSt.reduce((a, s) => a + s.lon, 0) / dataSt.length, cy = dataSt.reduce((a, s) => a + s.lat, 0) / dataSt.length;
+const SC = 46;
+const P = (s) => new THREE.Vector3((s.lon - cx) * kx * SC, 0, -(s.lat - cy) * SC);
+const alf = map.stations.find((s) => s.id === "place-alfcl"); const alfP = alf ? P(alf) : new THREE.Vector3();
+const cut = new Set(cont.network_spof.flatMap((x) => x.cut_off));
+const inView = (p) => Math.abs(p.x) < 14 && Math.abs(p.z) < 11;
+const shown = map.stations.filter((s) => inView(P(s)));
+const clayMat = (hex, r = 0.85) => new THREE.MeshStandardMaterial({ color: hex, roughness: r });
+const dots = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 20, 14), clayMat(TOKENS.sand), shown.length);
+dots.castShadow = true;
+const accents = shown.filter((s) => cut.has(s.id));
+const accentDots = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 24, 16),
+  new THREE.MeshPhysicalMaterial({ color: TOKENS.last, roughness: 0.4, clearcoat: 0.6, emissive: TOKENS.last, emissiveIntensity: 0.18 }), Math.max(1, accents.length));
+net.add(dots, accentDots);
+const at = new Map(map.stations.map((s) => [s.id, s]));
+const linkGeos = [];
+for (const l of map.links) {
+  const a = at.get(l.a), b = at.get(l.b);
+  if (!a || !b || !l.rail) continue;
+  const pa = P(a), pb = P(b);
+  if (!inView(pa) || !inView(pb)) continue;
+  const len = pa.distanceTo(pb); if (len < 1e-3) continue;
+  const g = new THREE.CylinderGeometry(0.02, 0.02, len, 6, 1, true);
+  g.translate(0, len / 2, 0); g.rotateX(Math.PI / 2);
+  g.applyMatrix4(new THREE.Matrix4().lookAt(pa, pb, new THREE.Vector3(0, 1, 0)).setPosition(pa.x, 0.04, pa.z));
+  linkGeos.push(g);
+}
+const linkMat = new THREE.MeshStandardMaterial({ color: TOKENS.stone, roughness: 0.9, transparent: true, opacity: 0 });
+if (linkGeos.length) net.add(new THREE.Mesh(mergeGeometries(linkGeos), linkMat));
+const maxD = Math.max(1, ...shown.map((s) => P(s).distanceTo(alfP)));
+const tmp = new THREE.Object3D();
+let lastReveal = -1;
+function layoutDots(reveal) {
+  if (Math.abs(reveal - lastReveal) < 1e-4) return; lastReveal = reveal;
+  let i = 0, j = 0;
+  for (const s of shown) {
+    const p = P(s), d = p.distanceTo(alfP);
+    const g = clamp((reveal * (maxD + 3) - d) / 2.5, 0, 1), e = 1 - Math.pow(1 - g, 3);
+    const r = (s.data ? 0.12 : 0.065) * e;
+    tmp.position.set(p.x, r, p.z); tmp.scale.setScalar(Math.max(r, 1e-4)); tmp.updateMatrix(); dots.setMatrixAt(i++, tmp.matrix);
+    if (cut.has(s.id)) { const ra = 0.2 * e; tmp.position.set(p.x, ra + 0.02, p.z); tmp.scale.setScalar(Math.max(ra, 1e-4)); tmp.updateMatrix(); accentDots.setMatrixAt(j++, tmp.matrix); }
+  }
+  dots.instanceMatrix.needsUpdate = true; accentDots.instanceMatrix.needsUpdate = true;
+  linkMat.opacity = clamp(reveal * 1.4 - 0.2, 0, 0.85); net.visible = reveal > 0.001;
+}
+layoutDots(0);
+
+/* ---------------------------------------------------------------- story framings */
+const portrait = () => innerWidth / innerHeight < 0.8;
+const size3 = station.bounds.getSize(new THREE.Vector3());
+const R = Math.max(size3.x, size3.y * 1.5, size3.z) * 0.6;
+const lensDist = (r) => r / Math.tan(THREE.MathUtils.degToRad(19)) * (portrait() ? 1.65 : 1);
+function frame(t, dx, dy, dz, dist) {
+  const d = new THREE.Vector3(dx, dy, dz).normalize().multiplyScalar(dist);
+  return { tx: t.x, ty: t.y, tz: t.z, px: t.x + d.x, py: t.y + d.y, pz: t.z + d.z };
+}
+function STEPS() {
+  // framings are taken with the model unturned and full size
+  const keep = { r: holder.rotation.clone(), s: holder.scale.clone(), p: holder.position.clone() };
+  holder.rotation.set(0, 0, 0); holder.scale.setScalar(1); holder.position.set(0, 0, 0); holder.updateMatrixWorld(true);
+  const mid = new THREE.Vector3(0, size3.y * 0.42, 0);
+  const a961 = toWorld(station.anchor(closedFid)), a813 = toWorld(station.anchor(lastFid)), aPl = toWorld(station.anchor(redLine));
+  const focus2 = a813.clone().lerp(aPl, 0.4);
+  holder.rotation.copy(keep.r); holder.scale.copy(keep.s); holder.position.copy(keep.p); holder.updateMatrixWorld(true);
+  return [
+    { ...frame(mid, 0.6, 0.36, 0.82, lensDist(R) * 0.86), net: 0, shrink: 0, gate: 0 },
+    { ...frame(a961.clone().setY(a961.y - 1.0), -0.3, 0.28, 0.95, lensDist(R * 0.5)), net: 0, shrink: 0, gate: 0 },
+    { ...frame(focus2, 0.3, 0.38, 0.92, lensDist(R * 0.62)), net: 0, shrink: 0, gate: 1 },
+    { ...frame(new THREE.Vector3(0, 0, 0), 0.1, 1.0, 0.5, lensDist(15)), net: 1, shrink: 1, gate: 1 },
+    { ...frame(mid, -0.62, 0.38, 0.8, lensDist(R) * 0.86), net: 0, shrink: 0, gate: 1 },
+  ];
+}
+let S;
+const KEYS = ["tx", "ty", "tz", "px", "py", "pz", "net", "shrink", "gate"];
+const want = {}, cur = {};
+
+/* the story sets the station until the reader takes over */
+let touched = false;
+function storyStation(step) {
+  if (touched) return;
+  station.setClosed(step >= 1 ? [closedFid] : []);
+  station.select(step >= 2 ? redLine : null);
+  fx.select(station.bloom);
+  status();
+}
+
+/* ---------------------------------------------------------------- interaction */
+const drag = { on: false, x: 0, y: 0, yaw: 0, pitch: 0, vyaw: 0, vpitch: 0, moved: 0 };
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+let hover = null;
+function pick(ev) {
+  if (cur.shrink > 0.3) return null;
+  const r = canvas.getBoundingClientRect();
+  ndc.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const hit = ray.intersectObjects(station.pickables(), false)[0];
+  return hit ? (hit.object.userData.lift ?? { platform: hit.object.userData.platform }) : null;
+}
+canvas.addEventListener("pointerdown", (e) => { drag.on = true; drag.x = e.clientX; drag.y = e.clientY; drag.moved = 0; canvas.setPointerCapture(e.pointerId); canvas.classList.add("dragging"); kick(); });
+canvas.addEventListener("pointermove", (e) => {
+  if (drag.on) {
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY; drag.moved += Math.abs(dx) + Math.abs(dy);
+    drag.vyaw = dx * 0.0065; drag.vpitch = dy * 0.0035; drag.yaw += drag.vyaw; drag.pitch = clamp(drag.pitch + drag.vpitch, -0.25, 0.3); kick(); return;
+  }
+  const h = pick(e);
+  const same = h === hover || (h && hover && h.platform && h.platform === hover.platform);
+  if (!same) { hover = h; for (const L of lifts) L.hoverWant = L === h ? 1 : 0; canvas.classList.toggle("hot", !!h); kick(); }
+});
+const endDrag = (e) => {
+  if (!drag.on) return; drag.on = false; canvas.classList.remove("dragging");
+  if (drag.moved < 6) {
+    const h = pick(e);
+    if (h?.fid) { touched = true; station.toggle(h.fid); fx.select(station.bloom); status(); }
+    else if (h?.platform) { touched = true; station.select(station.selected === h.platform ? null : h.platform); fx.select(station.bloom); status(); }
+  }
+  kick();
+};
+canvas.addEventListener("pointerup", endDrag); canvas.addEventListener("pointercancel", endDrag);
+canvas.addEventListener("pointerleave", () => { if (hover) { hover = null; for (const L of lifts) L.hoverWant = 0; canvas.classList.remove("hot"); kick(); } });
+
+// keyboard twin: one button per lift
+for (const L of lifts) {
+  const b = document.createElement("button");
+  b.className = "btn small magnet"; b.type = "button"; b.textContent = L.fid; b.setAttribute("aria-pressed", "false");
+  b.setAttribute("aria-label", `Lift ${L.fid}, closed`);
+  b.addEventListener("click", () => { touched = true; station.toggle(L.fid); fx.select(station.bloom); status(); kick(); });
+  L.button = b; $("#liftButtons").appendChild(b);
+}
+function status() {
+  for (const L of lifts) L.button?.setAttribute("aria-pressed", String(L.closed));
+  const s = station.summary, el = $("#status"), t = $("#statusText");
+  const dot = () => el.querySelector("i").style.background = el.dataset.s === "none" ? TOKENS.closed : el.dataset.s === "one" ? TOKENS.last : TOKENS.route;
+  queueMicrotask(dot);
+  if (s.k === null) { el.dataset.s = "two"; t.textContent = "Pick a platform to trace its way out"; }
+  else if (s.atGrade) { el.dataset.s = "two"; t.textContent = `${s.platform}: no lift needed`; }
+  else if (s.k === 0) { el.dataset.s = "none"; t.textContent = `${s.platform}: no step-free way out`; }
+  else if (s.k === 1) { el.dataset.s = "one"; t.textContent = `${s.platform}: everything depends on lift ${s.lastLifts.join(" and ")}`; }
+  else { el.dataset.s = "two"; t.textContent = `${s.platform}: ${s.k} independent ways out`; }
+  kick();
+}
+
+/* magnetic buttons */
+if (!reduced) document.addEventListener("pointermove", (e) => {
+  const b = e.target.closest?.(".magnet");
+  document.querySelectorAll(".magnet").forEach((m) => { if (m !== b) { m.style.setProperty("--mx", "0px"); m.style.setProperty("--my", "0px"); } });
+  if (!b) return;
+  const r = b.getBoundingClientRect();
+  b.style.setProperty("--mx", `${((e.clientX - r.left) / r.width - 0.5) * 12}px`);
+  b.style.setProperty("--my", `${((e.clientY - r.top) / r.height - 0.5) * 8}px`);
+}, { passive: true });
+
+/* ---------------------------------------------------------------- scroll → phase */
+const stepEls = [...document.querySelectorAll(".step")];
+let centres = [];
+const measure = () => { const base = $(".steps").getBoundingClientRect().top + scrollY; centres = stepEls.map((s) => base + s.offsetTop + s.offsetHeight / 2 - innerHeight / 2); };
+let active = -1;
+function phase() {
+  const y = scrollY;
+  if (y <= centres[0]) return 0;
+  for (let i = 0; i < centres.length - 1; i++) if (y <= centres[i + 1]) {
+    const u = (y - centres[i]) / (centres[i + 1] - centres[i]);
+    return i + (reduced ? (u < 0.5 ? 0 : 1) : sstep(u, 0.2, 0.8));
+  }
+  return centres.length - 1;
+}
+function onScroll() {
+  const p = phase(), i = Math.floor(p), f = p - i, a = S[i], b = S[Math.min(i + 1, S.length - 1)];
+  const e = f * f * (3 - 2 * f);
+  for (const k of KEYS) want[k] = lerp(a[k], b[k], e);
+  const step = Math.round(p);
+  if (step !== active) {
+    active = step;
+    stepEls.forEach((s, j) => s.classList.toggle("on", j === step));
+    storyStation(step);
+    $("#hud").classList.toggle("off", !(step === 2 || step === 4));
+  }
+  kick();
+}
+
+/* ---------------------------------------------------------------- render on demand */
+const tags = { A: $("#tagA"), B: $("#tagB"), H: $("#tagH") };
+const v = new THREE.Vector3();
+let running = false, lastT = performance.now();
+function kick() { if (!running) { running = true; lastT = performance.now(); requestAnimationFrame(tick); } }
+function placeTag(el, L, show, html, s) {
+  if (!show || !L) { el.classList.remove("show"); return; }
+  v.copy(toWorld(station.anchor(L.fid))).project(camera);
+  el.style.left = `${(v.x * 0.5 + 0.5) * innerWidth}px`; el.style.top = `${(-v.y * 0.5 + 0.5) * innerHeight}px`;
+  if (el.dataset.html !== html) { el.innerHTML = html; el.dataset.html = html; }
+  el.dataset.s = s; el.classList.add("show");
+}
+const word = (L) => (L.state === "closed" ? "closed" : L.state === "last" ? "the last lift" : "working");
+const label = (L) => `<span class="dot"></span>Lift <b>${L.fid}</b><small>${word(L)}</small>`;
+function tick(now) {
+  const dt = Math.min(0.12, (now - lastT) / 1000); lastT = now;
+  let busy = false;
+  const k = reduced ? 1 : 1 - Math.exp(-dt * 5.5);
+  for (const key of KEYS) { const d = want[key] - cur[key]; if (Math.abs(d) > 1e-4) { cur[key] += d * k; busy = true; } else cur[key] = want[key]; }
+  if (!drag.on && (Math.abs(drag.vyaw) > 1e-4 || Math.abs(drag.vpitch) > 1e-4)) {
+    drag.yaw += drag.vyaw; drag.pitch = clamp(drag.pitch + drag.vpitch, -0.25, 0.3); drag.vyaw *= 0.9; drag.vpitch *= 0.86; busy = true;
+  }
+  holder.rotation.y = drag.yaw; holder.rotation.x = drag.pitch * 0.6;
+  camera.position.set(cur.px, cur.py, cur.pz); camera.lookAt(cur.tx, cur.ty, cur.tz);
+
+  station.routeGate = cur.gate;
+  if (station.update(dt, reduced)) busy = true;
+  const s = 1 - 0.965 * cur.shrink;
+  holder.scale.setScalar(s);
+  holder.position.set(alfP.x * cur.shrink, 0, alfP.z * cur.shrink);
+  layoutDots(cur.net);
+
+  const near = cur.shrink < 0.15;
+  const Lc = station.lifts.get(closedFid), Ll = station.lifts.get(lastFid);
+  placeTag(tags.A, Lc, near && !touched && (active === 1 || active === 2) && hover !== Lc, Lc && label(Lc), Lc?.state);
+  placeTag(tags.B, Ll, near && !touched && active === 2 && hover !== Ll, Ll && label(Ll), Ll?.state);
+  placeTag(tags.H, hover?.fid ? hover : null, near && !!hover?.fid,
+    hover?.fid ? `${label(hover)}<small>· click to ${hover.closed ? "reopen" : "close"}</small>` : "", hover?.state);
+
+  if (fx.render(dt)) busy = true;
+  if (busy || drag.on) requestAnimationFrame(tick); else running = false;
+}
+
+function size() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false); fx.setSize(w, h);
+  camera.aspect = w / h;
+  camera.setViewOffset(w, h, 0, -h * (portrait() ? 0.15 : 0.14), w, h);
+  camera.updateProjectionMatrix();
+  S = STEPS(); measure(); onScroll();
+  tags.A.classList.toggle("left", !portrait()); tags.B.classList.toggle("right", !portrait());
+}
+addEventListener("resize", size);
+addEventListener("scroll", onScroll, { passive: true });
+S = STEPS(); measure();
+Object.assign(want, S[0]); Object.assign(cur, S[0]);
+size();
+storyStation(0);
+Object.assign(cur, want);
+kick();
+
+/** a small tween: eases from a to b over ms, calling step with the value (no animation library needed) */
+function tween(a, b, ms, step, delay = 0) {
+  const t0 = performance.now() + delay;
+  const go = (now) => { const t = clamp((now - t0) / ms, 0, 1), e = 1 - Math.pow(1 - t, 3); if (now >= t0) step(a + (b - a) * e); if (t < 1) requestAnimationFrame(go); };
+  requestAnimationFrame(go);
+}
+if (!reduced) {
+  tween(-0.42, 0, 3200, (v) => { drag.yaw = v; kick(); });
+  tween(0, claims.platforms_single_lift, 1600, (v) => setK("single", Math.round(v)), 200);
+}
+/* letter reveal: the visible letters are decorative; the heading keeps its text for assistive tech */
+for (const h of document.querySelectorAll(".copy h2")) {
+  const text = h.textContent.replace(/\s+/g, " ").trim();
+  let i = 0;
+  const wrap = (node) => {
+    for (const child of [...node.childNodes]) {
+      if (child.nodeType === 3) {
+        const frag = document.createDocumentFragment();
+        for (const part of child.textContent.split(/(\s+)/)) {
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.append(" "); continue; }
+          const w = document.createElement("span"); w.className = "w";
+          for (const ch of part) { const s = document.createElement("span"); s.className = "ch"; s.style.setProperty("--i", i++); s.textContent = ch; w.append(s); }
+          frag.append(w);
+        }
+        child.replaceWith(frag);
+      } else if (child.nodeType === 1 && child.tagName !== "BR") wrap(child);
+    }
+  };
+  wrap(h);
+  h.setAttribute("aria-label", text);
+}
+window.__clayReady = true;
+</script>
+</body>
+</html>
