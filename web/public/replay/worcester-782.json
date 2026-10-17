@@ -42,7 +42,11 @@
    "highlight": {
     "nodes": [],
     "edges": []
-   }
+   },
+   "queries": [
+    "Q_LIFT_INFO",
+    "Q_STATION_SEARCH"
+   ]
   },
   {
    "v": 1,
@@ -71,7 +75,11 @@
    "highlight": {
     "nodes": [],
     "edges": []
-   }
+   },
+   "queries": [
+    "Q_LIFT_INFO",
+    "Q_STATION_SEARCH"
+   ]
   },
   {
    "v": 1,
@@ -102,7 +110,10 @@
    "highlight": {
     "nodes": [],
     "edges": []
-   }
+   },
+   "queries": [
+    "Q_MODELLED_LIFTS"
+   ]
   },
   {
    "v": 1,

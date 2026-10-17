@@ -322,22 +322,26 @@ def repair_priority(scope: str = "demo", limit: int = 10):
     started = time.perf_counter()
     graph = _scope_graph(scope)
     g = db.client().select_graph(graph)
-    lost_stations = {r[3] for r in g.ro_query(Q_LOST_NOW).result_set}
+    lost_rows = g.ro_query(Q_LOST_NOW).result_set
+    lost_stations = {r[3] for r in lost_rows}
     closed = set(state.closed(graph))
     rows = []
     for fid, name, sid, is_closed, deps, newly, departures, n_inc in g.ro_query(Q_PRIORITY).result_set:
         tier = 2 if newly else 3
         rows.append({"facility_id": fid, "name": name, "station_id": sid, "closed": bool(is_closed),
-                     "platform_directions": deps, "newly_last": newly, "departures_day": departures,
+                     "platform_directions": deps, "newly_last": newly, "departures_day": int(departures or 0),
                      "incidents": n_inc, "tier": tier})
     for fid in closed:
         if not any(r["facility_id"] == fid for r in rows):
             info = g.ro_query(Q_LIFT_INFO, {"fid": fid}).result_set
             if info and info[0][3] in lost_stations:
                 n_inc = g.ro_query(Q_LIFT_INCIDENT_COUNT, {"fid": fid}).result_set[0][0]
+                # a closed lift has no "depends on it now" edges: count what its station lost instead
+                here = [r for r in lost_rows if r[3] == info[0][3]]
+                dirs = sum((r[4] == 0) + (r[5] == 0) for r in here)
                 rows.append({"facility_id": fid, "name": info[0][1], "station_id": info[0][3], "closed": True,
-                             "platform_directions": 0, "newly_last": 0, "departures_day": 0, "incidents": n_inc,
-                             "tier": 1})
+                             "platform_directions": dirs, "newly_last": 0,
+                             "departures_day": int(sum(r[6] or 0 for r in here)), "incidents": n_inc, "tier": 1})
     rank(rows)
     labels = {1: "repair now (closed, platforms lose access)",
               2: "protect (working, and already the last lift for some platforms because of current closures)",

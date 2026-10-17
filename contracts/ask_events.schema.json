@@ -23,6 +23,7 @@
               "properties": {"tool": {"type": "string"}, "ok": {"type": "boolean"}, "summary": {"type": "string"},
                              "via": {"const": "mcp"}, "digest": {"type": "string", "pattern": "^[0-9a-f]{16}$"},
                              "ms": {"type": ["number", "null"]},
+                             "queries": {"type": "array", "items": {"type": "string"}},
                              "entities": {"type": "array", "items": {"type": "string"}},
                              "highlight": {"type": "object", "required": ["nodes", "edges"]}}}},
     {"if": {"properties": {"type": {"const": "error"}}},

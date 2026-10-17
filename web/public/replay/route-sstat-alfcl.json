@@ -46,7 +46,11 @@
    "highlight": {
     "nodes": [],
     "edges": []
-   }
+   },
+   "queries": [
+    "Q_LIFT_INFO",
+    "Q_STATION_SEARCH"
+   ]
   },
   {
    "v": 1,
@@ -75,7 +79,11 @@
    "highlight": {
     "nodes": [],
     "edges": []
-   }
+   },
+   "queries": [
+    "Q_LIFT_INFO",
+    "Q_STATION_SEARCH"
+   ]
   },
   {
    "v": 1,
@@ -194,7 +202,14 @@
      "SF:node-814-ground>door-alfcl-alewifes",
      "SF:door-alfcl-alewifes>street:place-alfcl"
     ]
-   }
+   },
+   "queries": [
+    "Q_ROUTE_NODES",
+    "Q_ROUTE_EDGES",
+    "Q_CLOSED_FACILITIES",
+    "Q_ROUTE_CHECK_SF",
+    "Q_ROUTE_CHECK_RIDE"
+   ]
   },
   {
    "v": 1,

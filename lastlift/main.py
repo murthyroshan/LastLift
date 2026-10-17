@@ -189,3 +189,10 @@ async def ask_stream(q: str = Query(..., min_length=1, max_length=500),
 
     return StreamingResponse(stream(), media_type="text/event-stream",
                              headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+@app.get("/v1/queries")
+def query_catalogue():
+    """Every Cypher statement LastLift runs (the Q_* constants), so any answer's query ids can be read in full."""
+    from . import queries
+    return {name: getattr(queries, name) for name in sorted(dir(queries)) if name.startswith("Q_")}

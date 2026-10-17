@@ -65,3 +65,7 @@ jobs:
           node-version: "24"
       - run: npm ci
       - run: npm run build
+      - name: accessibility and API-blocked checks (axe, keyboard, 320 px, both themes)
+        run: |
+          npx playwright install --with-deps chromium
+          npx playwright test --reporter=line

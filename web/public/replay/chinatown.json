@@ -42,7 +42,11 @@
    "highlight": {
     "nodes": [],
     "edges": []
-   }
+   },
+   "queries": [
+    "Q_LIFT_INFO",
+    "Q_STATION_SEARCH"
+   ]
   },
   {
    "v": 1,
@@ -88,7 +92,14 @@
      "SF:node-chncl-fhfareunpaid>node-chncl-fhfarepaid",
      "SF:street:place-chncl>door-chncl-fhelevator"
     ]
-   }
+   },
+   "queries": [
+    "Q_STATION",
+    "Q_COMPLEX_STREETS",
+    "Q_COMPLEX_FLOW_EDGES",
+    "Q_COMPLEX_PLATFORMS",
+    "Q_MAXFLOW"
+   ]
   },
   {
    "v": 1,
@@ -151,7 +162,14 @@
      "RIDE:70015>70017",
      "RIDE:70017>70019"
     ]
-   }
+   },
+   "queries": [
+    "Q_ROUTE_NODES",
+    "Q_ROUTE_EDGES",
+    "Q_CLOSED_FACILITIES",
+    "Q_ROUTE_CHECK_SF",
+    "Q_ROUTE_CHECK_RIDE"
+   ]
   },
   {
    "v": 1,

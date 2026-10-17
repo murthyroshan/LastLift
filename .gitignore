@@ -39,3 +39,7 @@ Thumbs.db
 
 # MBTA alternate-service text is licensed for internal use only: used to validate, never committed
 validation/_private/
+
+# web test output
+web/test-results/
+web/playwright-report/

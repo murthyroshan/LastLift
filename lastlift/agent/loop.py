@@ -100,7 +100,7 @@ async def ask(question: str, scope: str = "demo", mode: str | None = None, emit=
                                              "data": {}, "entities": []}
             results.append(env)
             send("tool_result", tool=name, ok=env.get("ok"), summary=env.get("summary"), via=env.get("via"),
-                 digest=replay.digest(env),
+                 digest=replay.digest(env), queries=(env.get("evidence") or {}).get("query_ids", []),
                  ms=(env.get("evidence") or {}).get("ms"), entities=env.get("entities", []),
                  highlight=env.get("highlight", {"nodes": [], "edges": []}))
             return env

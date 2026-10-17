@@ -1,0 +1,72 @@
+{
+ "checker_accepted": 333,
+ "checker_rejected": 0,
+ "falkordb_certified": 734,
+ "falkordb_eq_networkx": 734,
+ "falkordb_first_pass_exact": 734,
+ "falkordb_repaired": 0,
+ "feed_version": "Fall 2026, 2026-10-14T18:47:38+00:00, version D",
+ "gtfs_sha256": "21578a40f6cb1de9c61ab1c5dde58f1f17c6ed7812953f2fc9baca62a1ccd931",
+ "k_hist_board": {
+  "0": 1,
+  "1": 89,
+  "2": 60,
+  "3": 17,
+  "4": 1,
+  "at_grade": 199
+ },
+ "k_hist_exit": {
+  "0": 1,
+  "1": 88,
+  "2": 60,
+  "3": 17,
+  "4": 1,
+  "at_grade": 200
+ },
+ "live_abstain_ok": 2,
+ "live_agree": 6,
+ "live_agree_or_partial_wilson95": [
+  0.676,
+  1.0
+ ],
+ "live_agree_wilson95": [
+  0.409,
+  0.929
+ ],
+ "live_closures": 14,
+ "live_disagree": 0,
+ "live_false_accessible": 1,
+ "live_false_accessible_cases": [
+  "L04 board"
+ ],
+ "live_false_inaccessible": 0,
+ "live_false_inaccessible_cases": [],
+ "live_gold_abstains": 0,
+ "live_key": "validation/gold_live_author.csv (author, blind, MBTA text only)",
+ "live_labeller_kappa_author_vs_ai": 0.8,
+ "live_labeller_raw_agreement_author_vs_ai": "12/14",
+ "live_model_abstains": 4,
+ "live_named_lift_recall": "6/11",
+ "live_partial": 2,
+ "live_reroute_type_agree": "10/13",
+ "live_scored": 8,
+ "live_unknown_rate": "6/14",
+ "maxflow_calls": 734,
+ "naive_two_lifts_but_k1": 74,
+ "networkx_mismatch": 0,
+ "platforms_k1_board": 89,
+ "platforms_k1_exit": 88,
+ "platforms_lift_dependent": 167,
+ "platforms_modelled": 386,
+ "platforms_no_accessible_entrance": 19,
+ "platforms_single_lift": 89,
+ "platforms_step_free": 366,
+ "seed_sha256": "9d88639d8fb94bae8e1e11713d595295fa8d22181b0f8e80a4a2d1d6616c62c8",
+ "snapshot_id": "2026-10-15",
+ "spof_lifts": 69,
+ "spof_lifts_exit_only": 0,
+ "static_sweep_flagged_for_review": 69,
+ "static_sweep_rows": 215,
+ "static_sweep_status": "awaiting author review (69 of 215 rows flagged)",
+ "sweep_seconds": 27.7
+}

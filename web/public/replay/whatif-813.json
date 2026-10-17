@@ -42,7 +42,11 @@
    "highlight": {
     "nodes": [],
     "edges": []
-   }
+   },
+   "queries": [
+    "Q_LIFT_INFO",
+    "Q_STATION_SEARCH"
+   ]
   },
   {
    "v": 1,
@@ -79,7 +83,13 @@
      "lift:813"
     ],
     "edges": []
-   }
+   },
+   "queries": [
+    "Q_CLOSE_LIFTS",
+    "Q_MAXFLOW",
+    "Q_LOST_NOW",
+    "Q_NEWLY_LAST"
+   ]
   },
   {
    "v": 1,
@@ -113,7 +123,12 @@
    "highlight": {
     "nodes": [],
     "edges": []
-   }
+   },
+   "queries": [
+    "Q_ROUTE_NODES",
+    "Q_ROUTE_EDGES",
+    "Q_CLOSED_FACILITIES"
+   ]
   },
   {
    "v": 1,
