@@ -1,0 +1,29 @@
+# Q_NEWLY_LAST
+
+Query:
+
+MATCH (p:Node:Platform)-[n:DEPENDS_NOW]->(l:Lift) WHERE NOT (p)-[:DEPENDS_ON {dir:n.dir}]->(l) RETURN l.facility_id, l.name, l.station_id, collect(DISTINCT p.stop_id + ' ' + n.dir)
+
+Parameters: {}
+
+EXPLAIN:
+
+Results
+    Aggregate
+        Anti Semi Apply
+            Conditional Traverse | (l)-[n:DEPENDS_NOW]->(p:Node:Platform)
+                Node By Label Scan | (l:Lift)
+            Filter
+                Expand Into | (p)-[@anon_0:DEPENDS_ON]->(l)
+                    Argument
+
+PROFILE:
+
+Results | Records produced: 3, Execution time: 0.000712 ms
+    Aggregate | Records produced: 3, Execution time: 0.043302 ms
+        Anti Semi Apply | Records produced: 12, Execution time: 0.079000 ms
+            Conditional Traverse | (p)-[n:DEPENDS_NOW]->(p) | Records produced: 214, Execution time: 0.797215 ms
+                Node By Label Scan | (l:Lift) | Records produced: 244, Execution time: 0.019651 ms
+            Filter | Records produced: 202, Execution time: 0.075645 ms
+                Expand Into | (p)-[@anon_0:DEPENDS_ON]->(l) | Records produced: 301, Execution time: 0.120234 ms
+                    Argument | Records produced: 214, Execution time: 0.008574 ms

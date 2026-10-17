@@ -130,6 +130,56 @@ def apply_precomputed(graph_name: str, snapshot: Path) -> int:
     return len(depends)
 
 
+def apply_network(graph_name: str, snapshot: Path) -> dict:
+    """Write the network sweep (network.json, scripts/network_sweep.py) onto the graph, so Cypher can read it:
+    (:Station)-[:REACHES {base_s}]->(:Station), lift blast radius properties, (:Lift)-[:DOMINATES_FOR]->(:Station),
+    (:Lift)-[:CRITICAL_PAIR {scope}]->(:Lift), and per-platform minimum cuts and reliability counts."""
+    path = snapshot / "network.json"
+    if not path.is_file():
+        return {}
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    g = db.client().select_graph(graph_name)
+    g.query("MATCH ()-[r:REACHES|DOMINATES_FOR|CRITICAL_PAIR]->() DELETE r")
+    reaches = [{"a": a, "b": b, "s": s} for a, row in doc["od_base_s"].items() for b, s in row.items()]
+    for chunk in batches(reaches):
+        g.query("UNWIND $rows AS r MATCH (x:Station {uid:r.a}) MATCH (y:Station {uid:r.b}) "
+                "CREATE (x)-[:REACHES {base_s:r.s}]->(y)", {"rows": chunk})
+    lifts = [{"f": f, "p": {"od_cut_base": x["od_cut"], "od_cut_off": x["cut_off"], "od_slow_base": x["od_slow"],
+                            "detour_max_s": x["detour_max_s"], "detour_mean_s": x["detour_mean_s"]}}
+             for f, x in doc["lifts"].items()]
+    g.query("UNWIND $rows AS r MATCH (l:Node:Lift {facility_id:r.f}) SET l += r.p", {"rows": lifts})
+    dom = [{"f": f, "s": s} for f, x in doc["lifts"].items() for s in x["dominates_for"]]
+    for chunk in batches(dom):
+        g.query("UNWIND $rows AS r MATCH (l:Node:Lift {facility_id:r.f}) MATCH (s:Station {uid:r.s}) "
+                "CREATE (l)-[:DOMINATES_FOR]->(s)", {"rows": chunk})
+    pairs = [{"a": p["a"], "b": p["b"], "n": p["n"], "dirs": [f"{d['stop_id']}:{d['dir']}" for d in p["dirs"]]}
+             for p in doc["pairs"]]
+    # one edge per facility pair, between each facility's first unit (lowest uid)
+    g.query("UNWIND $rows AS r MATCH (a:Node:Lift {facility_id:r.a}) WITH r, min(a.uid) AS au "
+            "MATCH (b:Node:Lift {facility_id:r.b}) WITH r, au, min(b.uid) AS bu "
+            "MATCH (a:Node:Lift {uid:au}) MATCH (b:Node:Lift {uid:bu}) "
+            "CREATE (a)-[:CRITICAL_PAIR {scope:'platform', n:r.n, dirs:r.dirs}]->(b)", {"rows": pairs})
+    cond = [{"a": c["closed"], "b": c["lift"], "n": c["journeys"], "same": c["same_station"]} for c in doc["conditional"]]
+    g.query("UNWIND $rows AS r MATCH (a:Node:Lift {facility_id:r.a}) WITH r, min(a.uid) AS au "
+            "MATCH (b:Node:Lift {facility_id:r.b}) WITH r, au, min(b.uid) AS bu "
+            "MATCH (a:Node:Lift {uid:au}) MATCH (b:Node:Lift {uid:bu}) "
+            "CREATE (a)-[:CRITICAL_PAIR {scope:'network', journeys:r.n, same_station:r.same}]->(b)", {"rows": cond})
+    plats = []
+    for stop, p in doc["platform"].items():
+        props = {}
+        for d in ("board", "exit"):
+            x = p.get(d) or {}
+            if x.get("mincuts") is not None:
+                props.update({f"n_mincuts_{d}": len(x["mincuts"]), f"mincuts_{d}": json.dumps(x["mincuts"]),
+                              f"rel_counts_{d}": x["rel_counts"], f"rel_relevant_{d}": x["relevant"]})
+        if props:
+            plats.append({"stop": stop, "p": props})
+    for chunk in batches(plats):
+        g.query("UNWIND $rows AS r MATCH (p:Node:Platform) WHERE p.stop_id = r.stop SET p += r.p", {"rows": chunk})
+    return {"reaches": len(reaches), "dominates_for": len(dom), "critical_pairs": len(pairs) + len(cond),
+            "platforms": len(plats)}
+
+
 def verify(graph_name: str, manifest: dict) -> list[str]:
     """Returns a list of problems (empty = verified)."""
     g = db.client().select_graph(graph_name)
@@ -170,6 +220,9 @@ def main(argv=None) -> int:
         return 0
     load(snapshot, args.graph)
     deps = apply_precomputed(args.graph, snapshot)
+    net = apply_network(args.graph, snapshot)
+    if net:
+        print(f"{args.graph}: network sweep applied {net}")
     print(f"{args.graph}: loaded snapshot {snapshot.name} (seed {manifest['seed_sha256'][:12]}, "
           f"{deps} single-lift dependencies)")
     if args.verify:

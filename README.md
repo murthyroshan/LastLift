@@ -67,6 +67,21 @@ On LastLift's network: <!--claim:maxflow_calls-->734<!--/claim--> max-flow calls
 
 The same caution applies to path search: on 4.22 `algo.SPpaths` enumerates paths and ignored the server timeout in our tests, so LastLift routes with Dijkstra over edges read from the graph and re-checks every edge of a route in FalkorDB ([`docs/falkordb-sppaths-note.md`](docs/falkordb-sppaths-note.md)).
 
+## One closed lift, seen across the whole network
+
+A lift can cut a platform off, yet riders may still ride a train to another station and back. So LastLift also asks the network question: which journeys between stations does a closure break?
+
+- **<!--claim:net_platform_spof_lifts-->69<!--/claim--> lifts can each cut a platform off on their own; only <!--claim:net_spof_lifts-->15<!--/claim--> can cut a whole station off from the step-free network** (<!--claim:net_cut_off_stations-->13<!--/claim--> stations; each such closure breaks <!--claim:net_spof_journeys_each-->176<!--/claim--> of the <!--claim:net_od_pairs-->7,832<!--/claim--> journeys between the <!--claim:net_origins-->89<!--/claim--> stations with an accessible entrance). For the other <!--claim:net_rescued_lifts-->54<!--/claim--> the network re-routes riders: median worst detour <!--claim:net_detour_median_min-->11<!--/claim--> min, longest <!--claim:net_detour_max_min-->20.2<!--/claim--> min.
+- **How:** dominator trees. Every lift is node-split, so closing it deletes one node; the journeys it breaks from an origin are exactly the stations in that node's dominator subtree. One tree per origin (Cooper-Harvey-Kennedy, on the network contracted to its lift-free strongly connected parts) gives the whole N-1 table in a fraction of a second. A plain search with each lift removed agrees for <!--claim:net_dominator_eq_witness-->198<!--/claim--> of <!--claim:net_dominator_lifts-->198<!--/claim--> lifts, and the tests apply closures in FalkorDB with Cypher and re-read the graph to confirm it.
+- **Conditional last lifts:** with one lift closed, its partner can become the only link between a station and the network. There are <!--claim:net_conditional_pairs-->42<!--/claim--> such pairs, and <!--claim:net_conditional_cross_station-->0<!--/claim--> of them span two stations: in the open data the turnaround stations always have a spare. In the demo state, lift 885 is closed, so 884 alone now links Revere Beach to every other station.
+- **Critical pairs (N-2):** <!--claim:n2_critical_pairs-->42<!--/claim--> lift pairs are each harmless alone but cut platforms off together; the worst is <!--claim:n2_top_pair-->821+973<!--/claim--> (<!--claim:n2_top_pair_dirs-->18<!--/claim--> platform-directions). Each pair is re-checked in FalkorDB: max-flow 0 with both closed, above 0 with either alone.
+- **Every minimum cut, not just one:** for each of the <!--claim:mincut_dirs-->333<!--/claim--> lift-dependent platform-directions, all minimum cuts come from the certified flow's residual graph (Picard-Queyranne); <!--claim:mincut_pq_eq_brute-->333<!--/claim--> equal a brute-force search over every set of lifts, and <!--claim:mincut_multi-->71<!--/claim--> have more than one.
+- **Exact reliability:** no platform depends on more than twelve lifts, so the chance of losing access when each lift is out with probability q is computed exactly by enumeration (the station page has a slider). With every lift out <!--claim:rel_q_assumed-->2%<!--/claim--> of the time, about <!--claim:net_mc_reachable_q02-->99%<!--/claim--> of journeys between stations stay step-free (Monte-Carlo, seeded).
+- **Repair order:** for the lifts closed now, the order that gives back the most soonest is computed exactly (dynamic programming over subsets) and compared with greedy.
+- **Query plans:** `GET /v1/queries/{id}/plan?mode=explain|profile` returns FalkorDB's own plan (profiles run on a private copy; write queries are refused); examples are in [`docs/profiles/`](docs/profiles/).
+
+The Silver Line (SL1-SL5) counts as a ride in this analysis (model rules version 2): Courthouse and World Trade Center are reachable step-free only by it.
+
 ## Checked against the operator's own words
 
 Fourteen live MBTA lift alerts were labelled blind by the author, from MBTA's alert text only, before the evaluation ran ([`validation/`](validation/)). Of the <!--claim:live_scored-->8<!--/claim--> that both the author and the model could assess: **<!--claim:live_agree-->6<!--/claim--> agree, <!--claim:live_partial-->2<!--/claim--> partial, <!--claim:live_disagree-->0<!--/claim--> disagree** (agreement interval <!--claim:live_agree_wilson95-->41%, 93%<!--/claim-->, Wilson 95%). **False accessible: <!--claim:live_false_accessible-->1<!--/claim--> (<!--claim:live_false_accessible_cases-->L04 board<!--/claim-->)**: for State 803 MBTA sends riders to Downtown Crossing, while the open data holds a longer in-station route; LastLift shows both and tells riders to follow MBTA's advice. The model abstains where MBTA publishes no layout (unknown rate <!--claim:live_unknown_rate-->6/14<!--/claim-->). Every row, including every disagreement, is in [`validation/EVALUATION.md`](validation/EVALUATION.md). A second sweep over the alternative-service text of every MBTA elevator is labelled by the author before it is scored (<!--claim:static_sweep_status-->awaiting author review (69 of 215 rows flagged)<!--/claim-->).
@@ -81,7 +96,7 @@ Everything LastLift computes is computed in FalkorDB: redundancy (`algo.maxFlow`
 
 ## The agent acts through the same tools as everyone
 
-- Eight tools ([`lastlift/tools.py`](lastlift/tools.py)): `resolve_place`, `current_closures`, `platform_redundancy`, `what_if_close`, `step_free_route`, `repair_priority`, `lift_history`, `draft_action`. The LLM never writes Cypher; every tool runs fixed, parameterised queries and reports their ids.
+- Ten tools ([`lastlift/tools.py`](lastlift/tools.py)): `resolve_place`, `current_closures`, `platform_redundancy`, `what_if_close`, `step_free_route`, `repair_priority`, `lift_history`, `draft_action`, `network_impact`, `repair_order`. The LLM never writes Cypher; every tool runs fixed, parameterised queries and reports their ids.
 - The agent reaches the tools **only through MCP** (an in-memory MCP client; a test breaks every direct path and the agent still answers).
 - Every answer is grounded: an id or number that is not in a tool result, or wording our copy rules forbid, sends the answer back to a deterministic template built from the tool results.
 - Repair priority ranks lifts to repair now (closed, platforms cut off), to protect (working, but newly the last lift) and structural single points of failure; `draft_action` drafts a ticket and never files it.
@@ -97,7 +112,7 @@ Point any MCP client that supports streamable HTTP at the endpoint:
 { "mcpServers": { "lastlift": { "url": "https://lastlift-api.onrender.com/mcp/" } } }
 ```
 
-All eight tools are read-only (`readOnlyHint`); `what_if_close` works on a throwaway copy. The free host sleeps when idle, so the first call may take a minute.
+All ten tools are read-only (`readOnlyHint`); `what_if_close` works on a throwaway copy. The free host sleeps when idle, so the first call may take a minute.
 
 ## Built for the people it is about
 
@@ -137,7 +152,7 @@ Every node in a station complex carries `cx`; step-free walkways, gates and lift
 | `Node:LiftOut` | 202 |
 | `Node:Platform` | 388 |
 | `Node:Street` | 89 |
-| `Platform` | 267 |
+| `Platform` | 312 |
 | `Station` | 276 |
 
 | Relationship | Count |
@@ -145,7 +160,7 @@ Every node in a station complex carries `cx`; step-free walkways, gates and lift
 | `HAS_ENTRANCE` | 330 |
 | `HAS_LIFT` | 244 |
 | `HAS_PLATFORM` | 388 |
-| `RIDE` | 591 |
+| `RIDE` | 650 |
 | `SF` | 9,248 |
 | `STEP` | 1,069 |
 
@@ -157,7 +172,7 @@ Every node in a station complex carries `cx`; step-free walkways, gates and lift
 | `street` | 424 |
 | `walk` | 7,492 |
 
-Snapshot `2026-10-15`, GTFS feed "Fall 2026, 2026-10-14T18:47:38+00:00, version D", seed sha256 `9d88639d8fb9…`: 3,720 nodes, 11,870 relationships.
+Snapshot `2026-10-15`, GTFS feed "Fall 2026, 2026-10-14T18:47:38+00:00, version D", seed sha256 `8277887f216a…`: 3,765 nodes, 11,929 relationships.
 <!--/generated-->
 
 ## The Cypher and the algorithms
@@ -175,7 +190,11 @@ FalkorDB algorithms used: `algo.maxFlow` (redundancy, certified), `algo.WCC` (lo
 | `Q_COMPLEX_FLOW_EDGES` | `MATCH (a:Node {cx:$cx})-[e:SF]->(b:Node) RETURN e.eid, a.uid, b.uid, e.cap, e.kind, e.facility_id` |
 | `Q_COMPLEX_PLATFORMS` | `MATCH (p:Node:Platform {cx:$cx}) RETURN p.stop_id, collect(p.uid), head(collect(p.name)), head(collect(p.wheelchair_boarding)), head(collect(p.platform_name))` |
 | `Q_COMPLEX_STREETS` | `MATCH (s:Street {cx:$cx}) RETURN collect(s.uid)` |
+| `Q_CONDITIONAL` | `MATCH (a:Node:Lift)-[c:CRITICAL_PAIR]->(b:Node:Lift) WHERE c.scope = 'network' RETURN a.facility_id, b.facility_id, b.station_id, c.journeys, c.same_station ORDER BY c.journeys DESC, a.facility_id, b.facility_id` |
 | `Q_CREATE_DEPENDS` | `UNWIND $rows AS r MATCH (p:Node:Platform) WHERE p.stop_id = r.stop MATCH (l:Node:Lift {{facility_id:r.fid, cx:p.cx}}) MERGE (p)-[d:{rel} {{dir:r.dir}}]->(l)` |
+| `Q_CRITICAL_PAIRS` | `MATCH (a:Node:Lift)-[c:CRITICAL_PAIR]->(b:Node:Lift) WHERE c.scope = 'platform' RETURN a.facility_id, b.facility_id, a.station_id, c.n, c.dirs ORDER BY c.n DESC, a.facility_id, b.facility_id` |
+| `Q_DOMINATES_FOR` | `MATCH (l:Node:Lift {facility_id:$fid})-[:DOMINATES_FOR]->(s:Station) RETURN collect(DISTINCT s.uid)` |
+| `Q_LIFT_BLAST` | `MATCH (l:Node:Lift) WHERE l.facility_id IN $fids WITH l.facility_id AS fid, head(collect(l)) AS l RETURN fid, l.name, l.station_id, l.od_cut_base, l.od_cut_off, l.od_slow_base, l.detour_max_s, l.detour_mean_s ORDER BY fid` |
 | `Q_LIFT_COMPLEXES` | `MATCH (l:Node:Lift) WHERE l.facility_id IN $fids RETURN collect(DISTINCT l.cx)` |
 | `Q_LIFT_HISTORY` | `MATCH (l:Lift {facility_id:$fid})-[:CLOSED_IN]->(i:Incident) RETURN DISTINCT i.alert_id, i.effect, i.header, i.started, i.first_seen, i.last_seen, i.ongoing, i.ended_by, i.versions ORDER BY i.first_seen` |
 | `Q_LIFT_INCIDENT_COUNT` | `MATCH (l:Lift {facility_id:$fid}) OPTIONAL MATCH (l)-[:CLOSED_IN]->(i:Incident) RETURN count(DISTINCT i)` |
@@ -184,8 +203,11 @@ FalkorDB algorithms used: `algo.maxFlow` (redundancy, certified), `algo.WCC` (lo
 | `Q_MAXFLOW` | `MATCH (s:Node) WHERE s.uid IN $src WITH collect(s) AS S MATCH (t:Node) WHERE t.uid IN $dst WITH S, collect(t) AS T CALL algo.maxFlow({sourceNodes:S, targetNodes:T, relationshipTypes:['SF'], capacityProperty:'cap'}) YIELD edges, edgeFlows, maxFlow RETURN [e IN edges \| e.eid], edgeFlows, maxFlow` |
 | `Q_META` | `MATCH (m:Meta) RETURN m.snapshot_id, m.seed_sha256 LIMIT 1` |
 | `Q_MODELLED_LIFTS` | `MATCH (l:Node:Lift) WHERE l.facility_id IN $fids RETURN collect(DISTINCT l.facility_id)` |
+| `Q_NETWORK_SPOF` | `MATCH (l:Node:Lift) WHERE l.od_cut_base > 0 WITH l.facility_id AS fid, head(collect(l)) AS l RETURN fid, l.name, l.station_id, l.od_cut_base, l.od_cut_off ORDER BY l.od_cut_base DESC, fid` |
 | `Q_NEWLY_LAST` | `MATCH (p:Node:Platform)-[n:DEPENDS_NOW]->(l:Lift) WHERE NOT (p)-[:DEPENDS_ON {dir:n.dir}]->(l) RETURN l.facility_id, l.name, l.station_id, collect(DISTINCT p.stop_id + ' ' + n.dir)` |
+| `Q_PLATFORM_CUTS` | `MATCH (p:Node:Platform {cx:$cx}) RETURN p.stop_id AS stop, head(collect(p.mincuts_board)), head(collect(p.mincuts_exit)), head(collect(p.rel_counts_board)), head(collect(p.rel_counts_exit)), head(collect(p.rel_relevant_board)), head(collect(p.rel_relevant_exit)) ORDER BY stop` |
 | `Q_PRIORITY` | `MATCH (p:Node:Platform)-[d:DEPENDS_NOW]->(l:Lift) OPTIONAL MATCH (p)-[o:DEPENDS_ON]->(l) WHERE o.dir = d.dir WITH l, p, d, count(o) AS before WITH l, count(DISTINCT p.stop_id + d.dir) AS deps, sum(p.deps_day) AS departures, toInteger(sum(CASE WHEN before = 0 THEN 1 ELSE 0 END)) AS newly OPTIONAL MATCH (l)-[:CLOSED_IN]->(i:Incident) WITH l, deps, departures, newly, count(DISTINCT i) AS incidents RETURN l.facility_id, l.name, l.station_id, coalesce(l.closed, false), deps, newly, departures, incidents` |
+| `Q_REACHES_FROM` | `MATCH (a:Station {uid:$sid})-[r:REACHES]->(b:Station) RETURN b.uid, b.name, r.base_s ORDER BY r.base_s, b.uid` |
 | `Q_REOPEN_LIFTS` | `MATCH (i:Lift)-[r:SF_CLOSED]->(o) WHERE NOT i.facility_id IN $fids CREATE (i)-[c:SF]->(o) SET c = properties(r), i.closed = false DELETE r RETURN count(c)` |
 | `Q_ROUTE_CHECK_RIDE` | `UNWIND $pairs AS p MATCH (a:Platform {uid:p[0]})-[e:RIDE]->(b:Platform {uid:p[1]}) RETURN a.uid, b.uid, e.wt` |
 | `Q_ROUTE_CHECK_SF` | `UNWIND $pairs AS p MATCH (a:Node {uid:p[0]})-[e:SF]->(b:Node {uid:p[1]}) RETURN a.uid, b.uid, e.wt` |

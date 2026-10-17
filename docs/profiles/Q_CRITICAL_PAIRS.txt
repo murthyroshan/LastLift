@@ -1,0 +1,25 @@
+# Q_CRITICAL_PAIRS
+
+Query:
+
+MATCH (a:Node:Lift)-[c:CRITICAL_PAIR]->(b:Node:Lift) WHERE c.scope = 'platform' RETURN a.facility_id, b.facility_id, a.station_id, c.n, c.dirs ORDER BY c.n DESC, a.facility_id, b.facility_id
+
+Parameters: {}
+
+EXPLAIN:
+
+Results
+    Sort
+        Project
+            Filter
+                Conditional Traverse | (a:Node)-[c:CRITICAL_PAIR]->(b:Lift:Node)
+                    Node By Label Scan | (a:Lift)
+
+PROFILE:
+
+Results | Records produced: 42, Execution time: 0.004691 ms
+    Sort | Records produced: 42, Execution time: 0.014567 ms
+        Project | Records produced: 42, Execution time: 0.025506 ms
+            Filter | Records produced: 42, Execution time: 0.027519 ms
+                Conditional Traverse | (a)-[c:CRITICAL_PAIR]->(b:Lift:Node) | Records produced: 126, Execution time: 1.128020 ms
+                    Node By Label Scan | (a:Lift) | Records produced: 244, Execution time: 0.022288 ms

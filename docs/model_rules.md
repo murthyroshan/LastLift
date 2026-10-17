@@ -1,4 +1,4 @@
-# Model rules (frozen, rules_version 1)
+# Model rules (frozen, rules_version 2)
 
 Every number LastLift publishes is computed under these rules. Changing a rule bumps `rules_version`
 in `ingest/build_snapshot.py`, which changes the snapshot hash and regenerates every claim.
@@ -55,10 +55,17 @@ All pathways in the feed are one-directional, so boarding and exiting are separa
 The build fails if any override stops matching the feed.
 
 ## Train rides
-- `RIDE` edges join consecutive stops of representative trips (route types 0, 1, 2; typicality 1–2),
+- `RIDE` edges join consecutive stops of representative trips (route types 0, 1, 2, plus the Silver Line
+  bus routes SL1–SL5; typicality 1–2),
   weight = scheduled seconds (min 30). Entering a rail platform costs a 300 s boarding penalty so a
   reroute never rides a train where a short walk exists. Used only for reroutes, never for k.
 
 ## Wording
 Results describe the open-data model. LastLift says "loses step-free access in the open-data model",
 never "stranded", "safe" or a bare "accessible", and says "cannot assess" where pathway data is missing. <!-- copy-lint: quoted -->
+
+## Changes
+- **rules_version 2 (M10):** Silver Line SL1–SL5 (GTFS route ids 741, 742, 743, 751, 749) added to `RIDE`.
+  Courthouse, World Trade Center and the other Silver Line stations are reachable step-free only by the
+  Silver Line, so without it the network analysis would count them as cut off. `is_rail` stays false for
+  stops served only by these buses. Redundancy (k) never uses `RIDE`, so no k changes.

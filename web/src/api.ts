@@ -72,6 +72,27 @@ const view = (stationId: string, dir: string, scope: Scope, scenario?: string) =
   `${API_BASE}/v1/stations/${encodeURIComponent(stationId)}/graph?dir=${dir}&scope=${scope}`
   + (scenario ? `&scenario=${encodeURIComponent(scenario)}` : ""), undefined, 30000);
 
+/** Per platform-direction of one station: every minimum cut, reliability counts and the per-lift N-1 table. */
+export type CutsDir = { k: number | null; at_grade: boolean; mincuts?: string[][]; relevant?: string[];
+  rel_counts?: number[]; minimal?: string[][]; k_without?: Record<string, number> };
+export type CutsBundle = { q_assumed: number;
+  platforms: Record<string, { station_id: string; board: CutsDir; exit: CutsDir }> };
+export const getCuts = (stationId: string) => mirror<CutsBundle>(`cuts/${encodeURIComponent(stationId)}.json`);
+
+/** The network view (base analysis from the mirror; the scope-dependent parts from the API in Live). */
+export async function getContingency(scope: Scope) {
+  const c = await mirror<Record<string, any>>("contingency.json");
+  if (scope === "demo") return c;
+  const [now, order] = await Promise.all([tool("network_impact", { scope }), tool("repair_order", { scope })]);
+  return { ...c, now, order };
+}
+
+/** P(no step-free route) when each relevant lift is out independently with probability q. */
+export function reliability(counts: number[], q: number): number {
+  const n = counts.length - 1;
+  return counts.reduce((sum, c, j) => sum + c * q ** j * (1 - q) ** (n - j), 0);
+}
+
 export const getLiveStatus = () => json<LiveStatus>(`${API_BASE}/v1/live`);
 
 /** Closures and repair priority for a scope; the evaluation summary is the same in both. */

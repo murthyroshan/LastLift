@@ -43,11 +43,17 @@ async def run(question: str, call) -> None:
     if lifts and re.search(r"what if|if .*\b(fail|fails|close|closes|closed|break)|simulate", q):
         await call("what_if_close", {"facility_ids": lifts})
         return
+    if re.search(r"journeys?|network|cut off|between stations|critical pair|last link|whole system", q):
+        await call("network_impact", {"facility_ids": lifts} if lifts else {})
+        return
     if lifts and re.search(r"ticket|draft|issue", q):
         await call("draft_action", {"facility_id": lifts[0]})
         return
     if lifts and re.search(r"history|how often|before|record", q):
         await call("lift_history", {"facility_id": lifts[0]})
+        return
+    if re.search(r"\b(order|sequence)\b", q) and re.search(r"repair|fix|reopen", q):
+        await call("repair_order", {})
         return
     if re.search(r"repair|priorit|fix first|protect", q):
         await call("repair_priority", {})

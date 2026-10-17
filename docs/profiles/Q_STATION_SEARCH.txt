@@ -1,0 +1,23 @@
+# Q_STATION_SEARCH
+
+Query:
+
+CALL db.idx.fulltext.queryNodes('Station', $q) YIELD node, score RETURN node.uid, node.name, node.has_pathways, node.has_street, score ORDER BY score DESC LIMIT 5
+
+Parameters: {'q': 'alewife*'}
+
+EXPLAIN:
+
+Results
+    Limit
+        Sort
+            Project
+                ProcedureCall
+
+PROFILE:
+
+Results | Records produced: 1, Execution time: 0.000347 ms
+    Limit | Records produced: 1, Execution time: 0.001401 ms
+        Sort | Records produced: 1, Execution time: 0.000426 ms
+            Project | Records produced: 1, Execution time: 0.002740 ms
+                ProcedureCall | Records produced: 1, Execution time: 0.022910 ms

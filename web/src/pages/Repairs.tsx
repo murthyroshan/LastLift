@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getEvalRows, getRerouteFor, getStateFor, getStations, getTicketFor, type Envelope, type Scope } from "../api";
+import { getContingency, getEvalRows, getRerouteFor, getStateFor, getStations, getTicketFor, type Envelope, type Scope } from "../api";
 import { href } from "../router";
 import { S } from "../strings.en";
 
@@ -9,6 +9,7 @@ export function Repairs({ scope }: { scope: Scope }) {
   const [ticket, setTicket] = useState<Envelope | null>(null);
   const [names, setNames] = useState<Record<string, string>>({});
   const [reroutes, setReroutes] = useState<{ platform: any; exit: Envelope; board: Envelope }[]>([]);
+  const [order, setOrder] = useState<Envelope | null>(null);
   const dlg = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -19,6 +20,7 @@ export function Repairs({ scope }: { scope: Scope }) {
         .then((rs) => setReroutes(rs.filter(Boolean) as any));
     }).catch(() => {});
     getEvalRows().then(setRows).catch(() => {});
+    getContingency(scope).then((c) => setOrder(c.order)).catch(() => {});
     getStations().then((ss) => setNames(Object.fromEntries(ss.map((x) => [x.id, x.name])))).catch(() => {});
   }, [scope]);
 
@@ -65,6 +67,16 @@ export function Repairs({ scope }: { scope: Scope }) {
         </>}
         <form method="dialog"><button>{S.agent.close}</button></form>
       </dialog>
+
+      {order && order.data?.order?.length > 0 && <section aria-labelledby="or-h">
+        <h2 id="or-h">{S.order.title}</h2>
+        <p>{S.order.intro}</p>
+        <ol>{order.data.order.map((x: any) => (
+          <li key={x.facility_id}>{S.order.step(x.facility_id, x.journeys_restored, x.platform_directions_restored)}</li>
+        ))}</ol>
+        {order.data.exact && <p className="muted">{S.order.exact}{" "}
+          {order.data.gap?.[0] === 0 && order.data.gap?.[1] === 0 ? S.order.greedySame : S.order.greedyDiffers}</p>}
+      </section>}
 
       <h2>{S.repairs.reroute}</h2>
       {reroutes.map((r) => (

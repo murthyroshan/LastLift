@@ -1,0 +1,25 @@
+# Q_LIFT_BLAST
+
+Query:
+
+MATCH (l:Node:Lift) WHERE l.facility_id IN $fids WITH l.facility_id AS fid, head(collect(l)) AS l RETURN fid, l.name, l.station_id, l.od_cut_base, l.od_cut_off, l.od_slow_base, l.detour_max_s, l.detour_mean_s ORDER BY fid
+
+Parameters: {'fids': ['813', '884']}
+
+EXPLAIN:
+
+Results
+    Sort
+        Project
+            Aggregate
+                Conditional Traverse | (l:Node)->(l:Node)
+                    Node By Index Scan | (l:Lift)
+
+PROFILE:
+
+Results | Records produced: 2, Execution time: 0.001061 ms
+    Sort | Records produced: 2, Execution time: 0.001037 ms
+        Project | Records produced: 2, Execution time: 0.003003 ms
+            Aggregate | Records produced: 2, Execution time: 0.012387 ms
+                Conditional Traverse | (l)->(l) | Records produced: 2, Execution time: 0.092669 ms
+                    Node By Index Scan | (l:Lift) | Records produced: 2, Execution time: 0.020845 ms

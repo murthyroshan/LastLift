@@ -18,13 +18,14 @@ import sys
 import zipfile
 
 BIG = 1_000_000
-RULES_VERSION = 1
+RULES_VERSION = 2
 WALK_MODES = {"1": "walk", "3": "walk"}            # walkway, moving sidewalk
 GATE_MODES = {"6": "gate", "7": "gate"}            # fare gate, exit gate (assumed accessible)
 STEP_MODES = {"2": "stairs", "4": "escalator"}     # never step-free; kept for explanations
 ELEVATOR = "5"
 GATE_WT, STREET_WT, LIFT_DEFAULT_WT, BOARDING_PENALTY = 10, 60, 60, 300
 RIDE_ROUTE_TYPES = {"0", "1", "2"}                 # light rail, subway, commuter rail
+RIDE_BUS_ROUTES = {"741", "742", "743", "751", "749"}  # Silver Line SL1-SL5 (rules_version 2)
 
 
 def merged_complex(station_id):
@@ -191,7 +192,8 @@ def build(gtfs_path, overrides_path, service_date):
             (active.add if x["exception_type"] == "1" else active.discard)(x["service_id"])
     trip_active = {t["trip_id"] for t in read_csv(z, "trips.txt") if t["service_id"] in active}
     reps = {r["representative_trip_id"]: r for r in route_patterns
-            if routes[r["route_id"]]["route_type"] in RIDE_ROUTE_TYPES and r["route_pattern_typicality"] in ("1", "2")}
+            if (routes[r["route_id"]]["route_type"] in RIDE_ROUTE_TYPES or r["route_id"] in RIDE_BUS_ROUTES)
+            and r["route_pattern_typicality"] in ("1", "2")}
     deps = collections.Counter()
     seqs = collections.defaultdict(list)
     reader = csv.reader(io.TextIOWrapper(z.open("stop_times.txt"), encoding="utf-8-sig"))
@@ -209,6 +211,7 @@ def build(gtfs_path, overrides_path, service_date):
 
     ride = {}
     ride_stops = set()
+    rail_stops = set()
     for trip_id in sorted(seqs):
         seq = sorted(seqs[trip_id])
         rp = reps[trip_id]
@@ -221,6 +224,8 @@ def build(gtfs_path, overrides_path, service_date):
                     e["wt"] = min(e["wt"], wt)
                     e["routes"].add(rp["route_id"])
             ride_stops.update(halves.get(a, [a]) + halves.get(b, [b]))
+            if routes[rp["route_id"]]["route_type"] != "3":
+                rail_stops.update(halves.get(a, [a]) + halves.get(b, [b]))
 
     for (a, b), e in sf.items():
         if e["kind"] in ("walk", "gate", "lift_access") and b in ride_stops:
@@ -247,7 +252,7 @@ def build(gtfs_path, overrides_path, service_date):
         if lt == "0":
             row = dict(common, labels=["Node", "Platform"], stop_id=base_stop(uid), modelled=True,
                        platform_name=s.get("platform_name") or None, wheelchair_boarding=int(s["wheelchair_boarding"] or 0),
-                       is_rail=uid in ride_stops, deps_day=deps.get(base_stop(uid), 0))
+                       is_rail=uid in rail_stops, deps_day=deps.get(base_stop(uid), 0))
             if base_stop(uid) in centre_of:
                 row["half"] = "centre" if uid.endswith("#centre") else "side"
         elif lt == "2":
@@ -288,7 +293,7 @@ def build(gtfs_path, overrides_path, service_date):
             s = stops[base_stop(uid)]
             nodes[uid] = {"labels": ["Platform"], "uid": uid, "stop_id": base_stop(uid), "name": s["stop_name"],
                           "platform_name": s.get("platform_name") or None, "station_id": parent(base_stop(uid)),
-                          "modelled": False, "is_rail": True, "deps_day": deps.get(base_stop(uid), 0)}
+                          "modelled": False, "is_rail": uid in rail_stops, "deps_day": deps.get(base_stop(uid), 0)}
 
     # --- edge rows -------------------------------------------------------------------------------
     edges = []

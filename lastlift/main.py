@@ -5,6 +5,7 @@ import inspect
 import json
 import logging
 import os
+import re
 import time
 from contextlib import asynccontextmanager
 from typing import Literal
@@ -99,7 +100,81 @@ def health():
         "uptime_s": round(time.time() - STARTED, 1),
         "rss_mb": _rss_mb(),
         "pid": os.getpid(),
+        "graph_memory_mb": _graph_memory() if up else None,
     }
+
+
+def _graph_memory() -> dict:
+    """GRAPH.MEMORY USAGE per scope graph (FalkorDB's own accounting, in MB)."""
+    out = {}
+    for scope in ("base", "demo", "live"):
+        name = state.graph_name(scope)
+        try:
+            r = db.client().connection.execute_command("GRAPH.MEMORY", "USAGE", name)
+            out[scope] = dict(zip(r[::2], r[1::2])).get("total_graph_sz_mb")
+        except Exception:                   # graph missing or command unsupported: report nothing
+            out[scope] = None
+    return out
+
+
+_PLAN_CALLS: list[float] = []
+PLAN_LIMIT_PER_MIN = 10
+
+
+def _sample_params(g, qid: str) -> dict | None:
+    """Fixed example parameters (Alewife, lifts 813/884/885) for the read queries that take parameters."""
+    cx = {"cx": "place-alfcl"}
+    simple = {
+        "Q_COMPLEX_FLOW_EDGES": cx, "Q_COMPLEX_PLATFORMS": cx, "Q_COMPLEX_STREETS": cx, "Q_STATION_NODES": cx,
+        "Q_STATION_EDGES": cx, "Q_STATION_PLATFORMS": cx, "Q_CLOSED_AT_COMPLEX": cx, "Q_PLATFORM_CUTS": cx,
+        "Q_STATION": {"sid": "place-alfcl"}, "Q_STATION_UNMODELLED_LIFTS": {"sid": "place-wrcst"},
+        "Q_STATION_SEARCH": {"q": "alewife*"}, "Q_LIFT_INFO": {"fid": "813"}, "Q_LIFT_HISTORY": {"fid": "885"},
+        "Q_LIFT_INCIDENT_COUNT": {"fid": "885"}, "Q_MODELLED_LIFTS": {"fids": ["813", "885"]},
+        "Q_LIFT_COMPLEXES": {"fids": ["813"]}, "Q_LIFT_BLAST": {"fids": ["813", "884"]},
+        "Q_REACHES_FROM": {"sid": "place-rbmnl"}, "Q_DOMINATES_FOR": {"fid": "884"},
+    }
+    if qid in simple:
+        return simple[qid]
+    if qid == "Q_MAXFLOW":
+        src = g.ro_query("MATCH (s:Street {cx:'place-alfcl'}) RETURN collect(s.uid)").result_set[0][0]
+        dst = g.ro_query("MATCH (p:Node:Platform {cx:'place-alfcl'}) RETURN p.uid ORDER BY p.uid LIMIT 1").result_set
+        return {"src": src, "dst": [dst[0][0]] if dst else []}
+    return {} if qid in ("Q_LOST_NOW", "Q_NEWLY_LAST", "Q_PRIORITY", "Q_CLOSED_FACILITIES", "Q_META",
+                         "Q_CRITICAL_PAIRS", "Q_CONDITIONAL", "Q_NETWORK_SPOF") else None
+
+
+@app.get("/v1/queries/{query_id}/plan")
+def query_plan(query_id: str, mode: Literal["explain", "profile"] = "explain"):
+    """FalkorDB's execution plan for one catalogued read query, with fixed example parameters.
+    explain: GRAPH.EXPLAIN on the demo graph (nothing runs). profile: GRAPH.PROFILE on a private copy of the
+    demo graph (the query runs; records and ms per operator). Write queries are refused; 10 calls a minute."""
+    from . import queries
+    q = getattr(queries, query_id, None) if query_id.startswith("Q_") else None
+    if not isinstance(q, str):
+        raise HTTPException(404, "unknown query id (see /v1/queries)")
+    if re.search(r"\b(CREATE|SET|DELETE|MERGE|REMOVE)\b", q):
+        raise HTTPException(403, "write queries are never explained or profiled here")
+    now = time.time()
+    _PLAN_CALLS[:] = [t for t in _PLAN_CALLS if now - t < 60]
+    if len(_PLAN_CALLS) >= PLAN_LIMIT_PER_MIN:
+        raise HTTPException(429, "at most 10 plans a minute")
+    _PLAN_CALLS.append(now)
+    demo = tools._scope_graph("demo")
+    g = db.client().select_graph(demo)
+    params = _sample_params(g, query_id)
+    if params is None:
+        raise HTTPException(404, "no example parameters for this query")
+    if mode == "profile":
+        name = state.graph_name(f"wi_profile_{os.getpid()}")
+        if not state.exists(name):
+            db.client().connection.execute_command("GRAPH.COPY", demo, name)
+        plan = db.client().select_graph(name).profile(q, params)
+        graph = name
+    else:
+        plan = g.explain(q, params)
+        graph = demo
+    return {"query_id": query_id, "mode": mode, "graph": graph, "params": params, "query": q,
+            "plan": [str(line).rstrip() for line in plan.plan if str(line).strip()]}
 
 
 def _call(fn, kwargs):

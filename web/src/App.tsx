@@ -4,6 +4,7 @@ import { AgentDrawer } from "./components/AgentDrawer";
 import { AnnouncerProvider } from "./components/Announcer";
 import { About } from "./pages/About";
 import { Landing } from "./pages/Landing";
+import { Network } from "./pages/Network";
 import { Repairs } from "./pages/Repairs";
 import { Station } from "./pages/Station";
 import { href, useRoute } from "./router";
@@ -55,7 +56,8 @@ export default function App() {
   useEffect(() => { getDisclaimers().then((d) => setFooter(d.footer)).catch(() => {}); }, []);
 
   const page = route.parts[0] ?? "";
-  const nav = [["/", S.nav.home, ""], ["/repairs", S.nav.repairs, "repairs"], ["/about", S.nav.about, "about"]];
+  const nav = [["/", S.nav.home, ""], ["/network", S.nav.network, "network"], ["/repairs", S.nav.repairs, "repairs"],
+    ["/about", S.nav.about, "about"]];
   return (
     <AnnouncerProvider>
       <a className="skip" href="#main">{S.skip}</a>
@@ -83,6 +85,7 @@ export default function App() {
       <main id="main" tabIndex={-1}>
         {page === "station" ? <Station key={scope} route={route} live={wake === "live"} scope={scope} />
           : page === "repairs" ? <Repairs key={scope} scope={scope} />
+          : page === "network" || page === "contingency" ? <Network key={scope} scope={scope} />
           : page === "about" ? <About />
           : <Landing key={scope} scope={scope} />}
       </main>

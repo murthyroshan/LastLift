@@ -1,0 +1,23 @@
+# Q_REACHES_FROM
+
+Query:
+
+MATCH (a:Station {uid:$sid})-[r:REACHES]->(b:Station) RETURN b.uid, b.name, r.base_s ORDER BY r.base_s, b.uid
+
+Parameters: {'sid': 'place-rbmnl'}
+
+EXPLAIN:
+
+Results
+    Sort
+        Project
+            Conditional Traverse | (a)-[r:REACHES]->(b:Station)
+                Node By Index Scan | (a:Station)
+
+PROFILE:
+
+Results | Records produced: 88, Execution time: 0.008212 ms
+    Sort | Records produced: 88, Execution time: 0.019475 ms
+        Project | Records produced: 88, Execution time: 0.027990 ms
+            Conditional Traverse | (a)-[r:REACHES]->(b:Station) | Records produced: 88, Execution time: 0.152522 ms
+                Node By Index Scan | (a:Station) | Records produced: 1, Execution time: 0.016980 ms

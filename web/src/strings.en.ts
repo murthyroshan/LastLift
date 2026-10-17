@@ -5,7 +5,7 @@ export const S = {
   appName: "LastLift",
   tagline: "Find the last lift before it fails.",
   skip: "Skip to content",
-  nav: { home: "Overview", repairs: "Repairs", about: "About", ask: "Ask the agent" },
+  nav: { home: "Overview", repairs: "Repairs", network: "Network", about: "About", ask: "Ask the agent" },
 
   // A redundancy value is always glyph + number + word (never colour alone).
   k: { lost: "lost", one: "single lift", many: "lift routes", grade: "no lift needed", none: "no data" },
@@ -15,6 +15,76 @@ export const S = {
     waking: "The live graph server is waking up (free hosting sleeps when idle). Recorded results are shown meanwhile.",
     live: "Live graph server connected.",
     offline: "The live graph server is not reachable. Everything below is the recorded demo state; simulations of other lifts need it.",
+  },
+
+  proof: {
+    title: "Why this number",
+    pick: "Choose a platform in the table to see exactly which lifts its step-free access depends on.",
+    dirLabel: (dir: string) => (dir === "board" ? "Boarding" : "Exiting"),
+    atGrade: "No lift is needed, so no lift failure can cut it off.",
+    lost: "Step-free access is already lost in the current state.",
+    cutsLead: (k: number, one: boolean) =>
+      `Lift-disjoint step-free routes: ${k}. To lose step-free access, ${one ? "every lift in this set" : "every lift in one of these sets"} must be out:`,
+    cutsOnly: "That is the only way to lose it.",
+    certified: "Every set is a minimum cut of FalkorDB's certified maximum flow, and each one was checked against trying every combination of lifts.",
+    relTitle: "How often would it fail?",
+    relLabel: "Chance that any one lift is out of service",
+    relResult: (pct: string, nines: string) => `Step-free access would be lost about ${pct}% of the time (${nines} nines).`,
+    relNever: "No combination of lift failures cuts this off.",
+    relNote: (assumed: string) =>
+      `Assumes lifts fail independently with the same chance (the analysis default is ${assumed}%). Real outage rates per lift come from the closure history later.`,
+    n1Title: "If one lift closes",
+    colLift: "Lift closed",
+    colLeft: "Lift routes left",
+    n1None: "No single lift closure changes this platform-direction.",
+  },
+
+  net: {
+    title: "The step-free network",
+    intro: "A closed lift can cut off a platform, but riders can sometimes ride a train to another station and back. This page looks at journeys between stations across the whole network.",
+    headline: (platform: number, network: number) =>
+      `${platform} lifts can each cut a platform off on their own; only ${network} can cut a whole station off from the rest of the step-free network.`,
+    method: "Computed with dominator trees: a lift dominates a journey when every step-free path for it passes through that lift. Each result was checked against a plain search with the lift removed.",
+    nowTitle: "Right now",
+    lastLinkTitle: "Lifts that are now the last link",
+    lastLink: (fid: string, station: string, journeys: number) => `Lift ${fid} (${station}) now carries ${journeys} journeys alone.`,
+    pairsNow: "Critical pairs with one lift already closed",
+    pairNow: (closed: string, open: string, station: string, n: number) =>
+      open ? `${station}: lift ${closed} is closed; if lift ${open} also closes, ${n} platform-directions lose step-free access.`
+        : `${station}: lifts ${closed} are both closed (${n} platform-directions).`,
+    tabs: { spof: "Cuts a station off", rescued: "Rescued by the network", pairs: "Critical pairs", conditional: "Conditional last lifts", matrix: "Travel times" },
+    colLift: "Lift",
+    colStation: "Station",
+    colJourneys: "Journeys lost",
+    colCutOff: "Station cut off",
+    colSlowed: "Journeys slowed",
+    colWorst: "Worst detour (min)",
+    colPair: "Lift pair",
+    colDirs: "Platform-directions lost together",
+    colWhenClosed: "When this lift is closed",
+    colBecomes: "this lift becomes the last link",
+    colSame: "Same station",
+    yes: "yes",
+    no: "no",
+    pairsIntro: "Each lift alone is not a single point of failure, but if both are out together these platform-directions lose step-free access.",
+    conditionalIntro: (cross: number) =>
+      `With one lift closed, its partner becomes the only link between the station and the network. Pairs at different stations: ${cross}.`,
+    matrixIntro: "Step-free travel time between stations, in minutes, including lifts, walking and the boarding allowance. Choose a starting station to read the row as a table.",
+    from: "From",
+    colTo: "To",
+    colMinutes: "Minutes",
+    mcTitle: "If every lift had the same chance of being out",
+    mc: (pct: string, q: string, lo: string, hi: string) =>
+      `With each lift out ${q}% of the time, about ${pct}% of journeys between stations stay step-free (confidence interval ${lo} to ${hi}).`,
+  },
+
+  order: {
+    title: "Repair order",
+    intro: "The order to reopen the closed lifts that gives the most back soonest: journeys between stations first, then platform-directions.",
+    exact: "Exact best order (checked against every order).",
+    greedySame: "Repairing whichever lift helps most next gives the same order.",
+    greedyDiffers: "Repairing whichever lift helps most next gives a different, worse order.",
+    step: (fid: string, j: number, d: number) => `Lift ${fid}: restores ${j} journeys between stations and ${d} platform-directions.`,
   },
 
   live: {

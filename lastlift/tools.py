@@ -12,9 +12,10 @@ from typing import Annotated
 
 from pydantic import Field
 
-from . import alerts, db, incidents, redundancy, routing, state
+from . import alerts, db, incidents, network, redundancy, routing, sequence, state
 from .queries import (Q_CLOSED_AT_COMPLEX, Q_COMPLEX_PLATFORMS, Q_STATION_PLATFORMS, Q_COMPLEX_STREETS, Q_LIFT_HISTORY, Q_LIFT_INCIDENT_COUNT, Q_LIFT_INFO,
-                      Q_LOST_NOW, Q_NEWLY_LAST, Q_PRIORITY, Q_STATION, Q_STATION_SEARCH)
+                      Q_LOST_NOW, Q_NEWLY_LAST, Q_PRIORITY, Q_STATION, Q_STATION_SEARCH, Q_CRITICAL_PAIRS,
+                      Q_LIFT_BLAST)
 
 SCOPES = ("demo", "live", "base")
 _FT_TOKEN = re.compile(r"[A-Za-z0-9]+")
@@ -404,5 +405,98 @@ def draft_action(facility_id: str, scope: str = "demo"):
                      "filed": False}, ["Q_PRIORITY"], state.graph_name(scope), started, entities=[facility_id])
 
 
+def network_impact(facility_ids: Annotated[list[str] | None, Field(
+        description="Lifts to simulate closing on top of the current closures; omit for the current closures alone")] = None,
+        scope: str = "demo"):
+    """Journeys between stations: which ones the closures cut, which stations are cut off from the step-free
+    network, which working lifts are now the last link for journeys, and critical lift pairs touched."""
+    started = time.perf_counter()
+    graph = _scope_graph(scope)
+    net = network.get(state.graph_name("base"))
+    asked = sorted({str(f) for f in facility_ids or []})
+    unknown = [f for f in asked if f not in net.units]
+    if unknown:
+        return _envelope("network_impact", False,
+                         f"cannot assess: lift(s) {', '.join(unknown)} not in the step-free model",
+                         {"cannot_assess": unknown}, ["Q_MODELLED_LIFTS"], graph, started, entities=asked)
+    closed_now = state.closed(graph)
+    closed = sorted(set(closed_now) | set(asked))
+    od_base, od_now = network.cached(net, "od", ()), network.cached(net, "od", closed)
+    broken = sorted((a, b) for a in net.stations for b in od_base[a] - od_now[a])
+    total = sum(len(v) for v in od_base.values())
+    cut_off = sorted({s for s in net.stations
+                      if od_base[s] and not od_now[s] and not any(s in od_now[a] for a in net.stations)})
+    n1_base, n1_now = network.cached(net, "n1", ()), network.cached(net, "n1", closed)
+    last_link = []
+    for f, imp in n1_now.items():
+        new = imp.broken - n1_base[f].broken
+        if new:
+            last_link.append({"facility_id": f, "station_id": net.unit_station.get(net.units[f][0], ""),
+                              "journeys": len(new), "cut_off_if_closed": imp.cut_off})
+    last_link.sort(key=lambda x: (-x["journeys"], x["facility_id"]))
+    g = db.client().select_graph(graph)
+    pairs = [{"a": a, "b": b, "station_id": st, "platform_directions": n, "dirs": dirs,
+              "closed": sorted({a, b} & set(closed))}
+             for a, b, st, n, dirs in g.ro_query(Q_CRITICAL_PAIRS).result_set if {a, b} & set(closed)]
+    blast = [{"facility_id": r[0], "name": r[1], "station_id": r[2], "journeys_if_closed_alone": r[3],
+              "cut_off_if_closed_alone": r[4] or [], "journeys_slowed_alone": r[5], "worst_detour_s": r[6]}
+             for r in g.ro_query(Q_LIFT_BLAST, {"fids": asked or closed}).result_set]
+    name = lambda s: net.names.get(s, s)
+    what = f"simulated closing {', '.join(asked)} (on top of the current closures)" if asked else "current closures"
+    summary = (f"{what}: {len(broken)} of {total} journeys between stations lose step-free reachability in the "
+               f"open-data model")
+    if cut_off:
+        summary += f"; cut off from the step-free network: {', '.join(name(s) for s in cut_off)}"
+    if last_link:
+        top = last_link[:3]
+        summary += "; now the last link for journeys: " + ", ".join(
+            f"lift {x['facility_id']} ({name(x['station_id'])}, {x['journeys']} journeys)" for x in top)
+    if pairs:
+        summary += f"; {len(pairs)} critical lift pair(s) have a member closed"
+    ents = asked + closed + cut_off + [x["facility_id"] for x in last_link] + [x["station_id"] for x in last_link] +         [p["a"] for p in pairs] + [p["b"] for p in pairs]
+    return _envelope("network_impact", True, summary,
+                     {"simulated": asked, "closed": closed, "journeys_total": total, "journeys_broken": len(broken),
+                      "broken": [list(x) for x in broken[:200]], "cut_off": cut_off, "last_link": last_link,
+                      "critical_pairs": pairs, "lifts": blast},
+                     ["Q_CLOSED_FACILITIES", "Q_ROUTE_EDGES", "Q_CRITICAL_PAIRS", "Q_LIFT_BLAST"], graph, started,
+                     highlight={"nodes": [f"lift:{x['facility_id']}" for x in last_link[:5]], "edges": []},
+                     entities=ents)
+
+
+_ORDERS: dict = {}
+
+
+def repair_order(scope: str = "demo"):
+    """The order to reopen the currently closed lifts that restores the most journeys and platform access soonest
+    (exact best order, compared with the greedy order)."""
+    started = time.perf_counter()
+    graph = _scope_graph(scope)
+    closed = state.closed(graph)
+    key = (graph, tuple(closed))
+    if key not in _ORDERS:
+        net = network.get(state.graph_name("base"))
+        access = sequence.PlatformAccess(db.client().select_graph(state.graph_name("base")), closed)
+        _ORDERS[key] = sequence.plan(net, closed, access)
+        while len(_ORDERS) > 8:
+            _ORDERS.pop(next(iter(_ORDERS)))
+    p = _ORDERS[key]
+    if not closed:
+        return _envelope("repair_order", True, "no modelled lifts are closed: nothing to order", p,
+                         ["Q_CLOSED_FACILITIES"], graph, started)
+    order = " -> ".join(x["facility_id"] for x in p["order"])
+    first = p["order"][0]
+    summary = (f"repair order for {len(closed)} closed lifts ({'exact best' if p['exact'] else 'greedy'}): {order}; "
+               f"first {first['facility_id']} restores {first['journeys_restored']} journeys between stations and "
+               f"{first['platform_directions_restored']} platform-directions")
+    if p["exact"]:
+        same = [x["facility_id"] for x in p["order"]] == [x["facility_id"] for x in p["greedy"]]
+        summary += "; greedy gives the same order" if same else (
+            f"; greedy order differs (gap: {p['gap'][0]} journey-steps, {p['gap'][1]} platform-direction-steps)")
+    return _envelope("repair_order", True, summary, p, ["Q_CLOSED_FACILITIES", "Q_LIFT_COMPLEXES",
+                     "Q_COMPLEX_FLOW_EDGES", "Q_ROUTE_EDGES"], graph, started,
+                     highlight={"nodes": [f"lift:{f}" for f in closed], "edges": []}, entities=closed)
+
+
 REGISTRY = {f.__name__: f for f in (resolve_place, current_closures, platform_redundancy, what_if_close,
-                                    step_free_route, repair_priority, lift_history, draft_action)}
+                                    step_free_route, repair_priority, lift_history, draft_action, network_impact,
+                                    repair_order)}

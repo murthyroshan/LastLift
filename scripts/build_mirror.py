@@ -8,6 +8,9 @@ Everything comes from the same tools the API serves, on the frozen demo scope:
   m/station/<id>.json     platform_redundancy + the station graph contract (board and exit)
   m/whatif/<fid>.json     what_if_close for the story lifts + the station graph under that simulation
   m/queries.json          the Cypher of every Q_* constant (for the query drawer)
+  m/contingency.json      network blast radius, N-2 critical pairs, conditional last lifts, the travel-time matrix,
+                          network_impact and repair_order on the demo scope (from the network sweep)
+  m/cuts/<id>.json        per platform-direction: every minimum cut, reliability counts, the per-lift N-1 table
 """
 import json
 import sys
@@ -80,9 +83,35 @@ def main():
     write(OUT / "eval.json", [{k: r[k] for k in keep} for r in rows])
     from lastlift.wording import DISCLAIMERS
     write(OUT / "disclaimers.json", DISCLAIMERS)
+    total += contingency()
     print(f"mirror: {len(stations)} stations, {len(STORY_WHATIFS)} what-ifs, {total // 1024} KB, "
           f"{time.time() - started:.0f} s")
     return 0
+
+
+def contingency() -> int:
+    from lastlift.seed import latest_snapshot
+    doc = json.loads((latest_snapshot() / "network.json").read_text(encoding="utf-8"))
+    names = doc["names"]
+    st = doc["stations"]
+    matrix = [[None if a == b else (round(doc["od_base_s"][a][b] / 60, 1) if b in doc["od_base_s"][a] else -1)
+               for b in st] for a in st]
+    lifts = doc["lifts"]
+    total = write(OUT / "contingency.json", {
+        "q_assumed": doc["q_assumed"], "stations": st, "names": names, "minutes": matrix,
+        "network_spof": [{"facility_id": f, **x} for f, x in sorted(lifts.items(), key=lambda kv: (-kv[1]["od_cut"], kv[0]))
+                         if x["od_cut"]],
+        "rescued": [{"facility_id": f, **x} for f, x in sorted(lifts.items(), key=lambda kv: (-kv[1]["detour_max_s"], kv[0]))
+                    if not x["od_cut"] and x["od_slow"]],
+        "pairs": doc["pairs"], "conditional": doc["conditional"], "monte_carlo": doc["monte_carlo"],
+        "now": tools.network_impact(scope="demo"), "order": tools.repair_order(scope="demo"),
+    })
+    by_station = {}
+    for stop, p in doc["platform"].items():
+        by_station.setdefault(p["station_id"], {})[stop] = p
+    for sid, plats in by_station.items():
+        total += write(OUT / "cuts" / f"{sid}.json", {"q_assumed": doc["q_assumed"], "platforms": plats})
+    return total
 
 
 if __name__ == "__main__":

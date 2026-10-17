@@ -1,0 +1,23 @@
+# Q_LOST_NOW
+
+Query:
+
+MATCH (p:Node:Platform) WHERE (p.k_board = 0 AND (p.k_board_base > 0 OR p.at_grade_board)) OR (p.k_exit = 0 AND (p.k_exit_base > 0 OR p.at_grade_exit)) RETURN p.stop_id, p.name, p.platform_name, p.station_id, p.k_board, p.k_exit, p.deps_day
+
+Parameters: {}
+
+EXPLAIN:
+
+Results
+    Project
+        Conditional Traverse | (p:Node)->(p:Node)
+            Filter
+                Node By Label Scan | (p:Platform)
+
+PROFILE:
+
+Results | Records produced: 3, Execution time: 0.000712 ms
+    Project | Records produced: 3, Execution time: 0.005038 ms
+        Conditional Traverse | (p)->(p) | Records produced: 3, Execution time: 0.107183 ms
+            Filter | Records produced: 3, Execution time: 0.316869 ms
+                Node By Label Scan | (p:Platform) | Records produced: 700, Execution time: 0.051137 ms

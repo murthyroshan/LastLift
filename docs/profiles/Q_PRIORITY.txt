@@ -1,0 +1,39 @@
+# Q_PRIORITY
+
+Query:
+
+MATCH (p:Node:Platform)-[d:DEPENDS_NOW]->(l:Lift) OPTIONAL MATCH (p)-[o:DEPENDS_ON]->(l) WHERE o.dir = d.dir WITH l, p, d, count(o) AS before WITH l, count(DISTINCT p.stop_id + d.dir) AS deps, sum(p.deps_day) AS departures, toInteger(sum(CASE WHEN before = 0 THEN 1 ELSE 0 END)) AS newly OPTIONAL MATCH (l)-[:CLOSED_IN]->(i:Incident) WITH l, deps, departures, newly, count(DISTINCT i) AS incidents RETURN l.facility_id, l.name, l.station_id, coalesce(l.closed, false), deps, newly, departures, incidents
+
+Parameters: {}
+
+EXPLAIN:
+
+Results
+    Project
+        Aggregate
+            Optional Conditional Traverse | (l)->(i:Incident)
+                Aggregate
+                    Aggregate
+                        Apply
+                            Conditional Traverse | (l)-[d:DEPENDS_NOW]->(p:Node:Platform)
+                                Node By Label Scan | (l:Lift)
+                            Optional
+                                Filter
+                                    Expand Into | (p)-[o:DEPENDS_ON]->(l)
+                                        Argument
+
+PROFILE:
+
+Results | Records produced: 72, Execution time: 0.006550 ms
+    Project | Records produced: 72, Execution time: 0.041413 ms
+        Aggregate | Records produced: 72, Execution time: 0.070137 ms
+            Optional Conditional Traverse | (l)->(i:Incident) | Records produced: 72, Execution time: 0.193372 ms
+                Aggregate | Records produced: 72, Execution time: 0.509274 ms
+                    Aggregate | Records produced: 214, Execution time: 0.314518 ms
+                        Apply | Records produced: 214, Execution time: 0.093146 ms
+                            Conditional Traverse | (p)-[d:DEPENDS_NOW]->(p) | Records produced: 214, Execution time: 0.823363 ms
+                                Node By Label Scan | (l:Lift) | Records produced: 244, Execution time: 0.018985 ms
+                            Optional | Records produced: 214, Execution time: 0.035525 ms
+                                Filter | Records produced: 202, Execution time: 0.101556 ms
+                                    Expand Into | (p)-[o:DEPENDS_ON]->(l) | Records produced: 400, Execution time: 0.145415 ms
+                                        Argument | Records produced: 214, Execution time: 0.016008 ms

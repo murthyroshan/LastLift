@@ -126,3 +126,32 @@ Q_LIFT_HISTORY = (
     "i.started, i.first_seen, i.last_seen, i.ongoing, i.ended_by, i.versions ORDER BY i.first_seen"
 )
 Q_CLOSED_AT_COMPLEX = "MATCH (l:Lift {cx:$cx})-[:SF_CLOSED]->() RETURN collect(DISTINCT l.facility_id)"
+
+# --- network and contingency (network.py, cuts.py, scripts/network_sweep.py) ------------------------
+Q_LIFT_BLAST = (
+    "MATCH (l:Node:Lift) WHERE l.facility_id IN $fids WITH l.facility_id AS fid, head(collect(l)) AS l "
+    "RETURN fid, l.name, l.station_id, l.od_cut_base, l.od_cut_off, l.od_slow_base, l.detour_max_s, l.detour_mean_s "
+    "ORDER BY fid"
+)
+Q_CRITICAL_PAIRS = (
+    "MATCH (a:Node:Lift)-[c:CRITICAL_PAIR]->(b:Node:Lift) WHERE c.scope = 'platform' "
+    "RETURN a.facility_id, b.facility_id, a.station_id, c.n, c.dirs ORDER BY c.n DESC, a.facility_id, b.facility_id"
+)
+Q_CONDITIONAL = (
+    "MATCH (a:Node:Lift)-[c:CRITICAL_PAIR]->(b:Node:Lift) WHERE c.scope = 'network' "
+    "RETURN a.facility_id, b.facility_id, b.station_id, c.journeys, c.same_station "
+    "ORDER BY c.journeys DESC, a.facility_id, b.facility_id"
+)
+Q_NETWORK_SPOF = (
+    "MATCH (l:Node:Lift) WHERE l.od_cut_base > 0 WITH l.facility_id AS fid, head(collect(l)) AS l "
+    "RETURN fid, l.name, l.station_id, l.od_cut_base, l.od_cut_off ORDER BY l.od_cut_base DESC, fid"
+)
+Q_REACHES_FROM = (
+    "MATCH (a:Station {uid:$sid})-[r:REACHES]->(b:Station) RETURN b.uid, b.name, r.base_s ORDER BY r.base_s, b.uid"
+)
+Q_DOMINATES_FOR = "MATCH (l:Node:Lift {facility_id:$fid})-[:DOMINATES_FOR]->(s:Station) RETURN collect(DISTINCT s.uid)"
+Q_PLATFORM_CUTS = (
+    "MATCH (p:Node:Platform {cx:$cx}) RETURN p.stop_id AS stop, head(collect(p.mincuts_board)), "
+    "head(collect(p.mincuts_exit)), head(collect(p.rel_counts_board)), head(collect(p.rel_counts_exit)), "
+    "head(collect(p.rel_relevant_board)), head(collect(p.rel_relevant_exit)) ORDER BY stop"
+)

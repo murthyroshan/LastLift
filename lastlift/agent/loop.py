@@ -34,7 +34,9 @@ SYSTEM = (
     "If a tool says 'cannot assess', say so plainly. If a platform loses step-free access (now or in a what-if), "
     "call step_free_route with from_station and to_platform (boarding) or from_platform (exiting), plus also_closed "
     "for a what-if, to find the step-free alternative via other stations, and give it; only if that returns no "
-    "route, say no step-free route exists in the open-data model. Answer in at most 5 short sentences, plain language, and end with: "
+    "route, say no step-free route exists in the open-data model. For effects across the network (journeys between "
+    "stations, stations cut off, which lift is now the last link, critical lift pairs) call network_impact. "
+    "Answer in at most 5 short sentences, plain language, and end with: "
     "Check mbta.com/alerts/access."
 )
 _llm_calls_today = {"day": None, "n": 0}

@@ -106,3 +106,33 @@ test("Live scope reads the API and shows the feed status", async ({ page }) => {
   expect(asked).toContain("current_closures:live");
   await noSeriousAxeIssues(page);
 });
+
+for (const scheme of ["light", "dark"] as const) {
+  test(`network page works from the mirror (${scheme})`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme: scheme });
+    await page.goto("/#/network");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("The step-free network");
+    await expect(page.getByText(/can cut a whole station off/)).toBeVisible();
+    const first = page.getByRole("tab", { name: "Cuts a station off" });
+    await expect(first).toHaveAttribute("aria-selected", "true");
+    await first.focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(page.getByRole("tab", { name: "Rescued by the network" })).toHaveAttribute("aria-selected", "true");
+    await page.getByRole("tab", { name: "Critical pairs" }).click();
+    await expect(page.getByRole("tabpanel")).toContainText("821 + 973");
+    await page.getByRole("tab", { name: "Travel times" }).click();
+    await expect(page.getByRole("combobox", { name: "From" })).toBeVisible();
+    await noSeriousAxeIssues(page);
+  });
+}
+
+test("station proof panel: minimum cuts, reliability slider, single-lift table", async ({ page }) => {
+  await page.goto("/#/station/place-harsq");
+  await page.getByRole("table").first().getByRole("button").first().click();
+  await expect(page.getByRole("heading", { name: /Why this number/ })).toBeVisible();
+  const slider = page.getByRole("slider", { name: /Chance that any one lift is out/ });
+  await expect(slider).toBeVisible();
+  await slider.fill("0.1");
+  await expect(page.getByText(/Step-free access would be lost about|No combination of lift failures/)).toBeVisible();
+  await noSeriousAxeIssues(page);
+});

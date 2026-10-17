@@ -1,0 +1,27 @@
+# Q_MAXFLOW
+
+Query:
+
+MATCH (s:Node) WHERE s.uid IN $src WITH collect(s) AS S MATCH (t:Node) WHERE t.uid IN $dst WITH S, collect(t) AS T CALL algo.maxFlow({sourceNodes:S, targetNodes:T, relationshipTypes:['SF'], capacityProperty:'cap'}) YIELD edges, edgeFlows, maxFlow RETURN [e IN edges | e.eid], edgeFlows, maxFlow
+
+Parameters: {'src': ['street:place-alfcl'], 'dst': ['14112']}
+
+EXPLAIN:
+
+Results
+    Project
+        ProcedureCall
+            Aggregate
+                Node By Index Scan | (t:Node)
+                    Aggregate
+                        Node By Index Scan | (s:Node)
+
+PROFILE:
+
+Results | Records produced: 1, Execution time: 0.000953 ms
+    Project | Records produced: 1, Execution time: 0.038186 ms
+        ProcedureCall | Records produced: 1, Execution time: 10.581818 ms
+            Aggregate | Records produced: 1, Execution time: 0.008721 ms
+                Node By Index Scan | (t:Node) | Records produced: 1, Execution time: 0.004323 ms
+                    Aggregate | Records produced: 1, Execution time: 0.008057 ms
+                        Node By Index Scan | (s:Node) | Records produced: 1, Execution time: 0.017555 ms

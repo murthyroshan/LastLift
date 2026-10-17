@@ -21,7 +21,8 @@ class _Down:
 
 ARGS = {"resolve_place": {"query": "Alewife"}, "current_closures": {}, "platform_redundancy": {"station_id": "place-alfcl"},
         "what_if_close": {"facility_ids": ["813"]}, "step_free_route": {"from_station": "place-sstat", "to_station": "place-alfcl"},
-        "repair_priority": {}, "lift_history": {"facility_id": "961"}, "draft_action": {"facility_id": "813"}}
+        "repair_priority": {}, "lift_history": {"facility_id": "961"}, "draft_action": {"facility_id": "813"},
+        "network_impact": {"facility_ids": ["884"]}, "repair_order": {}}
 
 
 def test_every_tool_is_covered():

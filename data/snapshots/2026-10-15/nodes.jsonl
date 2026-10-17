@@ -3175,6 +3175,44 @@
 {"cx":"place-wondl","labels":["Node","Street"],"name":"Street (Wonderland)","station_id":"place-wondl","uid":"street:place-wondl"}
 {"cx":"place-woodl","labels":["Node","Street"],"name":"Street (Woodland)","station_id":"place-woodl","uid":"street:place-woodl"}
 {"cx":"place-wtcst","labels":["Node","Street"],"name":"Street (World Trade Center)","station_id":"place-wtcst","uid":"street:place-wtcst"}
+{"deps_day":251,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Washington St @ Herald St","platform_name":null,"station_id":"","stop_id":"15095","uid":"15095"}
+{"deps_day":208,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Washington St @ Worcester St","platform_name":"Nubian","station_id":"","stop_id":"15176","uid":"15176"}
+{"deps_day":254,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Terminal A","platform_name":"South Station","station_id":"","stop_id":"17091","uid":"17091"}
+{"deps_day":129,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Terminal B Stop 2 - Arrivals Level","platform_name":"South Station","station_id":"","stop_id":"17093","uid":"17093"}
+{"deps_day":129,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Terminal C - Arrivals Level","platform_name":"South Station","station_id":"","stop_id":"17094","uid":"17094"}
+{"deps_day":129,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Terminal E - Arrivals Level","platform_name":"South Station","station_id":"","stop_id":"17095","uid":"17095"}
+{"deps_day":243,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Congress St @ World Trade Center Sta","platform_name":"South Station","station_id":"","stop_id":"17096","uid":"17096"}
+{"deps_day":245,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Washington St @ Worcester St","platform_name":null,"station_id":"","stop_id":"1787","uid":"1787"}
+{"deps_day":245,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Washington St @ E Newton St","platform_name":null,"station_id":"","stop_id":"1788","uid":"1788"}
+{"deps_day":208,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Washington St @ W Newton St","platform_name":"Nubian","station_id":"","stop_id":"19402","uid":"19402"}
+{"deps_day":135,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Northern Ave @ Harbor St","platform_name":"Design Center","station_id":"","stop_id":"247","uid":"247"}
+{"deps_day":129,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Terminal B Stop 1 - Arrivals Level","platform_name":"South Station","station_id":"","stop_id":"27092","uid":"27092"}
+{"deps_day":207,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Washington St @ Melnea Cass Blvd - Silver Line","platform_name":"South Station/Downtown Crossing","station_id":"","stop_id":"3","uid":"3"}
+{"deps_day":135,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Northern Ave @ Tide St","platform_name":"Design Center","station_id":"","stop_id":"30249","uid":"30249"}
+{"deps_day":251,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"23 Drydock Ave","platform_name":"Design Center","station_id":"","stop_id":"30250","uid":"30250"}
+{"deps_day":125,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"27 Drydock Ave","platform_name":null,"station_id":"","stop_id":"30251","uid":"30251"}
+{"deps_day":141,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Drydock Ave @ Design Center Place","platform_name":"South Station","station_id":"","stop_id":"31255","uid":"31255"}
+{"deps_day":133,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Northern Ave opp Harbor St","platform_name":"South Station","station_id":"","stop_id":"31256","uid":"31256"}
+{"deps_day":133,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Northern Ave @ Tide St","platform_name":"South Station","station_id":"","stop_id":"31257","uid":"31257"}
+{"deps_day":125,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Drydock Ave @ Black Falcon Ave","platform_name":"Design Center","station_id":"","stop_id":"31259","uid":"31259"}
+{"deps_day":245,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Washington St @ Lenox St","platform_name":null,"station_id":"","stop_id":"4","uid":"4"}
+{"deps_day":242,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Temple Pl @ Washington St","platform_name":"Nubian","station_id":"","stop_id":"49001","uid":"49001"}
+{"deps_day":208,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Washington St @ Tufts Med Ctr","platform_name":"Nubian","station_id":"","stop_id":"49002","uid":"49002"}
+{"deps_day":208,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Washington St @ Herald St","platform_name":"Nubian","station_id":"","stop_id":"49003","uid":"49003"}
+{"deps_day":245,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Washington St @ Massachusetts Ave","platform_name":null,"station_id":"","stop_id":"5","uid":"5"}
+{"deps_day":208,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Washington St @ Union Pk","platform_name":"South Station/Downtown Crossing","station_id":"","stop_id":"5093","uid":"5093"}
+{"deps_day":208,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Washington St @ E Berkeley St","platform_name":"South Station/Downtown Crossing","station_id":"","stop_id":"5095","uid":"5095"}
+{"deps_day":208,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Washington St @ E Berkeley St","platform_name":"Nubian","station_id":"","stop_id":"5098","uid":"5098"}
+{"deps_day":208,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Washington St @ W Dedham St","platform_name":"Nubian","station_id":"","stop_id":"5100","uid":"5100"}
+{"deps_day":208,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Washington St @ Massachusetts Ave","platform_name":"Nubian","station_id":"","stop_id":"55","uid":"55"}
+{"deps_day":208,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Washington St @ Lenox St","platform_name":"Nubian","station_id":"","stop_id":"60","uid":"60"}
+{"deps_day":207,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Washington St @ Melnea Cass Blvd","platform_name":"Nubian","station_id":"","stop_id":"61","uid":"61"}
+{"deps_day":837,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Nubian","platform_name":null,"station_id":"place-nubn","stop_id":"64","uid":"64"}
+{"deps_day":130,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Washington St @ Essex St","platform_name":null,"station_id":"","stop_id":"6537","uid":"6537"}
+{"deps_day":172,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Essex St @ Atlantic Ave","platform_name":"Nubian","station_id":"","stop_id":"6538","uid":"6538"}
+{"deps_day":163,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Chinatown Gate","platform_name":null,"station_id":"","stop_id":"6555","uid":"6555"}
+{"deps_day":251,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Washington St @ Tufts Med Ctr","platform_name":null,"station_id":"","stop_id":"6565","uid":"6565"}
+{"deps_day":121,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Washington St @ Essex St","platform_name":"Downtown Crossing","station_id":"","stop_id":"6567","uid":"6567"}
 {"deps_day":136,"is_rail":true,"labels":["Platform"],"modelled":false,"name":"Boston College","platform_name":"Park Street & North","station_id":"place-lake","stop_id":"70106","uid":"70106"}
 {"deps_day":136,"is_rail":true,"labels":["Platform"],"modelled":false,"name":"Boston College","platform_name":"Exit Only","station_id":"place-lake","stop_id":"70107","uid":"70107"}
 {"deps_day":136,"is_rail":true,"labels":["Platform"],"modelled":false,"name":"South Street","platform_name":"Park Street & North","station_id":"place-sougr","stop_id":"70110","uid":"70110"}
@@ -3246,6 +3284,13 @@
 {"deps_day":147,"is_rail":true,"labels":["Platform"],"modelled":false,"name":"Back of the Hill","platform_name":"Heath Street","station_id":"place-bckhl","stop_id":"70257","uid":"70257"}
 {"deps_day":146,"is_rail":true,"labels":["Platform"],"modelled":false,"name":"Back of the Hill","platform_name":"Park Street & North","station_id":"place-bckhl","stop_id":"70258","uid":"70258"}
 {"deps_day":293,"is_rail":true,"labels":["Platform"],"modelled":false,"name":"Heath Street","platform_name":"Green Line","station_id":"place-hsmnl","stop_id":"70260","uid":"70260"}
+{"deps_day":421,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Silver Line Way","platform_name":"South Station","station_id":"place-conrd","stop_id":"74614","uid":"74614"}
+{"deps_day":369,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Silver Line Way","platform_name":"Airport/Design Center/Chelsea","station_id":"place-conrd","stop_id":"74624","uid":"74624"}
+{"deps_day":116,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Box District","platform_name":"South Station","station_id":"place-boxdt","stop_id":"74634","uid":"74634"}
+{"deps_day":118,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Box District","platform_name":"Chelsea","station_id":"place-boxdt","stop_id":"74635","uid":"74635"}
+{"deps_day":116,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Eastern Avenue","platform_name":"South Station","station_id":"place-estav","stop_id":"74636","uid":"74636"}
+{"deps_day":118,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Eastern Avenue","platform_name":"Chelsea","station_id":"place-estav","stop_id":"74637","uid":"74637"}
+{"deps_day":152,"is_rail":false,"labels":["Platform"],"modelled":false,"name":"Tremont St @ Boylston Station","platform_name":null,"station_id":"","stop_id":"8279","uid":"8279"}
 {"deps_day":34,"is_rail":true,"labels":["Platform"],"modelled":false,"name":"Fairmount","platform_name":"Track 1 (Outbound)","station_id":"place-DB-2205","stop_id":"DB-2205-01","uid":"DB-2205-01"}
 {"deps_day":33,"is_rail":true,"labels":["Platform"],"modelled":false,"name":"Fairmount","platform_name":"Track 2 (South Station)","station_id":"place-DB-2205","stop_id":"DB-2205-02","uid":"DB-2205-02"}
 {"deps_day":34,"is_rail":true,"labels":["Platform"],"modelled":false,"name":"Blue Hill Avenue","platform_name":"Track 1 (Outbound)","station_id":"place-DB-2222","stop_id":"DB-2222-01","uid":"DB-2222-01"}

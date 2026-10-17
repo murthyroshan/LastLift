@@ -1,16 +1,16 @@
 {
  "big": 1000000,
  "counts": {
-  "edges": 11870,
+  "edges": 11929,
   "edges_by_type": {
    "HAS_ENTRANCE": 330,
    "HAS_LIFT": 244,
    "HAS_PLATFORM": 388,
-   "RIDE": 591,
+   "RIDE": 650,
    "SF": 9248,
    "STEP": 1069
   },
-  "nodes": 3720,
+  "nodes": 3765,
   "nodes_by_labels": {
    "Lift": 42,
    "Node,Entrance": 330,
@@ -19,7 +19,7 @@
    "Node,LiftOut": 202,
    "Node,Platform": 388,
    "Node,Street": 89,
-   "Platform": 267,
+   "Platform": 312,
    "Station": 276
   },
   "sf_edges_by_kind": {
@@ -32,8 +32,8 @@
  },
  "feed_version": "Fall 2026, 2026-10-14T18:47:38+00:00, version D",
  "files": {
-  "edges.jsonl": "7e68cc1bec01878c7f93586901aa5f79596a756e036506a4799286629c5793ff",
-  "nodes.jsonl": "e106d2a75e25d39a34016d1e4d7dabcfc2f7480a01cdb999cc292ed16e4e156f"
+  "edges.jsonl": "0446804d521725adaa89b5ca8f896eab07ac1c83308261774936b78c3b312cf2",
+  "nodes.jsonl": "e908ea7afc0ece7d5285647d532564d803eda3f526d56ff37ea79a9c8425af45"
  },
  "overrides_applied": {
   "entrance_accessible:door-coecl-bpl": 1,
@@ -42,8 +42,8 @@
   "split_platform:70031": 8,
   "split_platform:70033": 8
  },
- "rules_version": 1,
- "seed_sha256": "9d88639d8fb94bae8e1e11713d595295fa8d22181b0f8e80a4a2d1d6616c62c8",
+ "rules_version": 2,
+ "seed_sha256": "8277887f216a43e420f996d311267ea687fafdfe321779275c3c72119e4a5ace",
  "service_date": "2026-10-15",
  "source": {
   "name": "MBTA GTFS",
