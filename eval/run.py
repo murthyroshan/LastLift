@@ -43,6 +43,7 @@ GOLD = yaml.safe_load((ROOT / "eval" / "gold_questions.yaml").read_text(encoding
 SAMPLING = json.loads((ROOT / "eval" / "sampling.json").read_text(encoding="utf-8"))
 PACE_S = 30                                      # at most 2 questions a minute for the LLM systems
 TPM_LIMIT = 8000                                 # provider tokens-per-minute limit (x-ratelimit-limit-tokens)
+TPM = {"groq": 8000, "gemini": 250000}           # Amendment 2: --provider gemini pins both arms to gemini-3.1-flash-lite
 LOSS = re.compile(r"\b(lose|loses|lost|losing|no step-free|not step-free|cannot (reach|get)|can't (reach|get)|"
                   r"cut off|no route|unavailable)\b", re.I)
 SINGLE = re.compile(r"\b(only|single|one lift|last lift|sole|alone)\b", re.I)
@@ -101,12 +102,16 @@ async def run_one(q, system, ctx):
     if system == "llm_only":
         chain = llm.Chain()
         chain.tiers = chain.tiers[:1]
-        msg = await asyncio.to_thread(llm.chat, [{"role": "system", "content": LLM_ONLY_SYSTEM + "\n\n" + ctx},
-                                                 {"role": "user", "content": q["question"]}], None, "auto", chain)
+        try:
+            msg = await asyncio.to_thread(llm.chat, [{"role": "system", "content": LLM_ONLY_SYSTEM + "\n\n" + ctx},
+                                                     {"role": "user", "content": q["question"]}], None, "auto", chain)
+        except llm.LLMError as exc:                 # recorded as a failed question, never a crash of the whole run
+            msg = {"content": "", "model": None, "usage": None,
+                   "error": "; ".join(f["message"] for f in chain.failovers) or str(exc)}
         answer = (msg.get("content") or "").strip()
         return {"answer": answer, "source": "llm", "results": [], "called": [], "events": [],
                 "ms": round((time.perf_counter() - started) * 1000), "model": msg.get("model"),
-                "tokens": msg.get("usage"), "raw_grounding_failed": None}
+                "tokens": msg.get("usage"), "raw_grounding_failed": None, "error": msg.get("error")}
     r = await loop.ask(q["question"], scope="demo", mode="off" if system == "router" else "live")
     ev = r["events"]
     ans = next(e for e in ev if e["type"] == "answer")
@@ -137,8 +142,13 @@ def prop(x, n):
     return {"x": x, "n": n, "rate": round(x / n, 3) if n else None, "wilson95": [round(lo, 3), round(hi, 3)]}
 
 
-def run(system):
+def run(system, provider="groq"):
     qs = GOLD["questions"]
+    global TPM_LIMIT
+    TPM_LIMIT = TPM[provider]
+    if provider == "gemini":                    # both arms on the same model: tools vs no tools (Amendment 2)
+        gem = llm.tiers
+        llm.tiers = lambda: gem()[2:]
     if system == "fallback":
         rng = random.Random(SAMPLING["agent_eval_fallback_subset"]["seed"])
         keep = set(rng.sample([q["id"] for q in qs], SAMPLING["agent_eval_fallback_subset"]["questions"]))
@@ -162,7 +172,7 @@ def run(system):
                        raw_grounding_failed=out["raw_grounding_failed"],
                        shipped_ungrounded=bool(out["results"]) and out["source"] == "llm"
                        and bool(grounding.check(out["answer"], out["results"])),
-                       failovers=len(out.get("failovers") or []))
+                       failovers=len(out.get("failovers") or []), error=out.get("error"))
         rows.append(row)
         print(f"{system} {q['id']}: tools={row.get('tools_ok')} ids={row['ids_ok']} src={out['source']}", flush=True)
         if system != "router" and i < len(qs) - 1:
@@ -172,10 +182,18 @@ def run(system):
             wait = max(PACE_S, 60 * used / TPM_LIMIT + 5)
             time.sleep(max(0, wait - (time.time() - t0)))
     summary = summarise(rows, system)
-    doc = {"system": system, "date": date.today().isoformat() if system != "router" else None,
+    code = None
+    if system != "router":
+        import subprocess
+        head = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
+        dirty = bool(subprocess.run(["git", "status", "--porcelain", "--", "lastlift"], cwd=ROOT, capture_output=True,
+                                    text=True).stdout.strip())
+        code = {"commit": head, "uncommitted_changes_in_lastlift": dirty}
+    doc = {"system": system, "provider": provider, "code": code,
+           "date": date.today().isoformat() if system != "router" else None,
            "questions": len(rows), "summary": summary, "rows": rows}
     OUT.mkdir(parents=True, exist_ok=True)
-    path = OUT / f"{system}.json"
+    path = OUT / (f"{system}.json" if provider == "groq" else f"{system}_{provider}.json")
     path.write_text(json.dumps(doc, indent=1, sort_keys=True, ensure_ascii=False) + "\n", encoding="utf-8",
                     newline="\n")
     print(json.dumps(summary, indent=1))
@@ -206,6 +224,7 @@ def summarise(rows, system):
         s["shipped_ungrounded"] = sum(r["shipped_ungrounded"] for r in rows)
         s["fallback_to_template"] = prop(sum(r["source"] == "template" for r in rows), len(rows))
         s["failovers"] = sum(r.get("failovers", 0) for r in rows)
+        s["provider_errors"] = sum(1 for r in rows if r.get("error"))
         ms = sorted(r["ms"] for r in rows)
         s["latency_ms"] = {"p50": ms[len(ms) // 2], "p95": ms[min(len(ms) - 1, int(0.95 * len(ms)))]}
         tok = [r["tokens"] for r in rows if r.get("tokens")]
@@ -217,10 +236,36 @@ def summarise(rows, system):
 
 
 def combine():
-    docs = {p.stem: json.loads(p.read_text(encoding="utf-8")) for p in sorted(OUT.glob("*.json")) if p.stem != "latest"}
-    latest = {name: {"date": d["date"], "questions": d["questions"], **d["summary"]} for name, d in docs.items()}
-    (OUT / "latest.json").write_text(json.dumps(latest, indent=1, sort_keys=True) + "\n", encoding="utf-8",
-                                     newline="\n")
+    """eval/results/latest.json (and data/eval/latest.json, which the API serves at /v1/eval/latest); claims eval_*."""
+    docs = {p.stem: json.loads(p.read_text(encoding="utf-8")) for p in sorted(OUT.glob("*.json"))
+            if p.stem not in ("latest", "baselines")}
+    latest = {"systems": {name: {"date": d["date"], "questions": d["questions"], **d["summary"]}
+                          for name, d in docs.items()}}
+    if (OUT / "baselines.json").is_file():
+        b = json.loads((OUT / "baselines.json").read_text(encoding="utf-8"))
+        latest["baselines"] = {"b_count": b["b_count"], "b_bfs": b["b_bfs"],
+                               "b_llm": {k: v for k, v in b["b_llm"].items() if k != "rows"}}
+    text = json.dumps(latest, indent=1, sort_keys=True) + "\n"
+    (OUT / "latest.json").write_text(text, encoding="utf-8", newline="\n")
+    (ROOT / "data" / "eval").mkdir(parents=True, exist_ok=True)
+    (ROOT / "data" / "eval" / "latest.json").write_text(text, encoding="utf-8", newline="\n")
+    claims_path = ROOT / "claims.json"
+    claims = {k: v for k, v in json.loads(claims_path.read_text(encoding="utf-8")).items() if not k.startswith("eval_")}
+    for name, s in latest["systems"].items():
+        if "_run1_" in name:
+            continue
+        for key in ("tool_set", "ids", "verdicts", "abstain_must", "fallback_to_template", "raw_ungrounded"):
+            if key in s:
+                claims[f"eval_{name}_{key}"] = f"{s[key]['x']}/{s[key]['n']}"
+        claims[f"eval_{name}_false_accessible"] = s["false_accessible"]
+        claims[f"eval_{name}_forbidden"] = s["forbidden_claims"]
+    if "baselines" in latest:
+        bl = latest["baselines"]
+        claims.update({"eval_bcount_wrong": bl["b_count"]["rule_wrong"],
+                       "eval_bcount_platforms": bl["b_count"]["platforms"],
+                       "eval_bllm_k": f"{bl['b_llm']['k_exact']['x']}/{bl['b_llm']['k_exact']['n']}",
+                       "eval_bllm_cut": f"{bl['b_llm']['cut_exact']['x']}/{bl['b_llm']['cut_exact']['n']}"})
+    claims_path.write_text(json.dumps(claims, indent=1, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
     print(json.dumps(latest, indent=1))
     return 0
 
@@ -228,6 +273,7 @@ def combine():
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--system", choices=["router", "full", "llm_only", "fallback"])
+    ap.add_argument("--provider", choices=["groq", "gemini"], default="groq")
     ap.add_argument("--summary", action="store_true")
     a = ap.parse_args()
-    sys.exit(combine() if a.summary else run(a.system))
+    sys.exit(combine() if a.summary else run(a.system, a.provider))

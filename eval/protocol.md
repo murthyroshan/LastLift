@@ -64,3 +64,21 @@ of every answer. Questions, gold, systems, metrics and scoring are unchanged.
 **Reporting.** Run 1 is kept and published as is (`eval/results/full_run1_rate_limited.json`,
 `fallback_run1_rate_limited.json`), next to run 2. Run 2 is the scored run; any answer in it not written by the
 system's named model is counted and reported.
+
+## Amendment 2 (17 Oct 2026, before run 3)
+
+**What happened in run 2.** Groq's free tier also limits each model per day: qwen `qwen/qwen3.8-27b` reached its
+200,000 tokens-per-day limit (rolling 24 h) during the morning's runs, and `openai/gpt-oss-120b` reached its own. In
+run 2 the full agent's 30 answers were written by gpt-oss-120b (19) and the template (11), none by qwen; the
+LLM-only system stopped at its first question; the fallback system's 12 were Gemini (7) and the template (5). On
+this tier, qwen cannot serve both the full agent (about 6,000 tokens a question over 2-4 calls) and the LLM-only
+ablation within one day.
+
+**Change.** Run 3 puts both arms of the ablation on one model with room in its free tier,
+`gemini-3.1-flash-lite` (Google): the full agent (the same MCP tools, grounding validator and template fallback, with
+the provider chain pinned to this model) and the LLM-only system (the same model, alert headers and station list,
+no tools). Questions, gold, scoring and metrics are unchanged; `eval/gold_errata.md` lists one gold correction (Q25),
+reported both ways. Pacing uses Gemini's per-minute limit. A provider error now fails that question, not the run.
+
+**Reporting.** Runs 1 and 2 are kept and published as they are, with the serving model of every answer. Run 3 is the
+scored comparison of the graph against no graph; the router system (no LLM) is unchanged and reproducible.

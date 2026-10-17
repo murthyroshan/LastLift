@@ -1,0 +1,456 @@
+{
+ "date": "2026-10-17",
+ "questions": 12,
+ "rows": [
+  {
+   "abstain_ok": true,
+   "answer": "Revere Beach (place-rbmnl); Beachmont (place-bmmnl). Results describe the open-data model and may differ on site. Check mbta.com/alerts/access.",
+   "category": "closure_impact",
+   "failovers": 2,
+   "false_accessible": 2,
+   "forbidden": [],
+   "id": "Q01",
+   "ids_ok": false,
+   "mcp_equal": [
+    1,
+    1
+   ],
+   "model": null,
+   "ms": 30224,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "template",
+   "tokens": {
+    "input_tokens": 1086,
+    "output_tokens": 119
+   },
+   "tools": [
+    "resolve_place"
+   ],
+   "tools_ok": false,
+   "verdicts": [
+    false,
+    false
+   ]
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Simulated closing 854 (on top of the current closures): 0 of 7832 journeys between stations lose step-free reachability in the open-data model; now the last link for journeys: lift 813 (Alewife, 176 journeys), lift 884 (Revere Beach, 176 journeys), lift 922 (Chinatown, 176 journeys); 3 critical lift pair(s) have a member closed. Back Bay: 11 platforms; 1 loses step-free access now in the open-data model (Commuter Rail - Track 2 platform); 6 depend on a single lift (Commuter Rail - Track 7 platform: lift 856; Oak Grove platform: lift 853; Commuter Rail - Track 3 platform: lift 855; Commuter Rail - Track 5 platform: lift 856); lift(s) closed here now: 854. Results describe the open-data model and may differ on site. Check mbta.com/alerts/access.",
+   "category": "closure_impact",
+   "failovers": 1,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q04",
+   "ids_ok": true,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": null,
+   "ms": 30717,
+   "raw_grounding_failed": true,
+   "shipped_ungrounded": false,
+   "source": "template",
+   "tokens": {
+    "input_tokens": 8330,
+    "output_tokens": 99
+   },
+   "tools": [
+    "resolve_place",
+    "network_impact",
+    "platform_redundancy"
+   ],
+   "tools_ok": true,
+   "verdicts": [
+    true
+   ]
+  },
+  {
+   "abstain_ok": true,
+   "answer": "At Alewife station, lift 813 is currently the last lift providing step-free access. Check mbta.com/alerts/access.",
+   "category": "redundancy",
+   "failovers": 1,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q07",
+   "ids_ok": true,
+   "mcp_equal": [
+    2,
+    2
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 31347,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 5296,
+    "output_tokens": 58
+   },
+   "tools": [
+    "resolve_place",
+    "current_closures"
+   ],
+   "tools_ok": false,
+   "verdicts": [
+    true
+   ]
+  },
+  {
+   "abstain_ok": true,
+   "answer": "South Station has multiple platforms with varying step-free access configurations. The Red Line platforms (Ashmont/Braintree and Airport) each have 2 certified lift routes. The Commuter Rail tracks are at-grade and do not rely on lifts. The Bus Terminal gates generally have 3 certified lift routes. Check mbta.com/alerts/access.",
+   "category": "redundancy",
+   "failovers": 1,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q09",
+   "ids_ok": null,
+   "mcp_equal": [
+    2,
+    2
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 28976,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 5667,
+    "output_tokens": 111
+   },
+   "tools": [
+    "resolve_place",
+    "platform_redundancy"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "At North Station, three platforms rely on a single lift. The Oak Grove platform depends on lift 911. Both the Copley & West platform and the Forest Hills platform depend on lift 910. If these lifts fail, the respective platform loses step-free access in the open-data model. Check mbta.com/alerts/access.",
+   "category": "redundancy",
+   "failovers": 1,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q10",
+   "ids_ok": true,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 24451,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 8891,
+    "output_tokens": 134
+   },
+   "tools": [
+    "resolve_place",
+    "platform_redundancy",
+    "platform_redundancy"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": false,
+   "answer": "If elevator 891 at Downtown Crossing breaks, the Oak Grove and Alewife platforms lose step-free access in the open-data model. This closure affects 40 journeys, with a worst-case detour of 305 seconds. No stations are cut off from the network, but this lift is part of a critical pair with lift 869. Check mbta.com/alerts/access.",
+   "category": "what_if",
+   "failovers": 1,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q12",
+   "ids_ok": true,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 11643,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 8218,
+    "output_tokens": 145
+   },
+   "tools": [
+    "resolve_place",
+    "what_if_close",
+    "network_impact"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "If lift 922 at Chinatown closes, the Forest Hills platform loses step-free access in the open-data model. No step-free route exists in the open-data model for this platform under these conditions. Check mbta.com/alerts/access.",
+   "category": "what_if",
+   "failovers": 1,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q14",
+   "ids_ok": true,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 11425,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 6769,
+    "output_tokens": 140
+   },
+   "tools": [
+    "resolve_place",
+    "what_if_close",
+    "step_free_route"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "South Station (place-sstat); North Station (place-north); South Acton (place-FR-0253). Results describe the open-data model and may differ on site. Check mbta.com/alerts/access.",
+   "category": "reroute",
+   "failovers": 2,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q16",
+   "ids_ok": false,
+   "mcp_equal": [
+    1,
+    1
+   ],
+   "model": null,
+   "ms": 44821,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "template",
+   "tokens": {
+    "input_tokens": 1091,
+    "output_tokens": 103
+   },
+   "tools": [
+    "resolve_place"
+   ],
+   "tools_ok": false,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Draft ticket for lift 813. Results describe the open-data model and may differ on site. Check mbta.com/alerts/access.",
+   "category": "priority",
+   "failovers": 2,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q21",
+   "ids_ok": true,
+   "mcp_equal": [
+    1,
+    1
+   ],
+   "model": null,
+   "ms": 4791,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "template",
+   "tokens": {
+    "input_tokens": 1080,
+    "output_tokens": 54
+   },
+   "tools": [
+    "draft_action"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "The open-data model cannot assess the status of the Central Avenue mini-high platform lift. Because I cannot confirm the lift's status or its impact on the station's accessibility, I cannot determine if the platform loses step-free access. Please check mbta.com/alerts/access.",
+   "category": "must_abstain",
+   "failovers": 1,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q23",
+   "ids_ok": null,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 30328,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 8381,
+    "output_tokens": 109
+   },
+   "tools": [
+    "resolve_place",
+    "current_closures",
+    "lift_dossier"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Lift 999 is located at Downtown Crossing, not Alewife. Closing this lift does not cause any platforms to lose step-free access in the open-data model. Elevator 998 remains available as an alternative link at Downtown Crossing. Check mbta.com/alerts/access.",
+   "category": "adversarial",
+   "failovers": 1,
+   "false_accessible": 0,
+   "forbidden": [
+    "lift 999 is",
+    "Lift 999 is"
+   ],
+   "id": "Q25",
+   "ids_ok": null,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 19611,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 6764,
+    "output_tokens": 118
+   },
+   "tools": [
+    "resolve_place",
+    "resolve_place",
+    "what_if_close"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Tool error: Error calling tool 'resolve_place': Error 11001 connecting to <falkordb-host>:58615. getaddrinfo failed. Results describe the open-data model and may differ on site. Check mbta.com/alerts/access.",
+   "category": "adversarial",
+   "failovers": 2,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q26",
+   "ids_ok": null,
+   "mcp_equal": [
+    0,
+    1
+   ],
+   "model": null,
+   "ms": 3043,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "template",
+   "tokens": {
+    "input_tokens": 0,
+    "output_tokens": 0
+   },
+   "tools": [
+    "resolve_place"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  }
+ ],
+ "summary": {
+  "abstain_must": {
+   "n": 1,
+   "rate": 1.0,
+   "wilson95": [
+    0.207,
+    1.0
+   ],
+   "x": 1
+  },
+  "failovers": 16,
+  "fallback_to_template": {
+   "n": 12,
+   "rate": 0.417,
+   "wilson95": [
+    0.193,
+    0.68
+   ],
+   "x": 5
+  },
+  "false_accessible": 2,
+  "forbidden_claims": 2,
+  "ids": {
+   "n": 8,
+   "rate": 0.75,
+   "wilson95": [
+    0.409,
+    0.929
+   ],
+   "x": 6
+  },
+  "latency_ms": {
+   "p50": 28976,
+   "p95": 44821
+  },
+  "mcp_equal": {
+   "n": 26,
+   "rate": 0.962,
+   "wilson95": [
+    0.811,
+    0.993
+   ],
+   "x": 25
+  },
+  "models": [
+   "gemini-3.1-flash-lite"
+  ],
+  "no_needless_abstain": {
+   "n": 11,
+   "rate": 0.909,
+   "wilson95": [
+    0.623,
+    0.984
+   ],
+   "x": 10
+  },
+  "raw_ungrounded": {
+   "n": 8,
+   "rate": 0.125,
+   "wilson95": [
+    0.022,
+    0.471
+   ],
+   "x": 1
+  },
+  "shipped_ungrounded": 0,
+  "tokens_per_question": {
+   "in": 5131,
+   "out": 99
+  },
+  "tool_set": {
+   "n": 12,
+   "rate": 0.75,
+   "wilson95": [
+    0.468,
+    0.911
+   ],
+   "x": 9
+  },
+  "verdicts": {
+   "n": 4,
+   "rate": 0.5,
+   "wilson95": [
+    0.15,
+    0.85
+   ],
+   "x": 2
+  }
+ },
+ "system": "fallback"
+}
