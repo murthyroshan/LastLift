@@ -1,0 +1,997 @@
+{
+ "date": "2026-10-17",
+ "questions": 30,
+ "rows": [
+  {
+   "abstain_ok": true,
+   "answer": "Yes, you can still reach the Wonderland platform at Revere Beach step-free, but only via a roundabout route (~17 min): take lift 884 to the lobby, ride the Blue Line to Beachmont, turn around, use lifts 886 and 887, and ride back to Revere Beach. There is no backup route avoiding lifts 884, 886, and 887, so if any of those fail, no step-free route exists in the open-data model. Check mbta.com/alerts/access.",
+   "category": "closure_impact",
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q01",
+   "ids_ok": false,
+   "mcp_equal": [
+    2,
+    2
+   ],
+   "model": "qwen/qwen3.8-27b",
+   "ms": 2295,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 5893,
+    "output_tokens": 195
+   },
+   "tools": [
+    "resolve_place",
+    "step_free_route"
+   ],
+   "tools_ok": false,
+   "verdicts": [
+    true,
+    true
+   ]
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Chinatown is not fully step-free right now: the Oak Grove platform loses step-free access in the open-data model because lift 876 is closed. The Forest Hills platform remains step-free but depends on a single lift (922). To reach the Oak Grove platform step-free, take lift 922 to the Forest Hills platform, ride the Orange Line to Back Bay, turn around, and ride back to Chinatown. Check mbta.com/alerts/access.",
+   "category": "closure_impact",
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q02",
+   "ids_ok": true,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": "qwen/qwen3.8-27b",
+   "ms": 20578,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 6887,
+    "output_tokens": 209
+   },
+   "tools": [
+    "resolve_place",
+    "platform_redundancy",
+    "step_free_route"
+   ],
+   "tools_ok": true,
+   "verdicts": [
+    true,
+    true
+   ]
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Today, 3 platforms lose step-free access in the open-data model: Downtown Crossing's Oak Grove and Alewife platforms (lift 869 closed, leaving lift 891 as the only lift), and one more platform at a station where a lift is closed. Lifts 813 (Alewife), 891 (Downtown Crossing), and 866 (Kendall/MIT) are now the last lift for some platform. Check mbta.com/alerts/access.",
+   "category": "closure_impact",
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q03",
+   "ids_ok": true,
+   "mcp_equal": [
+    4,
+    4
+   ],
+   "model": "qwen/qwen3.8-27b",
+   "ms": 84033,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 10860,
+    "output_tokens": 202
+   },
+   "tools": [
+    "current_closures",
+    "network_impact",
+    "platform_redundancy",
+    "platform_redundancy"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Lift(s) 854 already closed in this scope: nothing to simulate; use current_closures or platform_redundancy for their effect now. Simulated closing 854 (on top of the current closures): 0 of 7832 journeys between stations lose step-free reachability in the open-data model; now the last link for journeys: lift 813 (Alewife, 176 journeys), lift 884 (Revere Beach, 176 journeys), lift 922 (Chinatown, 176 journeys); 3 critical lift pair(s) have a member closed. Back Bay: 11 platforms; 1 loses step-free access now in the open-data model (Commuter Rail - Track 2 platform); 6 depend on a single lift (Commuter Rail - Track 7 platform: lift 856; Oak Grove platform: lift 853; Commuter Rail - Track 3 platform: lift 855; Commuter Rail - Track 5 platform: lift 856); lift(s) closed here now: 854. Results describe the open-data model and may differ on site. Check mbta.com/alerts/access.",
+   "category": "closure_impact",
+   "failovers": 3,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q04",
+   "ids_ok": true,
+   "mcp_equal": [
+    5,
+    5
+   ],
+   "model": null,
+   "ms": 74237,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "template",
+   "tokens": {
+    "input_tokens": 6420,
+    "output_tokens": 157
+   },
+   "tools": [
+    "resolve_place",
+    "resolve_place",
+    "what_if_close",
+    "network_impact",
+    "platform_redundancy"
+   ],
+   "tools_ok": true,
+   "verdicts": [
+    true
+   ]
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Current closures: 0 of 7832 journeys between stations lose step-free reachability in the open-data model; now the last link for journeys: lift 813 (Alewife, 176 journeys), lift 884 (Revere Beach, 176 journeys), lift 922 (Chinatown, 176 journeys); 3 critical lift pair(s) have a member closed. State: 4 platforms; 0 depend on a single lift; lift(s) closed here now: 803. Results describe the open-data model and may differ on site. Check mbta.com/alerts/access.",
+   "category": "closure_impact",
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q05",
+   "ids_ok": true,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": null,
+   "ms": 66492,
+   "raw_grounding_failed": true,
+   "shipped_ungrounded": false,
+   "source": "template",
+   "tokens": {
+    "input_tokens": 8030,
+    "output_tokens": 153
+   },
+   "tools": [
+    "resolve_place",
+    "network_impact",
+    "platform_redundancy"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Wonderland: 7 platforms; 0 depend on a single lift; lift(s) closed here now: 711. Current closures: 0 of 7832 journeys between stations lose step-free reachability in the open-data model; now the last link for journeys: lift 813 (Alewife, 176 journeys), lift 884 (Revere Beach, 176 journeys), lift 922 (Chinatown, 176 journeys); 3 critical lift pair(s) have a member closed. Results describe the open-data model and may differ on site. Check mbta.com/alerts/access.",
+   "category": "closure_impact",
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q06",
+   "ids_ok": true,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": null,
+   "ms": 57381,
+   "raw_grounding_failed": true,
+   "shipped_ungrounded": false,
+   "source": "template",
+   "tokens": {
+    "input_tokens": 6806,
+    "output_tokens": 186
+   },
+   "tools": [
+    "resolve_place",
+    "platform_redundancy",
+    "network_impact"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "At Alewife, lift 813 is now the last lift for a platform in the open-data model. Check mbta.com/alerts/access.",
+   "category": "redundancy",
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q07",
+   "ids_ok": true,
+   "mcp_equal": [
+    2,
+    2
+   ],
+   "model": "qwen/qwen3.8-27b",
+   "ms": 50955,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 5972,
+    "output_tokens": 74
+   },
+   "tools": [
+    "resolve_place",
+    "current_closures"
+   ],
+   "tools_ok": false,
+   "verdicts": [
+    true
+   ]
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Because of today's closures, three working lifts are now the only step-free link for some platform: lift 813 at Alewife, lift 891 at Downtown Crossing, and lift 866 at Kendall/MIT.\n\nCheck mbta.com/alerts/access.",
+   "category": "redundancy",
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q08",
+   "ids_ok": true,
+   "mcp_equal": [
+    1,
+    1
+   ],
+   "model": "qwen/qwen3.8-27b",
+   "ms": 34982,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 4126,
+    "output_tokens": 73
+   },
+   "tools": [
+    "current_closures"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "The open-data model lists 24 platforms at South Station, but the tool output is truncated, so I can only confirm the lift-route counts for the first five. Ashmont/Braintree and Airport each have 2 lift routes for boarding and 2 for exiting. Commuter Rail Track 5 is at grade (no lift needed). Bus Gate 36 and Bus Gates 28-29 each have 3 lift routes for boarding and 3 for exiting. I cannot give a complete per-platform count for all 24 from the available data. Check mbta.com/alerts/access.",
+   "category": "redundancy",
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q09",
+   "ids_ok": null,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": "qwen/qwen3.8-27b",
+   "ms": 72434,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 8511,
+    "output_tokens": 217
+   },
+   "tools": [
+    "resolve_place",
+    "platform_redundancy",
+    "platform_redundancy"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "At North Station, three platforms hang on a single lift: the Oak Grove platform (lift 911), and the Copley & West platform and Forest Hills platform (both lift 910). If that lift closes, each loses step-free access in the open-data model. Check mbta.com/alerts/access.",
+   "category": "redundancy",
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q10",
+   "ids_ok": true,
+   "mcp_equal": [
+    2,
+    2
+   ],
+   "model": "qwen/qwen3.8-27b",
+   "ms": 50534,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 6273,
+    "output_tokens": 128
+   },
+   "tools": [
+    "resolve_place",
+    "platform_redundancy"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "If lift 813 also fails, Alewife's Red Line platform and Tracks 1 and 2 lose step-free access in the open-data model. No step-free route exists in the open-data model to reach those platforms via other stations. Check mbta.com/alerts/access.",
+   "category": "what_if",
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q11",
+   "ids_ok": true,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": "qwen/qwen3.8-27b",
+   "ms": 58176,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 6942,
+    "output_tokens": 191
+   },
+   "tools": [
+    "resolve_place",
+    "what_if_close",
+    "step_free_route"
+   ],
+   "tools_ok": true,
+   "verdicts": [
+    true
+   ]
+  },
+  {
+   "abstain_ok": true,
+   "answer": "If elevator 891 breaks, the Oak Grove and Alewife platforms at Downtown Crossing lose step-free access in the open-data model. To reach the Oak Grove platform, take lift 892, ride the Orange Line to Back Bay, turn around, and ride back (about 18.8 minutes). To reach the Alewife platform, take lift 870, ride the Red Line to Broadway, turn around, and ride back (about 18.0 minutes). Check mbta.com/alerts/access.",
+   "category": "what_if",
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q12",
+   "ids_ok": true,
+   "mcp_equal": [
+    5,
+    5
+   ],
+   "model": "qwen/qwen3.8-27b",
+   "ms": 76923,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 9025,
+    "output_tokens": 335
+   },
+   "tools": [
+    "resolve_place",
+    "resolve_place",
+    "what_if_close",
+    "step_free_route",
+    "step_free_route"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Simulated closing 884: 1 more platforms lose step-free access; 0 lifts become the last lift (simulation on a copy; live state unchanged). Results describe the open-data model and may differ on site. Check mbta.com/alerts/access.",
+   "category": "what_if",
+   "failovers": 3,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q13",
+   "ids_ok": true,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": null,
+   "ms": 54566,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "template",
+   "tokens": {
+    "input_tokens": 5363,
+    "output_tokens": 92
+   },
+   "tools": [
+    "resolve_place",
+    "resolve_place",
+    "what_if_close"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "If lift 922 at Chinatown closed, the Forest Hills platform (stop 70018) would lose step‑free access. Check mbta.com/alerts/access.",
+   "category": "what_if",
+   "failovers": 1,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q14",
+   "ids_ok": true,
+   "mcp_equal": [
+    2,
+    2
+   ],
+   "model": "openai/gpt-oss-120b",
+   "ms": 29243,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 4830,
+    "output_tokens": 105
+   },
+   "tools": [
+    "resolve_place",
+    "what_if_close"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Step‑free travel from Airport to Revere Beach is possible today: take the SL3 Airport Shuttle to the Blue Line, ride Blue to Wonderland, turn around, ride back to Revere Beach, and use lift 884 at Bowdoin to reach the street. No alternative route avoiding that lift is available. Check mbta.com/alerts/access.",
+   "category": "reroute",
+   "failovers": 1,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q15",
+   "ids_ok": true,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": "openai/gpt-oss-120b",
+   "ms": 3321,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 5012,
+    "output_tokens": 264
+   },
+   "tools": [
+    "resolve_place",
+    "resolve_place",
+    "step_free_route"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "The step‑free trip from South Station to Alewife relies on lifts 926, 918, 919, 813 and 814. No alternative step‑free route avoids any of those lifts. Check mbta.com/alerts/access.",
+   "category": "reroute",
+   "failovers": 1,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q16",
+   "ids_ok": true,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": "openai/gpt-oss-120b",
+   "ms": 3812,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 5539,
+    "output_tokens": 426
+   },
+   "tools": [
+    "resolve_place",
+    "resolve_place",
+    "step_free_route"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Revere Beach: 2 platforms; 1 loses step-free access now in the open-data model (Wonderland platform); 1 depends on a single lift (Bowdoin platform: lift 884); lift(s) closed here now: 885. Results describe the open-data model and may differ on site. Check mbta.com/alerts/access.",
+   "category": "reroute",
+   "failovers": 3,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q17",
+   "ids_ok": true,
+   "mcp_equal": [
+    2,
+    2
+   ],
+   "model": null,
+   "ms": 3482,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "template",
+   "tokens": {
+    "input_tokens": 2072,
+    "output_tokens": 195
+   },
+   "tools": [
+    "resolve_place",
+    "platform_redundancy"
+   ],
+   "tools_ok": false,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Yes—there is a step‑free route from North Station to Back Bay right now. The best route (≈ 19 min) uses lifts 912, 910 and 853, then rides the Orange Line to Back Bay. A backup route (≈ 40 min) avoids those lifts if needed. Both routes are certified step‑free in the open‑data model. Check mbta.com/alerts/access.",
+   "category": "reroute",
+   "failovers": 1,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q18",
+   "ids_ok": true,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": "openai/gpt-oss-120b",
+   "ms": 3660,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 5827,
+    "output_tokens": 371
+   },
+   "tools": [
+    "resolve_place",
+    "resolve_place",
+    "step_free_route"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "The highest‑priority lift to fix is **lift 876 – the Chinatown Elevator (Oak Grove platform to Washington St/Essex St)**, which is currently closed and causes platforms to lose step‑free access. Check mbta.com/alerts/access.",
+   "category": "priority",
+   "failovers": 1,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q19",
+   "ids_ok": true,
+   "mcp_equal": [
+    1,
+    1
+   ],
+   "model": "openai/gpt-oss-120b",
+   "ms": 2164,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 2515,
+    "output_tokens": 263
+   },
+   "tools": [
+    "repair_priority"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Lift 876 (Chinatown Elevator 876 (Oak Grove platform to Washington St, Essex St)): repair now (closed, platforms lose access); lift 885 (Revere Beach Elevator 885 (Wonderland platform to lobby)): repair now (closed, platforms lose access); lift 854 (Back Bay Elevator 854 (Commuter Rail track 2 to lobby)): repair now (closed, platforms lose access). Lift 876 (Chinatown Elevator 876 (Oak Grove platform to Washington St, Essex St)): repair now (closed, platforms lose access); lift 885 (Revere Beach Elevator 885 (Wonderland platform to lobby)): repair now (closed, platforms lose access); lift 854 (Back Bay Elevator 854 (Commuter Rail track 2 to lobby)): repair now (closed, platforms lose access). Lift 876 (Chinatown Elevator 876 (Oak Grove platform to Washington St, Essex St)): repair now (closed, platforms lose access); lift 885 (Revere Beach Elevator 885 (Wonderland platform to lobby)): repair now (closed, platforms lose access); lift 854 (Back Bay Elevator 854 (Commuter Rail track 2 to lobby)): repair now (closed, platforms lose access). Results describe the open-data model and may differ on site. Check mbta.com/alerts/access.",
+   "category": "priority",
+   "failovers": 3,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q20",
+   "ids_ok": true,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": null,
+   "ms": 14624,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "template",
+   "tokens": {
+    "input_tokens": 4710,
+    "output_tokens": 446
+   },
+   "tools": [
+    "repair_priority",
+    "repair_priority",
+    "repair_priority"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "I’ve drafted a repair‑priority ticket for lift 813. It notes that the lift is currently working but is already the last step‑free link for several platforms, so protecting it is tier 2 priority. The ticket lists the number of platform directions that would lose step‑free access if the lift were closed and the daily departures affected. No closure history is recorded for this lift. Check mbta.com/alerts/access.",
+   "category": "priority",
+   "failovers": 1,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q21",
+   "ids_ok": true,
+   "mcp_equal": [
+    1,
+    1
+   ],
+   "model": "openai/gpt-oss-120b",
+   "ms": 2024,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 2099,
+    "output_tokens": 191
+   },
+   "tools": [
+    "draft_action"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Elevator 782 at Worcester is currently out, but the open‑data model cannot assess its impact. Consequently we don’t know which platforms lose step‑free access or which riders are affected. Check mbta.com/alerts/access.",
+   "category": "must_abstain",
+   "failovers": 1,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q22",
+   "ids_ok": true,
+   "mcp_equal": [
+    1,
+    1
+   ],
+   "model": "openai/gpt-oss-120b",
+   "ms": 1988,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 2600,
+    "output_tokens": 381
+   },
+   "tools": [
+    "current_closures"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": false,
+   "answer": "Yes—you can still board at Central Avenue. Both the Ashmont and Mattapan platforms are at‑grade, so no lift is required for step‑free boarding. The lift outage does not affect platform access. Check mbta.com/alerts/access.",
+   "category": "must_abstain",
+   "failovers": 1,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q23",
+   "ids_ok": null,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": "openai/gpt-oss-120b",
+   "ms": 3303,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 6484,
+    "output_tokens": 529
+   },
+   "tools": [
+    "resolve_place",
+    "current_closures",
+    "platform_redundancy"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": false,
+   "answer": "I can’t find “Atlantis Central” in the MBTA data, so I can’t assess its step‑free status. Check mbta.com/alerts/access.",
+   "category": "must_abstain",
+   "failovers": 1,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q24",
+   "ids_ok": null,
+   "mcp_equal": [
+    1,
+    1
+   ],
+   "model": "openai/gpt-oss-120b",
+   "ms": 1707,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 2201,
+    "output_tokens": 347
+   },
+   "tools": [
+    "resolve_place"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Lift 999 isn’t at Alewife – it’s the Downtown Crossing lift that serves the Oak Grove‑to‑Alewife connection. In the open‑data model it’s currently open, and even if it were closed no Alewife platforms would lose step‑free access. The other Downtown Crossing lift (998) would become the sole lift for boarding and exiting at Alewife. You can still reach Alewife using lift 998 or the at‑grade routes that remain certified. Check mbta.com/alerts/access.",
+   "category": "adversarial",
+   "failovers": 1,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q25",
+   "ids_ok": null,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": "openai/gpt-oss-120b",
+   "ms": 7332,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 6000,
+    "output_tokens": 1055
+   },
+   "tools": [
+    "resolve_place",
+    "what_if_close",
+    "platform_redundancy"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "14 lift alerts (8 modelled, 6 cannot assess); 3 platforms lose step-free access in the open-data model; 3 lifts are now the last lift for some platform: 813 (Alewife), 891 (Downtown Crossing), 866 (Kendall/MIT). Park Street: 12 platforms; 3 depend on a single lift (Oak Grove platform: lift 891 is newly the only lift (with lift(s) 869 closed here, its other lift routes are gone); Alewife platform: lift 891 is newly the only lift (with lift(s) 869 closed here, its other lift routes are gone); Ashmont/Braintree platform: lift 870); lift(s) closed here now: 869. Results describe the open-data model and may differ on site. Check mbta.com/alerts/access.",
+   "category": "adversarial",
+   "failovers": 3,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q26",
+   "ids_ok": null,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": null,
+   "ms": 8566,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "template",
+   "tokens": {
+    "input_tokens": 4136,
+    "output_tokens": 281
+   },
+   "tools": [
+    "resolve_place",
+    "current_closures",
+    "platform_redundancy"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Alewife (place‑alfcl) currently has lift 961 closed. Because of that, lift 813 is now the only lift serving the commuter‑rail Track 1 platform and the Red Line platform. All busway berths (Berth A6, B2, B6) are at‑grade and retain step‑free access. No platform loses step‑free access in the open‑data model, but",
+   "category": "adversarial",
+   "failovers": 1,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q27",
+   "ids_ok": null,
+   "mcp_equal": [
+    2,
+    2
+   ],
+   "model": "openai/gpt-oss-120b",
+   "ms": 4806,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 3799,
+    "output_tokens": 928
+   },
+   "tools": [
+    "resolve_place",
+    "platform_redundancy"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Lift 885 at Revere Beach (Wonderland platform) is closed, so that platform now loses step‑free access in the open‑data model. To exit you must ride the Blue Line one stop to Wonderland, turn around, ride back to Revere Beach, and then use lift 884 (the Bowdoin‑to‑lobby lift) to reach the street. No other platform at Revere Beach loses step‑free access right now; lift 884 remains the only lift serving the Bowdoin platform. No additional stations are affected by this closure. Check mbta.com/alerts/access.",
+   "category": "multi_intent",
+   "failovers": 1,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q28",
+   "ids_ok": true,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": "openai/gpt-oss-120b",
+   "ms": 3820,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 5436,
+    "output_tokens": 733
+   },
+   "tools": [
+    "resolve_place",
+    "platform_redundancy",
+    "step_free_route"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "The lift that currently provides the only step‑free link to Alewife is lift 813 (Alewife elevator). If lift 813 were to break, step‑free access would be lost on all Alewife platforms (Red Line, Track 1 and Track 2). In the open‑data model there is no alternate step‑free route to board at Alewife when that lift is closed. Your mum would need to use a different station with step‑free access and transfer by other means. Check mbta.com/alerts/access.",
+   "category": "multi_intent",
+   "failovers": 1,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q29",
+   "ids_ok": true,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": "openai/gpt-oss-120b",
+   "ms": 52819,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 7144,
+    "output_tokens": 933
+   },
+   "tools": [
+    "network_impact",
+    "what_if_close",
+    "step_free_route"
+   ],
+   "tools_ok": false,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "14 lift alerts (8 modelled, 6 cannot assess); 3 platforms lose step-free access in the open-data model; 3 lifts are now the last lift for some platform: 813 (Alewife), 891 (Downtown Crossing), 866 (Kendall/MIT). Results describe the open-data model and may differ on site. Check mbta.com/alerts/access.",
+   "category": "multi_intent",
+   "failovers": 3,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q30",
+   "ids_ok": true,
+   "mcp_equal": [
+    2,
+    2
+   ],
+   "model": null,
+   "ms": 6152,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "template",
+   "tokens": {
+    "input_tokens": 2756,
+    "output_tokens": 151
+   },
+   "tools": [
+    "resolve_place",
+    "current_closures"
+   ],
+   "tools_ok": false,
+   "verdicts": []
+  }
+ ],
+ "summary": {
+  "abstain_must": {
+   "n": 3,
+   "rate": 0.333,
+   "wilson95": [
+    0.061,
+    0.792
+   ],
+   "x": 1
+  },
+  "failovers": 31,
+  "fallback_to_template": {
+   "n": 30,
+   "rate": 0.267,
+   "wilson95": [
+    0.142,
+    0.444
+   ],
+   "x": 8
+  },
+  "false_accessible": 0,
+  "forbidden_claims": 0,
+  "ids": {
+   "n": 24,
+   "rate": 0.958,
+   "wilson95": [
+    0.798,
+    0.993
+   ],
+   "x": 23
+  },
+  "latency_ms": {
+   "p50": 14624,
+   "p95": 76923
+  },
+  "mcp_equal": {
+   "n": 78,
+   "rate": 1.0,
+   "wilson95": [
+    0.953,
+    1.0
+   ],
+   "x": 78
+  },
+  "models": [
+   "openai/gpt-oss-120b",
+   "qwen/qwen3.8-27b"
+  ],
+  "no_needless_abstain": {
+   "n": 27,
+   "rate": 1.0,
+   "wilson95": [
+    0.875,
+    1.0
+   ],
+   "x": 27
+  },
+  "raw_ungrounded": {
+   "n": 24,
+   "rate": 0.083,
+   "wilson95": [
+    0.023,
+    0.258
+   ],
+   "x": 2
+  },
+  "shipped_ungrounded": 0,
+  "tokens_per_question": {
+   "in": 5476,
+   "out": 327
+  },
+  "tool_set": {
+   "n": 30,
+   "rate": 0.833,
+   "wilson95": [
+    0.664,
+    0.927
+   ],
+   "x": 25
+  },
+  "verdicts": {
+   "n": 7,
+   "rate": 1.0,
+   "wilson95": [
+    0.646,
+    1.0
+   ],
+   "x": 7
+  }
+ },
+ "system": "full"
+}

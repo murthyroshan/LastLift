@@ -48,3 +48,19 @@ partially correct / wrong with a one-line reason. These marks are the author's o
   paraphrase rows and in wording.
 - The graph's value is the gap between systems 1-2 and system 3.
 - Whatever the numbers are, they are reported as they come, including if the LLM-only baseline does well.
+
+## Amendment 1 (17 Oct 2026, before run 2)
+
+**What happened in run 1.** The harness paced at 2 questions a minute but did not pace by tokens. Groq limits each
+chat model to 8,000 tokens a minute, and a full-agent question uses about 5,800, so the models were rate-limited and
+the provider chain (added after pre-registration, M6) failed over: of the full agent's 30 answers, qwen wrote 9,
+gpt-oss-120b 13 and the template 8; the fallback system's 12 answers were 6 gpt-oss and 6 template; the LLM-only
+system stopped at its first question. Run 1 therefore does not measure the systems named above.
+
+**Change.** The harness now also paces by tokens (each question waits at least 60 x tokens used / 8,000 seconds),
+waits out a rate limit of up to 60 s instead of failing over, for all three LLM systems, and records the serving model
+of every answer. Questions, gold, systems, metrics and scoring are unchanged.
+
+**Reporting.** Run 1 is kept and published as is (`eval/results/full_run1_rate_limited.json`,
+`fallback_run1_rate_limited.json`), next to run 2. Run 2 is the scored run; any answer in it not written by the
+system's named model is counted and reported.

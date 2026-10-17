@@ -8,6 +8,7 @@
 Closures are relationship-type swaps (SF <-> SF_CLOSED) on lift edges, applied as an idempotent
 desired state. After a sync, only complexes whose closed set changed are recomputed.
 """
+import atexit
 import hashlib
 import os
 import threading
@@ -21,6 +22,7 @@ from .queries import (Q_CLEAR_DEPENDS_NOW, Q_CLOSE_LIFTS, Q_CLOSED_FACILITIES, Q
 WHAT_IF_LRU = 2
 _lock = threading.Lock()
 _what_ifs: "OrderedDict[str, str]" = OrderedDict()
+_what_if_sync: dict[str, dict] = {}      # copy name -> the sync result when it was made (a reuse reports the same)
 
 
 def graph_name(scope: str) -> str:
@@ -95,10 +97,12 @@ def what_if(scope: str, extra_fids) -> dict:
     # so one process's LRU eviction can never delete a copy the other is still reading.
     key = hashlib.sha1(f"{os.getpid()}|{parent}|{','.join(want)}".encode()).hexdigest()[:12]
     name = graph_name(f"wi_{key}")
+    fresh = False
     with _lock:
-        if name in _what_ifs and exists(name):
+        if name in _what_ifs and exists(name) and name in _what_if_sync:
             _what_ifs.move_to_end(name)
         else:
+            fresh = True
             _what_ifs.pop(name, None)       # cached but gone (e.g. swept at boot): make it again
             if exists(name):
                 db.client().select_graph(name).delete()
@@ -106,9 +110,27 @@ def what_if(scope: str, extra_fids) -> dict:
             _what_ifs[name] = parent
             while len(_what_ifs) > WHAT_IF_LRU:
                 old, _ = _what_ifs.popitem(last=False)
+                _what_if_sync.pop(old, None)
                 if exists(old):
                     db.client().select_graph(old).delete()
-    return {"copy": name, "parent": parent, "parent_closed": base_closed, **sync(name, want)}
+    if fresh:
+        _what_if_sync[name] = sync(name, want)
+    return {"copy": name, "parent": parent, "parent_closed": base_closed, **_what_if_sync[name]}
+
+
+@atexit.register
+def drop_own_what_ifs():
+    """At exit, delete the what-if copies this process made (scripts and tests too, not just the API): copies are
+    full graphs, and the shared development instance has a small memory limit."""
+    mine = f"_{os.getpid()}"
+    try:
+        names = list(_what_ifs) + [g for g in db.client().list_graphs()
+                                   if g.startswith(graph_name("wi_")) and g.endswith(mine)]
+        for name in names:
+            if exists(name):
+                db.client().select_graph(name).delete()
+    except Exception:                       # the graph server may already be gone at exit
+        pass
 
 
 def sweep_stale_what_ifs():
@@ -116,6 +138,7 @@ def sweep_stale_what_ifs():
     prefix = graph_name("wi_")
     with _lock:
         _what_ifs.clear()
+        _what_if_sync.clear()
         for g in db.client().list_graphs():
             if g.startswith(prefix):
                 db.client().select_graph(g).delete()

@@ -1,0 +1,458 @@
+{
+ "date": "2026-10-17",
+ "questions": 12,
+ "rows": [
+  {
+   "abstain_ok": true,
+   "answer": "Revere Beach: 2 platforms; 1 loses step-free access now in the open-data model (Wonderland platform); 1 depends on a single lift (Bowdoin platform: lift 884); lift(s) closed here now: 885. 1 step-free route(s); best ~17.1 min: lift 884 (Bowdoin platform to lobby); ride Blue to Beachmont; turn around at Beachmont (step-free change of platform); lift 886 (Bowdoin platform to lobby); lift 887 (Wonderland platform to lobby); ride Blue back to Revere Beach. No backup avoiding lifts 884, 886, 887. Results describe the open-data model and may differ on site. Check mbta.com/alerts/access.",
+   "category": "closure_impact",
+   "failovers": 2,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q01",
+   "ids_ok": true,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": null,
+   "ms": 59776,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "template",
+   "tokens": {
+    "input_tokens": 3580,
+    "output_tokens": 421
+   },
+   "tools": [
+    "resolve_place",
+    "platform_redundancy",
+    "step_free_route"
+   ],
+   "tools_ok": true,
+   "verdicts": [
+    true,
+    true
+   ]
+  },
+  {
+   "abstain_ok": true,
+   "answer": "14 lift alerts (8 modelled, 6 cannot assess); 3 platforms lose step-free access in the open-data model; 3 lifts are now the last lift for some platform: 813 (Alewife), 891 (Downtown Crossing), 866 (Kendall/MIT). Lift(s) 854 already closed in this scope: nothing to simulate; use current_closures or platform_redundancy for their effect now. Results describe the open-data model and may differ on site. Check mbta.com/alerts/access.",
+   "category": "closure_impact",
+   "failovers": 2,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q04",
+   "ids_ok": true,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": null,
+   "ms": 25463,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "template",
+   "tokens": {
+    "input_tokens": 4112,
+    "output_tokens": 415
+   },
+   "tools": [
+    "resolve_place",
+    "current_closures",
+    "what_if_close"
+   ],
+   "tools_ok": false,
+   "verdicts": [
+    true
+   ]
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Lift 813 at Alewife is now the last lift for step‑free access.  \nCheck mbta.com/alerts/access",
+   "category": "redundancy",
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q07",
+   "ids_ok": true,
+   "mcp_equal": [
+    2,
+    2
+   ],
+   "model": "openai/gpt-oss-120b",
+   "ms": 2511,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 3743,
+    "output_tokens": 307
+   },
+   "tools": [
+    "resolve_place",
+    "current_closures"
+   ],
+   "tools_ok": false,
+   "verdicts": [
+    true
+   ]
+  },
+  {
+   "abstain_ok": true,
+   "answer": "South Station: 24 platforms; 0 depend on a single lift. South Station: 24 platforms; 0 depend on a single lift. Results describe the open-data model and may differ on site. Check mbta.com/alerts/access.",
+   "category": "redundancy",
+   "failovers": 2,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q09",
+   "ids_ok": null,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": null,
+   "ms": 8972,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "template",
+   "tokens": {
+    "input_tokens": 4206,
+    "output_tokens": 272
+   },
+   "tools": [
+    "resolve_place",
+    "platform_redundancy",
+    "platform_redundancy"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "North Station has three platforms that rely on a single lift for step‑free access: the Oak Grove platform (served by lift 911), the Copley & West platform (served by lift 910), and the Forest Hills platform (also served by lift 910). These platforms lose step‑free access if their sole lift is out of service. Check mbta.com/alerts/access.",
+   "category": "redundancy",
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q10",
+   "ids_ok": true,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": "openai/gpt-oss-120b",
+   "ms": 5245,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 6907,
+    "output_tokens": 601
+   },
+   "tools": [
+    "resolve_place",
+    "platform_redundancy",
+    "platform_redundancy"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Simulated closing 891: 2 more platforms lose step-free access; 0 lifts become the last lift (simulation on a copy; live state unchanged). 2 step-free route(s); best ~18.8 min: lift 892 (Forest Hills platform to Washington Street, Winter Street); ride Orange to Back Bay; turn around at Back Bay (step-free change of platform); ride Orange back to Downtown Crossing. Backup avoiding lifts 892: ~26.0 min. Results describe the open-data model and may differ on site. Check mbta.com/alerts/access.",
+   "category": "what_if",
+   "failovers": 2,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q12",
+   "ids_ok": true,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": null,
+   "ms": 6453,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "template",
+   "tokens": {
+    "input_tokens": 3802,
+    "output_tokens": 570
+   },
+   "tools": [
+    "resolve_place",
+    "what_if_close",
+    "step_free_route"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "If lift 922 at Chinatown were closed, the Forest Hills platform (stop 70018) would lose step‑free access in the open‑data model. Check mbta.com/alerts/access.",
+   "category": "what_if",
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q14",
+   "ids_ok": true,
+   "mcp_equal": [
+    2,
+    2
+   ],
+   "model": "openai/gpt-oss-120b",
+   "ms": 2878,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 3354,
+    "output_tokens": 300
+   },
+   "tools": [
+    "resolve_place",
+    "what_if_close"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "The step‑free trip from South Station to Alewife uses lifts 926, 918, 919, 813 and 814 (as shown in the live route). No backup route that avoids any of those lifts is available in the open‑data model. If any of those lifts were closed, the step‑free connection would be lost. Check mbta.com/alerts/access.",
+   "category": "reroute",
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q16",
+   "ids_ok": true,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": "openai/gpt-oss-120b",
+   "ms": 3232,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 5539,
+    "output_tokens": 484
+   },
+   "tools": [
+    "resolve_place",
+    "resolve_place",
+    "step_free_route"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "I’ve drafted a repair‑priority ticket for lift 813. It notes that the lift is currently working but is already the last step‑free link for several platforms, so protecting it is tier 2 priority. The ticket lists the number of platform directions that would lose step‑free access if the lift were closed and the daily departures affected. No closure history is recorded for this lift. Check mbta.com/alerts/access.",
+   "category": "priority",
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q21",
+   "ids_ok": true,
+   "mcp_equal": [
+    1,
+    1
+   ],
+   "model": "openai/gpt-oss-120b",
+   "ms": 1875,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 2099,
+    "output_tokens": 191
+   },
+   "tools": [
+    "draft_action"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": false,
+   "answer": "14 lift alerts (8 modelled, 6 cannot assess); 3 platforms lose step-free access in the open-data model; 3 lifts are now the last lift for some platform: 813 (Alewife), 891 (Downtown Crossing), 866 (Kendall/MIT). Results describe the open-data model and may differ on site. Check mbta.com/alerts/access.",
+   "category": "must_abstain",
+   "failovers": 2,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q23",
+   "ids_ok": null,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": null,
+   "ms": 3775,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "template",
+   "tokens": {
+    "input_tokens": 4173,
+    "output_tokens": 233
+   },
+   "tools": [
+    "resolve_place",
+    "current_closures",
+    "resolve_place"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "14 lift alerts (8 modelled, 6 cannot assess); 3 platforms lose step-free access in the open-data model; 3 lifts are now the last lift for some platform: 813 (Alewife), 891 (Downtown Crossing), 866 (Kendall/MIT). Results describe the open-data model and may differ on site. Check mbta.com/alerts/access.",
+   "category": "adversarial",
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q25",
+   "ids_ok": null,
+   "mcp_equal": [
+    2,
+    2
+   ],
+   "model": null,
+   "ms": 3604,
+   "raw_grounding_failed": true,
+   "shipped_ungrounded": false,
+   "source": "template",
+   "tokens": {
+    "input_tokens": 3890,
+    "output_tokens": 640
+   },
+   "tools": [
+    "resolve_place",
+    "current_closures"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Park Street currently retains step‑free access on all its platforms. Two platforms (Oak Grove and Alewife) each rely on a single lift (facility 891); if that lift were to close they would lose step‑free access. No platform is presently losing step‑free access in the open‑data model. The station is therefore wheelchair‑compatible, though it has a single‑point‑of‑failure lift. Check mbta.com/alerts/access.",
+   "category": "adversarial",
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q26",
+   "ids_ok": null,
+   "mcp_equal": [
+    3,
+    3
+   ],
+   "model": "openai/gpt-oss-120b",
+   "ms": 5582,
+   "raw_grounding_failed": false,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 6823,
+    "output_tokens": 840
+   },
+   "tools": [
+    "resolve_place",
+    "current_closures",
+    "platform_redundancy"
+   ],
+   "tools_ok": true,
+   "verdicts": []
+  }
+ ],
+ "summary": {
+  "abstain_must": {
+   "n": 1,
+   "rate": 0.0,
+   "wilson95": [
+    0.0,
+    0.793
+   ],
+   "x": 0
+  },
+  "failovers": 10,
+  "fallback_to_template": {
+   "n": 12,
+   "rate": 0.5,
+   "wilson95": [
+    0.254,
+    0.746
+   ],
+   "x": 6
+  },
+  "false_accessible": 0,
+  "forbidden_claims": 0,
+  "ids": {
+   "n": 8,
+   "rate": 1.0,
+   "wilson95": [
+    0.676,
+    1.0
+   ],
+   "x": 8
+  },
+  "latency_ms": {
+   "p50": 5245,
+   "p95": 59776
+  },
+  "mcp_equal": {
+   "n": 31,
+   "rate": 1.0,
+   "wilson95": [
+    0.89,
+    1.0
+   ],
+   "x": 31
+  },
+  "models": [
+   "openai/gpt-oss-120b"
+  ],
+  "no_needless_abstain": {
+   "n": 11,
+   "rate": 1.0,
+   "wilson95": [
+    0.741,
+    1.0
+   ],
+   "x": 11
+  },
+  "raw_ungrounded": {
+   "n": 7,
+   "rate": 0.143,
+   "wilson95": [
+    0.026,
+    0.513
+   ],
+   "x": 1
+  },
+  "shipped_ungrounded": 0,
+  "tokens_per_question": {
+   "in": 4352,
+   "out": 440
+  },
+  "tool_set": {
+   "n": 12,
+   "rate": 0.833,
+   "wilson95": [
+    0.552,
+    0.953
+   ],
+   "x": 10
+  },
+  "verdicts": {
+   "n": 4,
+   "rate": 1.0,
+   "wilson95": [
+    0.51,
+    1.0
+   ],
+   "x": 4
+  }
+ },
+ "system": "fallback"
+}
