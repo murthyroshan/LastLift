@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getContingency, getEvalRows, getRerouteFor, getStateFor, getStations, getTicketFor, type Envelope, type Scope } from "../api";
+import { getContingency, getEvalRows, getLiftRecords, getRerouteFor, getStateFor, getStations, getTicketFor, type Envelope, type Scope } from "../api";
 import { href } from "../router";
 import { S } from "../strings.en";
 
@@ -10,6 +10,7 @@ export function Repairs({ scope }: { scope: Scope }) {
   const [names, setNames] = useState<Record<string, string>>({});
   const [reroutes, setReroutes] = useState<{ platform: any; exit: Envelope; board: Envelope }[]>([]);
   const [order, setOrder] = useState<Envelope | null>(null);
+  const [records, setRecords] = useState<Record<string, any>>({});
   const dlg = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -21,6 +22,7 @@ export function Repairs({ scope }: { scope: Scope }) {
     }).catch(() => {});
     getEvalRows().then(setRows).catch(() => {});
     getContingency(scope).then((c) => setOrder(c.order)).catch(() => {});
+    getLiftRecords().then((r) => setRecords(r.lifts)).catch(() => {});
     getStations().then((ss) => setNames(Object.fromEntries(ss.map((x) => [x.id, x.name])))).catch(() => {});
   }, [scope]);
 
@@ -41,7 +43,8 @@ export function Repairs({ scope }: { scope: Scope }) {
           <thead><tr>
             <th scope="col">{S.repairs.colTier}</th><th scope="col">{S.repairs.colLift}</th>
             <th scope="col">{S.repairs.colStation}</th><th scope="col">{S.repairs.colDirs}</th>
-            <th scope="col">{S.repairs.colDeps}</th><th scope="col">{S.repairs.colPrior}</th><th scope="col"></th>
+            <th scope="col">{S.repairs.colDeps}</th><th scope="col">{S.repairs.colPrior}</th>
+            <th scope="col">{S.repairs.colChronic}</th><th scope="col"></th>
           </tr></thead>
           <tbody>
             {ranked.filter((r) => r.tier <= 2).concat(ranked.filter((r) => r.tier > 2).slice(0, 10)).map((r) => (
@@ -52,6 +55,7 @@ export function Repairs({ scope }: { scope: Scope }) {
                 <td>{r.platform_directions}</td>
                 <td>{r.departures_day}</td>
                 <td>{r.incidents}</td>
+                <td>{records[r.facility_id]?.outages_12m ?? "–"}</td>
                 <td>{r.tier <= 2 && <button onClick={() => openTicket(r.facility_id)}>{S.repairs.draft}</button>}</td>
               </tr>
             ))}

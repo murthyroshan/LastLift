@@ -84,6 +84,7 @@ def main():
     from lastlift.wording import DISCLAIMERS
     write(OUT / "disclaimers.json", DISCLAIMERS)
     total += contingency()
+    total += history()
     print(f"mirror: {len(stations)} stations, {len(STORY_WHATIFS)} what-ifs, {total // 1024} KB, "
           f"{time.time() - started:.0f} s")
     return 0
@@ -111,6 +112,40 @@ def contingency() -> int:
         by_station.setdefault(p["station_id"], {})[stop] = p
     for sid, plats in by_station.items():
         total += write(OUT / "cuts" / f"{sid}.json", {"q_assumed": doc["q_assumed"], "platforms": plats})
+    return total
+
+
+def history() -> int:
+    """m/history/<station>.json: closures since 2024 for the station's platforms and lifts (the Lift Ledger), and
+    m/history/lifts.json for the repairs table. Historical frequencies only, never a forecast."""
+    hdir = ROOT / "data" / "history"
+    if not (hdir / "replay.json").is_file():
+        return 0
+    from lastlift.seed import latest_snapshot
+    rep = json.loads((hdir / "replay.json").read_text(encoding="utf-8"))
+    net = json.loads((latest_snapshot() / "network.json").read_text(encoding="utf-8"))
+    station_of_stop = {s: p["station_id"] for s, p in net["platform"].items()}
+    station_of_lift = {f: x["station_id"] for f, x in net["lifts"].items()}
+    out = {}
+    for key, x in rep["platform_dirs"].items():
+        stop, d = key.split(":")
+        out.setdefault(station_of_stop.get(stop), {"platforms": {}, "lifts": {}})["platforms"][key] = {
+            "svc_h": x["svc_h"], "months": len(x["months"]), "losses": x["losses"],
+            "concurrent_svc_h": x["concurrent_svc_h"]}
+    for key, x in rep["reliability_empirical"].items():
+        st = station_of_stop.get(key.split(":")[0])
+        out.setdefault(st, {"platforms": {}, "lifts": {}}).setdefault("empirical", {})[key] = x["r"]
+    for f, x in rep["lifts"].items():
+        st = station_of_lift.get(f)
+        if st:
+            out.setdefault(st, {"platforms": {}, "lifts": {}})["lifts"][f] = x
+    total = 0
+    meta = {"from": rep["from"], "to": "2026-05"}
+    for st, v in out.items():
+        if st:
+            total += write(OUT / "history" / f"{st}.json", {**meta, **v})
+    total += write(OUT / "history" / "lifts.json", {**meta, "lifts": {
+        f: {k: x.get(k) for k in ("avail_12m", "outages_12m", "mttr_h", "single_svc_h")} for f, x in rep["lifts"].items()}})
     return total
 
 

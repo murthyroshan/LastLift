@@ -155,3 +155,18 @@ Q_PLATFORM_CUTS = (
     "head(collect(p.mincuts_exit)), head(collect(p.rel_counts_board)), head(collect(p.rel_counts_exit)), "
     "head(collect(p.rel_relevant_board)), head(collect(p.rel_relevant_exit)) ORDER BY stop"
 )
+
+# --- lift ledger (data/history, scripts/history_replay.py) -----------------------------------------------------
+Q_LIFT_RECORD = (
+    "MATCH (l:Lift) WHERE l.facility_id = $fid WITH l ORDER BY l.uid LIMIT 1 "
+    "OPTIONAL MATCH (o:Outage)-[:OF]->(l) "
+    "RETURN l.avail_12m, l.closed_h_12m, l.outages_12m, l.mttr_h, l.single_svc_h, count(o), sum(o.hours), "
+    "max(o.end), sum(CASE WHEN o.imputed THEN 1 ELSE 0 END)"
+)
+# Redundancy defeated: closures of two lifts that overlapped in time (a critical pair, or the two lifts of a k=2 cut).
+Q_PAIR_OVERLAP = (
+    "MATCH (x:Outage)-[:OF]->(a:Lift {facility_id:$a}) MATCH (y:Outage)-[:OF]->(b:Lift {facility_id:$b}) "
+    "WHERE x.start < y.end AND y.start < x.end "
+    "RETURN count(*), collect([CASE WHEN x.start > y.start THEN x.start ELSE y.start END, "
+    "CASE WHEN x.end < y.end THEN x.end ELSE y.end END])[0..20]"
+)

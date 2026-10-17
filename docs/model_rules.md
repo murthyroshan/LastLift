@@ -64,6 +64,22 @@ The build fails if any override stops matching the feed.
 Results describe the open-data model. LastLift says "loses step-free access in the open-data model",
 never "stranded", "safe" or a bare "accessible", and says "cannot assess" where pathway data is missing. <!-- copy-lint: quoted -->
 
+## History (the Lift Ledger, `ingest/history.py`, `ingest/history_lamp.py`, `scripts/history_replay.py`)
+- Sources: MassDOT's "MBTA Service Alerts" CSV collections (2020-2023, 2024, 2025, 2026; to the end of May 2026) and
+  MBTA LAMP's alert parquet (from February 2019). sha256 of every file in `data/history/`.
+- A closure is an alert row with `effect_detail = ELEVATOR_CLOSURE` and a facility id. `ACCESS_ISSUE` rows are out of
+  scope (counted, not used).
+- The portal writes Boston local time with a `Z` suffix; it is read as local time. LAMP's timestamps are UTC.
+- An alert's windows are those of its latest version. Recorded end = min(active period end, closed time). A portal
+  window without one takes LAMP's recorded end for the same alert and lift; LAMP windows the portal lacks are added.
+  Remaining windows without an end are imputed (`low`: the alert's last modification; flagged).
+- Episodes: windows of one lift merged when less than 30 minutes apart.
+- Replay: today's step-free model applied to every moment since 1 January 2024. A platform-direction has no
+  step-free route when the closed lifts contain one of its minimal failure sets (M10). Hours are counted on the
+  calendar and within the station's first-to-last scheduled departure (Boston time; the service days of the
+  snapshot week); headlines use service hours.
+- These are reported closures, not measured downtime, and no forecast is made from them (`validation/HISTORY.md`).
+
 ## Changes
 - **rules_version 2 (M10):** Silver Line SL1–SL5 (GTFS route ids 741, 742, 743, 751, 749) added to `RIDE`.
   Courthouse, World Trade Center and the other Silver Line stations are reachable step-free only by the

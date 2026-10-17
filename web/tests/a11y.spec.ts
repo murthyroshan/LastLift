@@ -136,3 +136,13 @@ test("station proof panel: minimum cuts, reliability slider, single-lift table",
   await expect(page.getByText(/Step-free access would be lost about|No combination of lift failures/)).toBeVisible();
   await noSeriousAxeIssues(page);
 });
+
+test("station history: replayed closures, lift table and month strip with its table twin", async ({ page }) => {
+  await page.goto("/#/station/place-brntn");
+  await expect(page.getByRole("heading", { name: "History" })).toBeVisible();
+  await expect(page.getByText(/no step-free route for about/).first()).toBeVisible();
+  await expect(page.getByText(/not a forecast/)).toBeVisible();
+  await page.getByText(/Hours closed per month for lift 811/).click();
+  await expect(page.getByRole("columnheader", { name: "Hours closed" }).first()).toBeVisible();
+  await noSeriousAxeIssues(page);
+});

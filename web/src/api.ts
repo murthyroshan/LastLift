@@ -79,6 +79,15 @@ export type CutsBundle = { q_assumed: number;
   platforms: Record<string, { station_id: string; board: CutsDir; exit: CutsDir }> };
 export const getCuts = (stationId: string) => mirror<CutsBundle>(`cuts/${encodeURIComponent(stationId)}.json`);
 
+/** The Lift Ledger for one station (closures since 2024 replayed through today's graph). */
+export type LiftRecord = { avail_12m?: number; outages_12m?: number; mttr_h?: number | null; single_svc_h?: number;
+  closed_h_12m?: number; months?: Record<string, number> };
+export type HistoryBundle = { from: string; to: string;
+  platforms: Record<string, { svc_h: number; months: number; losses: number; concurrent_svc_h: number }>;
+  lifts: Record<string, LiftRecord>; empirical?: Record<string, number> };
+export const getHistory = (stationId: string) => mirror<HistoryBundle>(`history/${encodeURIComponent(stationId)}.json`);
+export const getLiftRecords = () => mirror<{ from: string; lifts: Record<string, LiftRecord> }>("history/lifts.json");
+
 /** The network view (base analysis from the mirror; the scope-dependent parts from the API in Live). */
 export async function getContingency(scope: Scope) {
   const c = await mirror<Record<string, any>>("contingency.json");

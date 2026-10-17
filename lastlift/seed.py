@@ -9,6 +9,7 @@ graph first; rows are loaded in batches with UNWIND; the Meta node is written la
 presence means the load completed.
 """
 import argparse
+import collections
 import json
 import sys
 from collections import defaultdict
@@ -180,12 +181,50 @@ def apply_network(graph_name: str, snapshot: Path) -> dict:
             "platforms": len(plats)}
 
 
+def apply_history(graph_name: str, folder: Path) -> dict:
+    """Write the Lift Ledger (data/history/replay.json, scripts/history_replay.py) onto the graph:
+    (:Outage {start, end, hours, imputed, alert_ids, causes})-[:OF]->(:Lift), lift availability (H3) and
+    per-platform lost hours since the ledger start."""
+    path = folder / "replay.json"
+    if not path.is_file():
+        return {}
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    g = db.client().select_graph(graph_name)
+    g.query("MATCH (o:Outage) DETACH DELETE o")
+    rows = []
+    for f, es in doc["episodes"].items():
+        for s, e, imp, aids, causes in es:
+            if e < doc["from"]:
+                continue
+            from datetime import datetime
+            hours = (datetime.fromisoformat(e.replace("Z", "+00:00")) -
+                     datetime.fromisoformat(s.replace("Z", "+00:00"))).total_seconds() / 3600
+            rows.append({"f": f, "p": {"start": s, "end": e, "hours": round(hours, 2), "imputed": bool(imp),
+                                       "alert_ids": aids, "causes": causes}})
+    for chunk in batches(rows):
+        g.query("UNWIND $rows AS r MATCH (l:Lift {facility_id:r.f}) WITH r, min(l.uid) AS lu "
+                "MATCH (l:Lift {uid:lu}) CREATE (o:Outage)-[:OF]->(l) SET o = r.p", {"rows": chunk})
+    lifts = [{"f": f, "p": {k: v for k, v in x.items() if k != "months" and v is not None}}
+             for f, x in doc["lifts"].items()]
+    for chunk in batches(lifts):
+        g.query("UNWIND $rows AS r MATCH (l:Lift {facility_id:r.f}) SET l += r.p", {"rows": chunk})
+    plats = collections.defaultdict(dict)
+    for key, x in doc["platform_dirs"].items():
+        stop, d = key.split(":")
+        plats[stop].update({f"hist_svc_h_{d}": x["svc_h"], f"hist_cal_h_{d}": x["cal_h"],
+                            f"hist_months_{d}": len(x["months"]), f"hist_concurrent_svc_h_{d}": x["concurrent_svc_h"]})
+    prow = [{"stop": k, "p": v} for k, v in plats.items()]
+    for chunk in batches(prow):
+        g.query("UNWIND $rows AS r MATCH (p:Node:Platform) WHERE p.stop_id = r.stop SET p += r.p", {"rows": chunk})
+    return {"outages": len(rows), "lifts": len(lifts), "platforms": len(prow)}
+
+
 def verify(graph_name: str, manifest: dict) -> list[str]:
     """Returns a list of problems (empty = verified)."""
     g = db.client().select_graph(graph_name)
     problems = []
     want_nodes = manifest["counts"]["nodes"]
-    got_nodes = g.ro_query("MATCH (n) WHERE NOT n:Meta RETURN count(n)").result_set[0][0]
+    got_nodes = g.ro_query("MATCH (n) WHERE NOT n:Meta AND NOT n:Outage RETURN count(n)").result_set[0][0]
     if got_nodes != want_nodes:
         problems.append(f"nodes: graph {got_nodes} != manifest {want_nodes}")
     for t, want in manifest["counts"]["edges_by_type"].items():
@@ -223,6 +262,9 @@ def main(argv=None) -> int:
     net = apply_network(args.graph, snapshot)
     if net:
         print(f"{args.graph}: network sweep applied {net}")
+    hist = apply_history(args.graph, REPO_ROOT / "data" / "history")
+    if hist:
+        print(f"{args.graph}: lift ledger applied {hist}")
     print(f"{args.graph}: loaded snapshot {snapshot.name} (seed {manifest['seed_sha256'][:12]}, "
           f"{deps} single-lift dependencies)")
     if args.verify:

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getStationFor, getWhatIf, type Scope, type StationBundle, type StationGraph, type WhatIfBundle } from "../api";
 import { useAnnounce } from "../components/Announcer";
 import { KState } from "../components/KState";
+import { HistoryPanel } from "../components/HistoryPanel";
 import { ProofPanel } from "../components/ProofPanel";
 import { XRay } from "../components/XRay";
 import { href, type Route } from "../router";
@@ -161,6 +162,8 @@ export function Station({ route, live, scope }: { route: Route; live: boolean; s
       </div>
 
       <ProofPanel stationId={id} stop={selected} dir={dir} name={selected ? platformName(selected) : ""} />
+
+      <HistoryPanel stationId={id} platformName={platformName} />
 
       <section aria-labelledby="ro-h">
         <h2 id="ro-h">{S.station.routesTitle}</h2>

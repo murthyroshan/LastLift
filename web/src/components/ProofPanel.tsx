@@ -1,5 +1,5 @@
 import { useEffect, useId, useState } from "react";
-import { getCuts, reliability, type CutsBundle } from "../api";
+import { getCuts, getHistory, reliability, type CutsBundle } from "../api";
 import { S } from "../strings.en";
 
 const pct = (x: number) => (x * 100 < 0.01 && x > 0 ? (x * 100).toExponential(1) : (x * 100).toFixed(2));
@@ -11,8 +11,10 @@ export function ProofPanel({ stationId, stop, dir, name }: {
 }) {
   const [cuts, setCuts] = useState<CutsBundle | null>(null);
   const [q, setQ] = useState<number | null>(null);
+  const [emp, setEmp] = useState<Record<string, number>>({});
   const sliderId = useId();
   useEffect(() => { getCuts(stationId).then(setCuts).catch(() => setCuts(null)); }, [stationId]);
+  useEffect(() => { getHistory(stationId).then((h) => setEmp(h.empirical ?? {})).catch(() => setEmp({})); }, [stationId]);
   useEffect(() => { if (cuts && q === null) setQ(cuts.q_assumed); }, [cuts, q]);
 
   if (!stop) return <section aria-labelledby="pf-h"><h2 id="pf-h">{S.proof.title}</h2><p>{S.proof.pick}</p></section>;
@@ -41,6 +43,7 @@ export function ProofPanel({ stationId, stop, dir, name }: {
           return <p aria-live="polite">{r > 0 ? S.proof.relResult(pct(r), (-Math.log10(r)).toFixed(1)) : S.proof.relNever}</p>;
         })()}
         <p className="muted">{S.proof.relNote((cuts.q_assumed * 100).toFixed(0))}</p>
+        {emp[`${stop}:${dir}`] !== undefined && <p>{S.proof.empirical(pct(emp[`${stop}:${dir}`]))}</p>}
       </>}
 
       {d.k !== null && d.k > 0 && <>

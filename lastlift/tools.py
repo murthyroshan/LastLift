@@ -15,7 +15,7 @@ from pydantic import Field
 from . import alerts, db, incidents, network, redundancy, routing, sequence, state
 from .queries import (Q_CLOSED_AT_COMPLEX, Q_COMPLEX_PLATFORMS, Q_STATION_PLATFORMS, Q_COMPLEX_STREETS, Q_LIFT_HISTORY, Q_LIFT_INCIDENT_COUNT, Q_LIFT_INFO,
                       Q_LOST_NOW, Q_NEWLY_LAST, Q_PRIORITY, Q_STATION, Q_STATION_SEARCH, Q_CRITICAL_PAIRS,
-                      Q_LIFT_BLAST)
+                      Q_LIFT_BLAST, Q_LIFT_RECORD)
 
 SCOPES = ("demo", "live", "base")
 _FT_TOKEN = re.compile(r"[A-Za-z0-9]+")
@@ -377,9 +377,23 @@ def lift_history(facility_id: str, scope: str = "demo"):
     began = f" since collection began {since[:10]}" if since else ""
     summary = (f"lift {facility_id}: {len(events)} closure alert(s) on record ({ongoing} ongoing){began}"
                if events else f"lift {facility_id}: no closures on record{began}")
+    rec = g.ro_query(Q_LIFT_RECORD, {"fid": str(facility_id)}).result_set
+    archive = None
+    if rec and rec[0][5]:
+        a12, h12, n12, mttr, single, n, hours, last_end, imputed = rec[0]
+        archive = {"source": "MassDOT MBTA Service Alerts archive", "from": "2024-01-01", "closures": n,
+                   "closed_hours": round(hours or 0, 1), "imputed_ends": imputed, "last_closure_end": last_end,
+                   "availability_12m": a12, "closed_hours_12m": h12, "closures_12m": n12, "median_repair_h": mttr,
+                   "step_free_service_hours_lost_alone": single}
+        summary += (f"; archive since 2024-01-01: {n} closures, {round(hours or 0)} hours closed"
+                    + (f", available {round(a12 * 100, 1)}% of the last 12 archive months" if a12 is not None else "")
+                    + (f", median closure {mttr} h" if mttr is not None else "")
+                    + (f", {round(single)} platform-direction service hours without step-free access caused alone"
+                       if single else "")
+                    + " (historical frequency, not a forecast)")
     return _envelope("lift_history", True, summary,
-                     {"facility_id": facility_id, "incidents": events, "collection_began": since},
-                     ["Q_LIFT_HISTORY"], graph, started, entities=[facility_id])
+                     {"facility_id": facility_id, "incidents": events, "collection_began": since, "archive": archive},
+                     ["Q_LIFT_HISTORY", "Q_LIFT_RECORD"], graph, started, entities=[facility_id])
 
 
 def draft_action(facility_id: str, scope: str = "demo"):

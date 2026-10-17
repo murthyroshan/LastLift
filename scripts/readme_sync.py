@@ -22,8 +22,14 @@ CLAIM = re.compile(r"<!--claim:([a-z0-9_]+)-->(.*?)<!--/claim-->", re.DOTALL)
 GEN = re.compile(r"(<!--generated:([a-z]+)-->)(.*?)(<!--/generated-->)", re.DOTALL)
 
 
-def fmt(v):
+# Coefficients and scores that are not shares: printed as plain numbers, never as percentages.
+PLAIN = ("spearman", "brier_skill", "_p10")
+
+
+def fmt(v, key=""):
     if isinstance(v, float):
+        if any(p in key for p in PLAIN):
+            return f"{v:g}"
         return f"{v:.0%}" if 0 < v < 1 else f"{v:g}"
     if isinstance(v, list):
         return ", ".join(fmt(x) for x in v) or "none"
@@ -60,7 +66,7 @@ def render(text):
     missing = [k for k in CLAIM.findall(text) if k[0] not in claims]
     if missing:
         raise SystemExit(f"README cites claims that do not exist: {sorted({k[0] for k in missing})}")
-    text = CLAIM.sub(lambda m: f"<!--claim:{m.group(1)}-->{fmt(claims[m.group(1)])}<!--/claim-->", text)
+    text = CLAIM.sub(lambda m: f"<!--claim:{m.group(1)}-->{fmt(claims[m.group(1)], m.group(1))}<!--/claim-->", text)
     gens = {"cypher": cypher_table, "counts": counts_table}
     return GEN.sub(lambda m: f"{m.group(1)}\n{gens[m.group(2)]()}\n{m.group(4)}", text)
 

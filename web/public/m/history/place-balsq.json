@@ -1,0 +1,1 @@
+{"from":"2024-01-01","lifts":{"769":{"avail_12m":0.9985,"avail_24m":0.9992,"closed_h_12m":13.3,"closed_h_24m":13.3,"last_outage_end":"2026-02-24T14:15:32Z","months":{"2026-01":8.8,"2026-02":4.5},"mttr_h":4.5,"outages_12m":3,"outages_24m":3,"single_svc_h":0.0}},"platforms":{},"to":"2026-05"}

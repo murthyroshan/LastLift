@@ -3,3 +3,4 @@ networkx==3.7
 pytest==8.4.2
 jsonschema==4.26.0
 pyyaml==6.0.3
+pyarrow==26.0.0          # ingest/history_lamp.py only (reads MBTA LAMP parquet); the app never imports it

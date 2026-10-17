@@ -33,10 +33,31 @@ export const S = {
     relNever: "No combination of lift failures cuts this off.",
     relNote: (assumed: string) =>
       `Assumes lifts fail independently with the same chance (the analysis default is ${assumed}%). Real outage rates per lift come from the closure history later.`,
+    empirical: (pct: string) =>
+      `With each lift's own outage rate over the last year of the archive, step-free access here would have been lost about ${pct}% of the time.`,
     n1Title: "If one lift closes",
     colLift: "Lift closed",
     colLeft: "Lift routes left",
     n1None: "No single lift closure changes this platform-direction.",
+  },
+
+  hist: {
+    title: "History",
+    intro: (from: string, to: string) =>
+      `MBTA's published elevator closures from ${from} to ${to}, replayed through today's station layout. These are reported closures, not measured downtime, and not a forecast.`,
+    platformLine: (name: string, dir: string, hours: number, months: number) =>
+      `${name}, ${dir}: no step-free route for about ${hours} service hours, in ${months} different months.`,
+    none: "No platform here lost step-free access in the replayed closures.",
+    liftsTitle: "Lifts here",
+    colLift: "Lift",
+    colAvail: "Available (last year of the archive)",
+    colClosures: "Closures (last year)",
+    colMedian: "Median closure (h)",
+    colCost: "Platform service hours lost while it alone was out",
+    stripLabel: (fid: string) => `Hours closed per month, lift ${fid}`,
+    colMonth: "Month",
+    colHours: "Hours closed",
+    showMonths: (fid: string) => `Hours closed per month for lift ${fid}`,
   },
 
   net: {
@@ -191,6 +212,7 @@ export const S = {
     colDirs: "Platform-directions",
     colDeps: "Departures per day",
     colPrior: "Prior closures",
+    colChronic: "Closures in the archive's last year",
     draft: "Draft ticket",
     reroute: "Step-free reroutes",
     ticketTitle: "Draft ticket (never filed automatically)",

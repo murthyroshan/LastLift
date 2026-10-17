@@ -142,3 +142,5 @@ dialog::backdrop { background: rgb(0 0 0 / 0.45); }
 .count-line { font-size: 1.15rem; }
 ul.cuts { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
 ul.cuts li { border: 2px dashed var(--k0); padding: 0.25rem 0.6rem; border-radius: var(--r1); }
+.strip { display: flex; gap: 2px; margin: 0.5rem 0; flex-wrap: wrap; }
+.strip span { width: 10px; height: 18px; background: var(--k0); border-radius: 2px; }

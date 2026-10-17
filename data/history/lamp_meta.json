@@ -1,0 +1,10 @@
+{
+ "alerts": 13427,
+ "first_window_start": "2019-02-01T20:02:00Z",
+ "rows_used": 236129,
+ "sha256": "0853d5c863106a2b4b0f36451a87520ddc724c1bf4ef9bf09c87feb294652c9f",
+ "source": "https://performancedata.mbta.com/lamp/tableau/alerts/LAMP_RT_ALERTS.parquet",
+ "until": "2026-06-01T00:00:00Z",
+ "windows": 12444,
+ "windows_with_recorded_end": 12424
+}
