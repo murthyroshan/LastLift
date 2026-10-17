@@ -186,11 +186,13 @@ def certify_route(g, path: list[Edge]) -> dict:
             "query_ids": ["Q_ROUTE_CHECK_SF", "Q_ROUTE_CHECK_RIDE"]}
 
 
-def route(scope_graph: str, base_graph: str, sources, targets, alternatives: int = 2, certify: bool = True):
-    """Best step-free route and up to `alternatives - 1` lift-disjoint backups."""
+def route(scope_graph: str, base_graph: str, sources, targets, alternatives: int = 2, certify: bool = True,
+          also_closed=()):
+    """Best step-free route and up to `alternatives - 1` lift-disjoint backups. `also_closed` simulates more
+    closed lifts on top of the scope's real closures (a what-if reroute; nothing is written)."""
     topo = topology(base_graph)
     g = db.client().select_graph(scope_graph)
-    closed = closed_facilities(g)
+    closed = sorted(set(closed_facilities(g)) | {str(f) for f in also_closed})
     routes, avoid = [], set()
     for i in range(max(1, alternatives)):
         found = topo.shortest(sources, targets, set(closed) | avoid)

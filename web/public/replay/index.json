@@ -1,0 +1,37 @@
+[
+ {
+  "id": "revere-board",
+  "question": "Can I get step-free onto the Wonderland-bound platform at Revere Beach right now?",
+  "source": "llm"
+ },
+ {
+  "id": "chinatown",
+  "question": "Is Chinatown step-free right now?",
+  "source": "llm"
+ },
+ {
+  "id": "alewife-813",
+  "question": "What changed at Alewife now that lift 961 is closed?",
+  "source": "llm"
+ },
+ {
+  "id": "whatif-813",
+  "question": "What happens if lift 813 fails too?",
+  "source": "llm"
+ },
+ {
+  "id": "priority",
+  "question": "Which lifts should be repaired or protected first?",
+  "source": "llm"
+ },
+ {
+  "id": "worcester-782",
+  "question": "Elevator 782 at Worcester is out. Who is affected?",
+  "source": "llm"
+ },
+ {
+  "id": "route-sstat-alfcl",
+  "question": "I need to get from South Station to Alewife step-free today. Which lifts does that depend on?",
+  "source": "llm"
+ }
+]

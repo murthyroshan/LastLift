@@ -1,0 +1,148 @@
+{
+ "id": "whatif-813",
+ "question": "What happens if lift 813 fails too?",
+ "schema": "contracts/ask_events.schema.json",
+ "recorded_at": "2026-10-17T02:45:17Z",
+ "answer": "If lift 813 fails, the Alewife Red Line platform loses step-free access in the open-data model. No step-free route exists in the open-data model to board that platform via other stations. Check mbta.com/alerts/access.",
+ "source": "llm",
+ "events": [
+  {
+   "v": 1,
+   "seq": 1,
+   "type": "start",
+   "t_ms": 0.0,
+   "question": "What happens if lift 813 fails too?",
+   "scope": "demo",
+   "mode": "live"
+  },
+  {
+   "v": 1,
+   "seq": 2,
+   "type": "tool_call",
+   "t_ms": 358.6,
+   "tool": "resolve_place",
+   "args": {
+    "query": "lift 813"
+   }
+  },
+  {
+   "v": 1,
+   "seq": 3,
+   "type": "tool_result",
+   "t_ms": 396.9,
+   "tool": "resolve_place",
+   "ok": true,
+   "summary": "lift 813 (Alewife Elevator 813 (Platform to main lobby))",
+   "via": "mcp",
+   "digest": "d6afe413b4d45083",
+   "ms": 35.7,
+   "entities": [
+    "813"
+   ],
+   "highlight": {
+    "nodes": [],
+    "edges": []
+   }
+  },
+  {
+   "v": 1,
+   "seq": 4,
+   "type": "tool_call",
+   "t_ms": 705.1,
+   "tool": "what_if_close",
+   "args": {
+    "facility_ids": [
+     "813"
+    ]
+   }
+  },
+  {
+   "v": 1,
+   "seq": 5,
+   "type": "tool_result",
+   "t_ms": 1777.6,
+   "tool": "what_if_close",
+   "ok": true,
+   "summary": "simulated closing 813: 3 more platforms lose step-free access; 0 lifts become the last lift (simulation on a copy; live state unchanged)",
+   "via": "mcp",
+   "digest": "823cc84788e95ada",
+   "ms": 1069.6,
+   "entities": [
+    "70061",
+    "813",
+    "Alewife-01",
+    "Alewife-02",
+    "place-alfcl"
+   ],
+   "highlight": {
+    "nodes": [
+     "lift:813"
+    ],
+    "edges": []
+   }
+  },
+  {
+   "v": 1,
+   "seq": 6,
+   "type": "tool_call",
+   "t_ms": 2209.8,
+   "tool": "step_free_route",
+   "args": {
+    "also_closed": [
+     "813"
+    ],
+    "from_station": "place-alfcl",
+    "to_platform": "Red Line"
+   }
+  },
+  {
+   "v": 1,
+   "seq": 7,
+   "type": "tool_result",
+   "t_ms": 2279.7,
+   "tool": "step_free_route",
+   "ok": true,
+   "summary": "no step-free route in the open-data model",
+   "via": "mcp",
+   "digest": "b3ed8a5bcdd61448",
+   "ms": 67.4,
+   "entities": [
+    "70061",
+    "place-alfcl"
+   ],
+   "highlight": {
+    "nodes": [],
+    "edges": []
+   }
+  },
+  {
+   "v": 1,
+   "seq": 8,
+   "type": "grounding",
+   "t_ms": 2566.5,
+   "ok": true,
+   "problems": []
+  },
+  {
+   "v": 1,
+   "seq": 9,
+   "type": "answer",
+   "t_ms": 2567.3,
+   "text": "If lift 813 fails, the Alewife Red Line platform loses step-free access in the open-data model. No step-free route exists in the open-data model to board that platform via other stations. Check mbta.com/alerts/access.",
+   "source": "llm",
+   "grounded": true,
+   "tools": [
+    "resolve_place",
+    "what_if_close",
+    "step_free_route"
+   ]
+  },
+  {
+   "v": 1,
+   "seq": 10,
+   "type": "done",
+   "t_ms": 2567.3,
+   "ms": 2567.3
+  }
+ ]
+}

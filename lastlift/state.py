@@ -96,9 +96,10 @@ def what_if(scope: str, extra_fids) -> dict:
     key = hashlib.sha1(f"{os.getpid()}|{parent}|{','.join(want)}".encode()).hexdigest()[:12]
     name = graph_name(f"wi_{key}")
     with _lock:
-        if name in _what_ifs:
+        if name in _what_ifs and exists(name):
             _what_ifs.move_to_end(name)
         else:
+            _what_ifs.pop(name, None)       # cached but gone (e.g. swept at boot): make it again
             if exists(name):
                 db.client().select_graph(name).delete()
             db.client().connection.execute_command("GRAPH.COPY", parent, name)
@@ -113,6 +114,8 @@ def what_if(scope: str, extra_fids) -> dict:
 def sweep_stale_what_ifs():
     """Delete what-if copies left by a previous process (called at boot)."""
     prefix = graph_name("wi_")
-    for g in db.client().list_graphs():
-        if g.startswith(prefix):
-            db.client().select_graph(g).delete()
+    with _lock:
+        _what_ifs.clear()
+        for g in db.client().list_graphs():
+            if g.startswith(prefix):
+                db.client().select_graph(g).delete()

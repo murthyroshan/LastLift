@@ -1,0 +1,294 @@
+{
+ "id": "alewife-813",
+ "question": "What changed at Alewife now that lift 961 is closed?",
+ "schema": "contracts/ask_events.schema.json",
+ "recorded_at": "2026-10-17T03:04:27Z",
+ "answer": "With lift 961 closed, the Track 1, Track 2, and Red Line platforms at Alewife now rely solely on lift 813 for step-free access. This makes lift 813 the last remaining lift for those platforms in the open-data model. A step-free route to the Track 1 platform still exists via lifts 814 and 813. Check mbta.com/alerts/access.",
+ "source": "llm",
+ "events": [
+  {
+   "v": 1,
+   "seq": 1,
+   "type": "start",
+   "t_ms": 0.0,
+   "question": "What changed at Alewife now that lift 961 is closed?",
+   "scope": "demo",
+   "mode": "live"
+  },
+  {
+   "v": 1,
+   "seq": 2,
+   "type": "tool_call",
+   "t_ms": 466.4,
+   "tool": "resolve_place",
+   "args": {
+    "query": "Alewife"
+   }
+  },
+  {
+   "v": 1,
+   "seq": 3,
+   "type": "tool_result",
+   "t_ms": 779.0,
+   "tool": "resolve_place",
+   "ok": true,
+   "summary": "Alewife (place-alfcl)",
+   "via": "mcp",
+   "digest": "b8832f553bcbfe6b",
+   "ms": 303.3,
+   "entities": [
+    "place-alfcl"
+   ],
+   "highlight": {
+    "nodes": [],
+    "edges": []
+   }
+  },
+  {
+   "v": 1,
+   "seq": 4,
+   "type": "tool_call",
+   "t_ms": 779.1,
+   "tool": "resolve_place",
+   "args": {
+    "query": "961"
+   }
+  },
+  {
+   "v": 1,
+   "seq": 5,
+   "type": "tool_result",
+   "t_ms": 818.1,
+   "tool": "resolve_place",
+   "ok": true,
+   "summary": "lift 961 (Alewife Elevator 961 (Platform to Russell Field, Rindge Avenue lobby))",
+   "via": "mcp",
+   "digest": "e366204e9f369180",
+   "ms": 35.1,
+   "entities": [
+    "961"
+   ],
+   "highlight": {
+    "nodes": [],
+    "edges": []
+   }
+  },
+  {
+   "v": 1,
+   "seq": 6,
+   "type": "tool_call",
+   "t_ms": 1254.1,
+   "tool": "current_closures",
+   "args": {}
+  },
+  {
+   "v": 1,
+   "seq": 7,
+   "type": "tool_result",
+   "t_ms": 1338.4,
+   "tool": "current_closures",
+   "ok": true,
+   "summary": "14 lift alerts (8 modelled, 6 cannot assess); 3 platforms lose step-free access in the open-data model; 3 lifts are now the last lift for some platform: 813 (Alewife), 891 (Downtown Crossing), 866 (Kendall/MIT)",
+   "via": "mcp",
+   "digest": "a8ced088b8c294db",
+   "ms": 78.2,
+   "entities": [
+    "70019",
+    "70058",
+    "704",
+    "711",
+    "726",
+    "751",
+    "777",
+    "782",
+    "803",
+    "813",
+    "854",
+    "866",
+    "869",
+    "876",
+    "885",
+    "891",
+    "929",
+    "930",
+    "961",
+    "NEC-2276-02",
+    "place-FR-0253",
+    "place-WML-0035",
+    "place-WML-0177",
+    "place-WML-0442",
+    "place-alfcl",
+    "place-bbsta",
+    "place-cenav",
+    "place-chncl",
+    "place-dwnxg",
+    "place-knncl",
+    "place-rbmnl",
+    "place-state",
+    "place-wondl",
+    "subplat-cenav-1"
+   ],
+   "highlight": {
+    "nodes": [],
+    "edges": []
+   }
+  },
+  {
+   "v": 1,
+   "seq": 8,
+   "type": "tool_call",
+   "t_ms": 1339.0,
+   "tool": "platform_redundancy",
+   "args": {
+    "station_id": "place-alfcl"
+   }
+  },
+  {
+   "v": 1,
+   "seq": 9,
+   "type": "tool_result",
+   "t_ms": 2062.7,
+   "tool": "platform_redundancy",
+   "ok": true,
+   "summary": "Alewife: 10 platforms; 3 depend on a single lift (Track 1 platform: lift 813 is newly the only lift (with lift(s) 961 closed here, its other lift routes are gone); Red Line platform: lift 813 is newly the only lift (with lift(s) 961 closed here, its other lift routes are gone); Track 2 platform: lift 813 is newly the only lift (with lift(s) 961 closed here, its other lift routes are gone)); lift(s) closed here now: 961",
+   "via": "mcp",
+   "digest": "65453a3840831963",
+   "ms": 715.0,
+   "entities": [
+    "14112",
+    "14118",
+    "14120",
+    "14121",
+    "14122",
+    "14123",
+    "70061",
+    "813",
+    "9070061",
+    "Alewife-01",
+    "Alewife-02",
+    "place-alfcl"
+   ],
+   "highlight": {
+    "nodes": [],
+    "edges": [
+     "SF:70061>node-813-bottom",
+     "SF:Alewife-01>node-813-bottom",
+     "SF:Alewife-02>node-813-bottom",
+     "SF:door-alfcl-cambridgepark>node-alfcl-cambridgesideramp-top",
+     "SF:door-alfcl-steel>street:place-alfcl",
+     "SF:lift:813:out>node-813-bottom",
+     "SF:lift:813:out>node-813-top",
+     "SF:lift:813>lift:813:out",
+     "SF:node-813-bottom>70061",
+     "SF:node-813-bottom>Alewife-01",
+     "SF:node-813-bottom>Alewife-02",
+     "SF:node-813-bottom>lift:813",
+     "SF:node-813-top>lift:813",
+     "SF:node-813-top>node-alfcl-main-farepaid",
+     "SF:node-alfcl-cambridgesideramp-bottom>node-alfcl-main-fareunpaid",
+     "SF:node-alfcl-cambridgesideramp-landing>node-alfcl-cambridgesideramp-bottom",
+     "SF:node-alfcl-cambridgesideramp-top>node-alfcl-cambridgesideramp-landing",
+     "SF:node-alfcl-main-farepaid>node-813-top",
+     "SF:node-alfcl-main-farepaid>node-alfcl-main-fareunpaid",
+     "SF:node-alfcl-main-fareunpaid>node-alfcl-main-farepaid",
+     "SF:node-alfcl-main-fareunpaid>node-alfcl-steelplramp-bottom",
+     "SF:node-alfcl-steelplramp-bottom>node-alfcl-steelplramp-landing",
+     "SF:node-alfcl-steelplramp-landing>node-alfcl-steelplramp-top",
+     "SF:node-alfcl-steelplramp-top>door-alfcl-steel",
+     "SF:street:place-alfcl>door-alfcl-cambridgepark"
+    ]
+   }
+  },
+  {
+   "v": 1,
+   "seq": 10,
+   "type": "tool_call",
+   "t_ms": 2642.0,
+   "tool": "step_free_route",
+   "args": {
+    "from_station": "place-alfcl",
+    "to_platform": "Track 1"
+   }
+  },
+  {
+   "v": 1,
+   "seq": 11,
+   "type": "tool_result",
+   "t_ms": 3802.4,
+   "tool": "step_free_route",
+   "ok": true,
+   "summary": "1 step-free route(s); best ~4.0 min: lift 814 (Main lobby to street, parking garage); lift 813 (Platform to main lobby). No backup avoiding lifts 814, 813",
+   "via": "mcp",
+   "digest": "b8f74b6b600d49d9",
+   "ms": 1150.4,
+   "entities": [
+    "813",
+    "814",
+    "Alewife-01",
+    "place-alfcl"
+   ],
+   "highlight": {
+    "nodes": [
+     "street:place-alfcl",
+     "door-alfcl-alewifes",
+     "node-814-ground",
+     "lift:814",
+     "lift:814:out",
+     "node-814-concourse",
+     "node-alfcl-main-fareunpaid",
+     "node-alfcl-main-farepaid",
+     "node-813-top",
+     "lift:813",
+     "lift:813:out",
+     "node-813-bottom",
+     "Alewife-01"
+    ],
+    "edges": [
+     "SF:street:place-alfcl>door-alfcl-alewifes",
+     "SF:door-alfcl-alewifes>node-814-ground",
+     "SF:node-814-ground>lift:814",
+     "SF:lift:814>lift:814:out",
+     "SF:lift:814:out>node-814-concourse",
+     "SF:node-814-concourse>node-alfcl-main-fareunpaid",
+     "SF:node-alfcl-main-fareunpaid>node-alfcl-main-farepaid",
+     "SF:node-alfcl-main-farepaid>node-813-top",
+     "SF:node-813-top>lift:813",
+     "SF:lift:813>lift:813:out",
+     "SF:lift:813:out>node-813-bottom",
+     "SF:node-813-bottom>Alewife-01"
+    ]
+   }
+  },
+  {
+   "v": 1,
+   "seq": 12,
+   "type": "grounding",
+   "t_ms": 16606.3,
+   "ok": true,
+   "problems": []
+  },
+  {
+   "v": 1,
+   "seq": 13,
+   "type": "answer",
+   "t_ms": 16607.7,
+   "text": "With lift 961 closed, the Track 1, Track 2, and Red Line platforms at Alewife now rely solely on lift 813 for step-free access. This makes lift 813 the last remaining lift for those platforms in the open-data model. A step-free route to the Track 1 platform still exists via lifts 814 and 813. Check mbta.com/alerts/access.",
+   "source": "llm",
+   "grounded": true,
+   "tools": [
+    "resolve_place",
+    "resolve_place",
+    "current_closures",
+    "platform_redundancy",
+    "step_free_route"
+   ]
+  },
+  {
+   "v": 1,
+   "seq": 14,
+   "type": "done",
+   "t_ms": 16607.8,
+   "ms": 16607.8
+  }
+ ]
+}

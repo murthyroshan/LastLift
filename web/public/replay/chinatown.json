@@ -1,0 +1,186 @@
+{
+ "id": "chinatown",
+ "question": "Is Chinatown step-free right now?",
+ "schema": "contracts/ask_events.schema.json",
+ "recorded_at": "2026-10-17T03:00:17Z",
+ "answer": "Chinatown is not fully step-free right now in the open-data model. The Oak Grove platform loses step-free access due to lift 876 being closed. You can still reach the Oak Grove platform via a step-free route through the Forest Hills platform and Back Bay, taking about 17.1 minutes. The Forest Hills platform remains step-free but depends on a single lift (922). Check mbta.com/alerts/access.",
+ "source": "llm",
+ "events": [
+  {
+   "v": 1,
+   "seq": 1,
+   "type": "start",
+   "t_ms": 0.0,
+   "question": "Is Chinatown step-free right now?",
+   "scope": "demo",
+   "mode": "live"
+  },
+  {
+   "v": 1,
+   "seq": 2,
+   "type": "tool_call",
+   "t_ms": 646.5,
+   "tool": "resolve_place",
+   "args": {
+    "query": "Chinatown"
+   }
+  },
+  {
+   "v": 1,
+   "seq": 3,
+   "type": "tool_result",
+   "t_ms": 1062.1,
+   "tool": "resolve_place",
+   "ok": true,
+   "summary": "Chinatown (place-chncl)",
+   "via": "mcp",
+   "digest": "9867f5547f76511c",
+   "ms": 404.8,
+   "entities": [
+    "place-chncl"
+   ],
+   "highlight": {
+    "nodes": [],
+    "edges": []
+   }
+  },
+  {
+   "v": 1,
+   "seq": 4,
+   "type": "tool_call",
+   "t_ms": 1522.3,
+   "tool": "platform_redundancy",
+   "args": {
+    "station_id": "place-chncl"
+   }
+  },
+  {
+   "v": 1,
+   "seq": 5,
+   "type": "tool_result",
+   "t_ms": 1746.6,
+   "tool": "platform_redundancy",
+   "ok": true,
+   "summary": "Chinatown: 2 platforms; 1 loses step-free access now in the open-data model (Oak Grove platform); 1 depends on a single lift (Forest Hills platform: lift 922); lift(s) closed here now: 876",
+   "via": "mcp",
+   "digest": "b06c9e525bd16120",
+   "ms": 219.5,
+   "entities": [
+    "70018",
+    "70019",
+    "922",
+    "place-chncl"
+   ],
+   "highlight": {
+    "nodes": [],
+    "edges": [
+     "SF:70018>node-chncl-fhfarepaid",
+     "SF:door-chncl-fhelevator>lift:922",
+     "SF:door-chncl-fhelevator>street:place-chncl",
+     "SF:lift:922:out>door-chncl-fhelevator",
+     "SF:lift:922:out>node-922-lobby",
+     "SF:lift:922>lift:922:out",
+     "SF:node-922-lobby>lift:922",
+     "SF:node-922-lobby>node-chncl-fhfareunpaid",
+     "SF:node-chncl-fhfarepaid>70018",
+     "SF:node-chncl-fhfarepaid>node-chncl-fhfareunpaid",
+     "SF:node-chncl-fhfareunpaid>node-922-lobby",
+     "SF:node-chncl-fhfareunpaid>node-chncl-fhfarepaid",
+     "SF:street:place-chncl>door-chncl-fhelevator"
+    ]
+   }
+  },
+  {
+   "v": 1,
+   "seq": 6,
+   "type": "tool_call",
+   "t_ms": 2142.0,
+   "tool": "step_free_route",
+   "args": {
+    "from_station": "place-chncl",
+    "to_platform": "Oak Grove"
+   }
+  },
+  {
+   "v": 1,
+   "seq": 7,
+   "type": "tool_result",
+   "t_ms": 2838.8,
+   "tool": "step_free_route",
+   "ok": true,
+   "summary": "1 step-free route(s); best ~17.1 min: lift 922 (Forest Hills platform to Boylston St, Washington St); ride Orange to Back Bay; turn around at Back Bay (step-free change of platform); ride Orange back to Chinatown. No backup avoiding lifts 922",
+   "via": "mcp",
+   "digest": "976d6491b17ce873",
+   "ms": 688.7,
+   "entities": [
+    "70019",
+    "922",
+    "place-bbsta",
+    "place-chncl",
+    "place-tumnl"
+   ],
+   "highlight": {
+    "nodes": [
+     "street:place-chncl",
+     "door-chncl-fhelevator",
+     "lift:922",
+     "lift:922:out",
+     "node-922-lobby",
+     "node-chncl-fhfareunpaid",
+     "node-chncl-fhfarepaid",
+     "70018",
+     "70016",
+     "70014",
+     "node-853-platform",
+     "70015",
+     "70017",
+     "70019"
+    ],
+    "edges": [
+     "SF:street:place-chncl>door-chncl-fhelevator",
+     "SF:door-chncl-fhelevator>lift:922",
+     "SF:lift:922>lift:922:out",
+     "SF:lift:922:out>node-922-lobby",
+     "SF:node-922-lobby>node-chncl-fhfareunpaid",
+     "SF:node-chncl-fhfareunpaid>node-chncl-fhfarepaid",
+     "SF:node-chncl-fhfarepaid>70018",
+     "RIDE:70018>70016",
+     "RIDE:70016>70014",
+     "SF:70014>node-853-platform",
+     "SF:node-853-platform>70015",
+     "RIDE:70015>70017",
+     "RIDE:70017>70019"
+    ]
+   }
+  },
+  {
+   "v": 1,
+   "seq": 8,
+   "type": "grounding",
+   "t_ms": 3265.7,
+   "ok": true,
+   "problems": []
+  },
+  {
+   "v": 1,
+   "seq": 9,
+   "type": "answer",
+   "t_ms": 3267.9,
+   "text": "Chinatown is not fully step-free right now in the open-data model. The Oak Grove platform loses step-free access due to lift 876 being closed. You can still reach the Oak Grove platform via a step-free route through the Forest Hills platform and Back Bay, taking about 17.1 minutes. The Forest Hills platform remains step-free but depends on a single lift (922). Check mbta.com/alerts/access.",
+   "source": "llm",
+   "grounded": true,
+   "tools": [
+    "resolve_place",
+    "platform_redundancy",
+    "step_free_route"
+   ]
+  },
+  {
+   "v": 1,
+   "seq": 10,
+   "type": "done",
+   "t_ms": 3267.9,
+   "ms": 3267.9
+  }
+ ]
+}

@@ -1,0 +1,229 @@
+{
+ "id": "route-sstat-alfcl",
+ "question": "I need to get from South Station to Alewife step-free today. Which lifts does that depend on?",
+ "schema": "contracts/ask_events.schema.json",
+ "recorded_at": "2026-10-17T02:49:52Z",
+ "answer": "Your step-free route (about 24 minutes) depends on five lifts: 926 (South Station, Subway Lobby to Atlantic Avenue), 918 (South Station, Ashmont/Braintree to Airport/Design Center/Chelsea), 919 (South Station, Alewife platform to Airport/Design Center/Chelsea), 813 (Alewife, Platform to main lobby), and 814 (Alewife, Main lobby to street). You then ride the Red Line to Alewife. There is no backup route avoiding these lifts in the open-data model. Check mbta.com/alerts/access.",
+ "source": "llm",
+ "events": [
+  {
+   "v": 1,
+   "seq": 1,
+   "type": "start",
+   "t_ms": 0.0,
+   "question": "I need to get from South Station to Alewife step-free today. Which lifts does that depend on?",
+   "scope": "demo",
+   "mode": "live"
+  },
+  {
+   "v": 1,
+   "seq": 2,
+   "type": "tool_call",
+   "t_ms": 840.5,
+   "tool": "resolve_place",
+   "args": {
+    "query": "South Station"
+   }
+  },
+  {
+   "v": 1,
+   "seq": 3,
+   "type": "tool_result",
+   "t_ms": 891.3,
+   "tool": "resolve_place",
+   "ok": true,
+   "summary": "South Station (place-sstat); North Station (place-north); South Acton (place-FR-0253)",
+   "via": "mcp",
+   "digest": "90c06d962de5b717",
+   "ms": 37.0,
+   "entities": [
+    "place-FR-0253",
+    "place-NEC-1919",
+    "place-PB-0158",
+    "place-north",
+    "place-sstat"
+   ],
+   "highlight": {
+    "nodes": [],
+    "edges": []
+   }
+  },
+  {
+   "v": 1,
+   "seq": 4,
+   "type": "tool_call",
+   "t_ms": 891.4,
+   "tool": "resolve_place",
+   "args": {
+    "query": "Alewife"
+   }
+  },
+  {
+   "v": 1,
+   "seq": 5,
+   "type": "tool_result",
+   "t_ms": 927.7,
+   "tool": "resolve_place",
+   "ok": true,
+   "summary": "Alewife (place-alfcl)",
+   "via": "mcp",
+   "digest": "b8832f553bcbfe6b",
+   "ms": 34.2,
+   "entities": [
+    "place-alfcl"
+   ],
+   "highlight": {
+    "nodes": [],
+    "edges": []
+   }
+  },
+  {
+   "v": 1,
+   "seq": 6,
+   "type": "tool_call",
+   "t_ms": 1443.5,
+   "tool": "step_free_route",
+   "args": {
+    "from_station": "place-sstat",
+    "to_station": "place-alfcl"
+   }
+  },
+  {
+   "v": 1,
+   "seq": 7,
+   "type": "tool_result",
+   "t_ms": 1529.1,
+   "tool": "step_free_route",
+   "ok": true,
+   "summary": "1 step-free route(s); best ~24.4 min: lift 926 (Subway Lobby to Atlantic Avenue, Summer Street); lift 918 (Ashmont/Braintree platform to Airport/Design Center/Chelsea platform and lobby); lift 919 (Alewife platform to Airport/Design Center/Chelsea platform); ride Red to Alewife; lift 813 (Platform to main lobby); lift 814 (Main lobby to street, parking garage). No backup avoiding lifts 926, 918, 919, 813, 814",
+   "via": "mcp",
+   "digest": "cb6da2250e722360",
+   "ms": 83.0,
+   "entities": [
+    "813",
+    "814",
+    "918",
+    "919",
+    "926",
+    "place-alfcl",
+    "place-chmnl",
+    "place-cntsq",
+    "place-davis",
+    "place-dwnxg",
+    "place-harsq",
+    "place-knncl",
+    "place-pktrm",
+    "place-portr",
+    "place-sstat"
+   ],
+   "highlight": {
+    "nodes": [
+     "street:place-sstat",
+     "door-sstat-outmainelev",
+     "lift:926",
+     "lift:926:out",
+     "node-926-lobby",
+     "node-sstat-south-fareunpaid",
+     "node-sstat-south-farepaid",
+     "node-918-lobby",
+     "lift:918",
+     "lift:918:out",
+     "node-918-sl",
+     "node-919-sl",
+     "lift:919",
+     "lift:919:out",
+     "node-919-rl",
+     "70080",
+     "70078",
+     "70076",
+     "70074",
+     "70072",
+     "70070",
+     "70068",
+     "70066",
+     "70064",
+     "70061",
+     "node-813-bottom",
+     "lift:813",
+     "lift:813:out",
+     "node-813-top",
+     "node-alfcl-main-farepaid",
+     "node-alfcl-main-fareunpaid",
+     "node-814-concourse",
+     "lift:814",
+     "lift:814:out",
+     "node-814-ground",
+     "door-alfcl-alewifes",
+     "street:place-alfcl"
+    ],
+    "edges": [
+     "SF:street:place-sstat>door-sstat-outmainelev",
+     "SF:door-sstat-outmainelev>lift:926",
+     "SF:lift:926>lift:926:out",
+     "SF:lift:926:out>node-926-lobby",
+     "SF:node-926-lobby>node-sstat-south-fareunpaid",
+     "SF:node-sstat-south-fareunpaid>node-sstat-south-farepaid",
+     "SF:node-sstat-south-farepaid>node-918-lobby",
+     "SF:node-918-lobby>lift:918",
+     "SF:lift:918>lift:918:out",
+     "SF:lift:918:out>node-918-sl",
+     "SF:node-918-sl>node-919-sl",
+     "SF:node-919-sl>lift:919",
+     "SF:lift:919>lift:919:out",
+     "SF:lift:919:out>node-919-rl",
+     "SF:node-919-rl>70080",
+     "RIDE:70080>70078",
+     "RIDE:70078>70076",
+     "RIDE:70076>70074",
+     "RIDE:70074>70072",
+     "RIDE:70072>70070",
+     "RIDE:70070>70068",
+     "RIDE:70068>70066",
+     "RIDE:70066>70064",
+     "RIDE:70064>70061",
+     "SF:70061>node-813-bottom",
+     "SF:node-813-bottom>lift:813",
+     "SF:lift:813>lift:813:out",
+     "SF:lift:813:out>node-813-top",
+     "SF:node-813-top>node-alfcl-main-farepaid",
+     "SF:node-alfcl-main-farepaid>node-alfcl-main-fareunpaid",
+     "SF:node-alfcl-main-fareunpaid>node-814-concourse",
+     "SF:node-814-concourse>lift:814",
+     "SF:lift:814>lift:814:out",
+     "SF:lift:814:out>node-814-ground",
+     "SF:node-814-ground>door-alfcl-alewifes",
+     "SF:door-alfcl-alewifes>street:place-alfcl"
+    ]
+   }
+  },
+  {
+   "v": 1,
+   "seq": 8,
+   "type": "grounding",
+   "t_ms": 2188.1,
+   "ok": true,
+   "problems": []
+  },
+  {
+   "v": 1,
+   "seq": 9,
+   "type": "answer",
+   "t_ms": 2188.9,
+   "text": "Your step-free route (about 24 minutes) depends on five lifts: 926 (South Station, Subway Lobby to Atlantic Avenue), 918 (South Station, Ashmont/Braintree to Airport/Design Center/Chelsea), 919 (South Station, Alewife platform to Airport/Design Center/Chelsea), 813 (Alewife, Platform to main lobby), and 814 (Alewife, Main lobby to street). You then ride the Red Line to Alewife. There is no backup route avoiding these lifts in the open-data model. Check mbta.com/alerts/access.",
+   "source": "llm",
+   "grounded": true,
+   "tools": [
+    "resolve_place",
+    "resolve_place",
+    "step_free_route"
+   ]
+  },
+  {
+   "v": 1,
+   "seq": 10,
+   "type": "done",
+   "t_ms": 2188.9,
+   "ms": 2188.9
+  }
+ ]
+}

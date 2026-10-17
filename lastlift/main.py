@@ -1,6 +1,8 @@
-"""LastLift API: health, the agent's tools over HTTP, and the station graph contract.
-The agent and MCP server arrive in later milestones and call the same tool registry."""
+"""LastLift API: health, the tools over HTTP and MCP (/mcp/), the agent (/api/ask, POST or SSE) and the
+station graph contract. HTTP, MCP and the agent all use the one tool registry."""
+import asyncio
 import inspect
+import json
 import logging
 import os
 import time
@@ -9,15 +11,18 @@ from typing import Literal
 
 from fastapi import Body, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from redis.exceptions import ConnectionError as RedisConnectionError
 from redis.exceptions import TimeoutError as RedisTimeoutError
 
 from . import __version__, db, incidents, state, station_view, tools, wording
+from .agent import loop as agent
+from .mcp_server import mcp
 from .config import settings
 
 STARTED = time.time()
 log = logging.getLogger("lastlift")
+mcp_app = mcp.http_app(path="/", stateless_http=True)        # MCP over streamable HTTP at /mcp/
 
 
 @asynccontextmanager
@@ -29,7 +34,8 @@ async def lifespan(_app):
                 incidents.sync(scope)       # incident memory rebuilt from the committed harvest
     except Exception as exc:                # graph server not up yet: /healthz reports it
         log.warning("boot sync skipped: %s", exc)
-    yield
+    async with mcp_app.lifespan(mcp_app):
+        yield
 
 
 app = FastAPI(title="LastLift", version=__version__, docs_url="/v1/docs", openapi_url="/v1/openapi.json",
@@ -40,6 +46,7 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],
 )
+app.mount("/mcp", mcp_app)
 
 
 @app.exception_handler(RedisConnectionError)
@@ -134,3 +141,51 @@ def station_graph(station_id: str, dir: Literal["board", "exit"] = "board",
 def disclaimers():
     """The exact disclaimer texts every surface uses (footer, validation, partial, cannot-assess, ...)."""
     return wording.DISCLAIMERS
+
+
+def _require_graph():
+    if not db.ping():                       # fail loudly before the agent starts, never a guessed answer
+        raise RedisConnectionError("graph server unreachable")
+
+
+@app.post("/api/ask")
+async def ask(body: dict = Body(...)):
+    """Ask the agent; returns the answer, its source (llm or template) and every event of the run."""
+    question = str(body.get("question", "")).strip()[:500]
+    scope = body.get("scope", "demo")
+    if not question or scope not in tools.SCOPES:
+        raise HTTPException(400, "question (non-empty) and scope (demo|live|base) required")
+    _require_graph()
+    r = await agent.ask(question, scope=scope)
+    return {"answer": r["answer"], "source": r["source"], "events": r["events"]}
+
+
+@app.get("/api/ask")
+async def ask_stream(q: str = Query(..., min_length=1, max_length=500),
+                     scope: Literal["demo", "live", "base"] = "demo"):
+    """The same run as a server-sent event stream (one SSE event per agent event, ending with 'done')."""
+    _require_graph()
+    queue: asyncio.Queue = asyncio.Queue()
+
+    async def run():
+        try:
+            await agent.ask(q, scope=scope, emit=queue.put_nowait)
+        except Exception as exc:            # surface the failure in the stream, then end it
+            queue.put_nowait({"v": 1, "seq": 0, "type": "error", "t_ms": 0, "stage": "server",
+                              "message": type(exc).__name__})
+            queue.put_nowait({"v": 1, "seq": 0, "type": "done", "t_ms": 0, "ms": 0})
+
+    task = asyncio.create_task(run())
+
+    async def stream():
+        try:
+            while True:
+                ev = await queue.get()
+                yield f"event: {ev['type']}\ndata: {json.dumps(ev, ensure_ascii=False)}\n\n"
+                if ev["type"] == "done":
+                    break
+        finally:
+            task.cancel()
+
+    return StreamingResponse(stream(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})

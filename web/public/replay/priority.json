@@ -1,0 +1,90 @@
+{
+ "id": "priority",
+ "question": "Which lifts should be repaired or protected first?",
+ "schema": "contracts/ask_events.schema.json",
+ "recorded_at": "2026-10-17T02:55:43Z",
+ "answer": "Repair now: Back Bay Elevator 854, Chinatown Elevator 876, and Revere Beach Elevator 885 — all closed and causing platforms to lose step-free access in the open-data model. Protect next: Alewife Elevator 813 and Downtown Crossing Elevator 891, which are working but already the last lift for some platforms due to current closures. Check mbta.com/alerts/access.",
+ "source": "llm",
+ "events": [
+  {
+   "v": 1,
+   "seq": 1,
+   "type": "start",
+   "t_ms": 0.0,
+   "question": "Which lifts should be repaired or protected first?",
+   "scope": "demo",
+   "mode": "live"
+  },
+  {
+   "v": 1,
+   "seq": 2,
+   "type": "tool_call",
+   "t_ms": 273.4,
+   "tool": "repair_priority",
+   "args": {}
+  },
+  {
+   "v": 1,
+   "seq": 3,
+   "type": "tool_result",
+   "t_ms": 542.4,
+   "tool": "repair_priority",
+   "ok": true,
+   "summary": "lift 854 (Back Bay Elevator 854 (Commuter Rail track 2 to lobby)): repair now (closed, platforms lose access); lift 876 (Chinatown Elevator 876 (Oak Grove platform to Washington St, Essex St)): repair now (closed, platforms lose access); lift 885 (Revere Beach Elevator 885 (Wonderland platform to lobby)): repair now (closed, platforms lose access)",
+   "via": "mcp",
+   "digest": "5c83c438a328b1be",
+   "ms": 264.5,
+   "entities": [
+    "813",
+    "854",
+    "866",
+    "876",
+    "885",
+    "891",
+    "962",
+    "963",
+    "964",
+    "977",
+    "place-alfcl",
+    "place-armnl",
+    "place-bbsta",
+    "place-chncl",
+    "place-coecl",
+    "place-dwnxg",
+    "place-knncl",
+    "place-rbmnl"
+   ],
+   "highlight": {
+    "nodes": [],
+    "edges": []
+   }
+  },
+  {
+   "v": 1,
+   "seq": 4,
+   "type": "grounding",
+   "t_ms": 1157.5,
+   "ok": true,
+   "problems": []
+  },
+  {
+   "v": 1,
+   "seq": 5,
+   "type": "answer",
+   "t_ms": 1159.1,
+   "text": "Repair now: Back Bay Elevator 854, Chinatown Elevator 876, and Revere Beach Elevator 885 — all closed and causing platforms to lose step-free access in the open-data model. Protect next: Alewife Elevator 813 and Downtown Crossing Elevator 891, which are working but already the last lift for some platforms due to current closures. Check mbta.com/alerts/access.",
+   "source": "llm",
+   "grounded": true,
+   "tools": [
+    "repair_priority"
+   ]
+  },
+  {
+   "v": 1,
+   "seq": 6,
+   "type": "done",
+   "t_ms": 1159.1,
+   "ms": 1159.1
+  }
+ ]
+}

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lastlift/ask_events/v1",
+  "title": "LastLift agent run events (frozen, v1)",
+  "description": "One run = start, then any number of tool_call/tool_result pairs (plus optional error and grounding), then answer, then done. Every event has v, seq (1, 2, 3 ...), type and t_ms (ms since start).",
+  "type": "object",
+  "required": ["v", "seq", "type", "t_ms"],
+  "properties": {
+    "v": {"const": 1},
+    "seq": {"type": "integer", "minimum": 1},
+    "t_ms": {"type": "number", "minimum": 0},
+    "type": {"enum": ["start", "tool_call", "tool_result", "error", "grounding", "answer", "done"]}
+  },
+  "allOf": [
+    {"if": {"properties": {"type": {"const": "start"}}},
+     "then": {"required": ["question", "scope", "mode"],
+              "properties": {"question": {"type": "string"}, "scope": {"enum": ["demo", "live", "base"]},
+                             "mode": {"type": "string"}}}},
+    {"if": {"properties": {"type": {"const": "tool_call"}}},
+     "then": {"required": ["tool", "args"], "properties": {"tool": {"type": "string"}, "args": {"type": "object"}}}},
+    {"if": {"properties": {"type": {"const": "tool_result"}}},
+     "then": {"required": ["tool", "ok", "summary", "via", "digest", "entities", "highlight"],
+              "properties": {"tool": {"type": "string"}, "ok": {"type": "boolean"}, "summary": {"type": "string"},
+                             "via": {"const": "mcp"}, "digest": {"type": "string", "pattern": "^[0-9a-f]{16}$"},
+                             "ms": {"type": ["number", "null"]},
+                             "entities": {"type": "array", "items": {"type": "string"}},
+                             "highlight": {"type": "object", "required": ["nodes", "edges"]}}}},
+    {"if": {"properties": {"type": {"const": "error"}}},
+     "then": {"required": ["stage", "message"]}},
+    {"if": {"properties": {"type": {"const": "grounding"}}},
+     "then": {"required": ["ok", "problems"], "properties": {"ok": {"type": "boolean"},
+                                                            "problems": {"type": "array", "items": {"type": "string"}}}}},
+    {"if": {"properties": {"type": {"const": "answer"}}},
+     "then": {"required": ["text", "source", "grounded", "tools"],
+              "properties": {"text": {"type": "string"}, "source": {"enum": ["llm", "template"]},
+                             "grounded": {"type": "boolean"}, "tools": {"type": "array"}}}},
+    {"if": {"properties": {"type": {"const": "done"}}},
+     "then": {"required": ["ms"]}}
+  ]
+}
