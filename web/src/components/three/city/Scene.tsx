@@ -42,10 +42,10 @@ function Rig({ data }: { data: CityData }) {
   const wantT = useMemo(() => new THREE.Vector3(), []);
   useFrame(({ camera, clock }, dt) => {
     const now = clock.elapsedTime;
-    advanceClock(Math.min(dt, 0.05), performance.now() / 1000);
+    if (!story.film) advanceClock(Math.min(dt, 0.05), performance.now() / 1000);
     void now;
     const target = story.reduced ? story.active : story.p;
-    const k = story.reduced ? 1 : 1 - Math.exp(-Math.min(dt, 0.05) * 3.2);
+    const k = story.reduced || story.film ? 1 : 1 - Math.exp(-Math.min(dt, 0.05) * 3.2);
     story.pSmooth += (target - story.pSmooth) * k;
     // story position -> spline parameter (piecewise linear between keyframes)
     const p = story.pSmooth;
@@ -59,11 +59,11 @@ function Rig({ data }: { data: CityData }) {
     const drift = (1 - smooth(0.2, 0.9, p)) * (story.reduced ? 0 : 1);
     want.x += Math.sin(story.t * 0.12) * 2.5 * drift;
     camera.position.copy(want);
-    look.current.lerp(wantT, story.reduced ? 1 : 0.25);
+    look.current.lerp(wantT, story.reduced || story.film ? 1 : 0.25);
     camera.lookAt(look.current);
     // shift the frustum sideways so the subject sits beside the text, not under it (none on narrow screens)
     const j = Math.min(SIDE.length - 2, Math.floor(p)), fr = p - j;
-    const side = size.width < 900 ? 0 : SIDE[j] + (SIDE[j + 1] - SIDE[j]) * (fr * fr * (3 - 2 * fr));
+    const side = size.width < 900 || story.film ? 0 : SIDE[j] + (SIDE[j + 1] - SIDE[j]) * (fr * fr * (3 - 2 * fr));
     const cam = camera as THREE.PerspectiveCamera;
     cam.setViewOffset(size.width, size.height, side * size.width, 0, size.width, size.height);
     cam.updateProjectionMatrix();

@@ -29,6 +29,7 @@ export const story = {
   dark: true,
   enteredStep: [0, 0, 0, 0, 0] as number[],   // motion-clock time at which each step was entered
   active: 0,
+  film: false,                                // offline film render: exact frames, no smoothing, centred framing
 };
 
 export const MOTION_WINDOW = 4;

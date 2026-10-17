@@ -2,6 +2,8 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { getClaims, getContingency, type Scope } from "../api";
 import type { Camera } from "../components/LiveMap";
 import { LineSweep } from "../components/LineSweep";
+import { StationTable } from "../components/StationTable";
+import { TheCount } from "../components/TheCount";
 import { href } from "../router";
 import { S } from "../strings.en";
 
@@ -144,6 +146,17 @@ export function Network({ scope }: { scope: Scope }) {
         <p>{S.net.mc((mc.mean * 100).toFixed(2), (c.q_assumed * 100).toFixed(0),
           (mc.ci95[0] * 100).toFixed(2), (mc.ci95[1] * 100).toFixed(2))}</p>
       </section>}
+
+      <section className="block card" aria-labelledby="tc-h">
+        <div className="section-head">
+          <div>
+            <h2 id="tc-h">{S.home.countTitle}</h2>
+            <p className="muted">{S.home.countHelp}</p>
+          </div>
+        </div>
+        <TheCount />
+      </section>
+      <StationTable />
     </>
   );
 }

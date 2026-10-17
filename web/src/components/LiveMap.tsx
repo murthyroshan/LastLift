@@ -171,10 +171,10 @@ export function LiveMap({ camera = CAMERAS.overview, highlight = null, arcLifts 
         pickable: true, updateTriggers: { getFillColor: [highlight] },
       }),
       new ColumnLayer({
-        id: "columns", data: data.filter((r) => r.single > 0 || r.lost > 0), diskResolution: 24, radius: 110 * scale,
+        id: "columns", data: data.filter((r) => r.single > 0 || r.lost > 0), diskResolution: 40, radius: 72 * scale, opacity: 0.94,
         extruded: true, getPosition: (r: Row) => [r.lon, r.lat], getElevation: (r: Row) => (r.single + r.lost * 2),
-        elevationScale: 380 * rise * scale, getFillColor: colour, pickable: true,
-        material: { ambient: 0.55, diffuse: 0.6, shininess: 40, specularColor: [255, 230, 180] },
+        elevationScale: 300 * rise * scale, getFillColor: colour, pickable: true,
+        material: { ambient: 0.42, diffuse: 0.72, shininess: 72, specularColor: [255, 236, 200] },
         transitions: reduced() ? undefined : { elevationScale: { duration: 1400, easing: (t: number) => 1 - Math.pow(1 - t, 3) } },
         updateTriggers: { getFillColor: [highlight] },
       }),
