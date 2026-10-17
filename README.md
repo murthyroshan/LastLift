@@ -97,6 +97,27 @@ MBTA keeps no lift-outage history of its own, but MassDOT publishes every servic
 
 Fourteen live MBTA lift alerts were labelled blind by the author, from MBTA's alert text only, before the evaluation ran ([`validation/`](validation/)). Of the <!--claim:live_scored-->8<!--/claim--> that both the author and the model could assess: **<!--claim:live_agree-->6<!--/claim--> agree, <!--claim:live_partial-->2<!--/claim--> partial, <!--claim:live_disagree-->0<!--/claim--> disagree** (agreement interval <!--claim:live_agree_wilson95-->41%, 93%<!--/claim-->, Wilson 95%). **False accessible: <!--claim:live_false_accessible-->1<!--/claim--> (<!--claim:live_false_accessible_cases-->L04 board<!--/claim-->)**: for State 803 MBTA sends riders to Downtown Crossing, while the open data holds a longer in-station route; LastLift shows both and tells riders to follow MBTA's advice. The model abstains where MBTA publishes no layout (unknown rate <!--claim:live_unknown_rate-->6/14<!--/claim-->). Every row, including every disagreement, is in [`validation/EVALUATION.md`](validation/EVALUATION.md). A second sweep over the alternative-service text of every MBTA elevator is labelled by the author before it is scored (<!--claim:static_sweep_status-->awaiting author review (69 of 215 rows flagged)<!--/claim-->).
 
+## Measured: the agent with and without the graph
+
+Thirty questions in eight categories were committed before any run ([`eval/protocol.md`](eval/protocol.md), [`eval/gold_questions.yaml`](eval/gold_questions.yaml)), scored deterministically with Wilson intervals (`eval/run.py`). Free-tier limits forced two documented amendments: run 1 was rate-limited, and in run 2 the planned model (qwen) had reached its daily token cap, so run 3 puts both arms of the ablation on one model, `gemini-3.1-flash-lite`. Every run is published; the corrections are in [`eval/gold_errata.md`](eval/gold_errata.md).
+
+<!--generated:eval-->
+| System | Right tools | Gold ids | Verdicts | False accessible | Abstains when it must | Forbidden claims | Template fallback | Models |
+|---|---|---|---|---|---|---|---|---|
+| Run 3: full agent (MCP tools + grounding), gemini-3.1-flash-lite | 21/30 | 23/24 | 5/7 | 2 | 1/3 | 2 | 13/30 | gemini-3.1-flash-lite |
+| Run 3: same model, no graph (FalkorDB off) | – | 5/24 | 4/7 | 2 | 1/3 | 0 | 0/30 | gemini-3.1-flash-lite |
+| Router + templates (no LLM) | 27/30 | 22/24 | 7/7 | 0 | 1/3 | 0 | – | – |
+| Run 2: full agent (qwen at its daily cap; see amendment 2) | 25/30 | 24/24 | 7/7 | 0 | 1/3 | 0 | 11/30 | openai/gpt-oss-120b |
+| Run 2: fallback subset, 12 q | 9/12 | 6/8 | 2/4 | 2 | 1/1 | 2 | 5/12 | gemini-3.1-flash-lite |
+| Run 1: full agent (rate-limited; amendment 1) | 25/30 | 23/24 | 7/7 | 0 | 1/3 | 0 | 8/30 | openai/gpt-oss-120b, qwen/qwen3.8-27b |
+| Run 1: fallback subset (rate-limited) | 10/12 | 8/8 | 4/4 | 0 | 0/1 | 0 | 6/12 | openai/gpt-oss-120b |
+<!--/generated-->
+
+- **The graph is what gets the facts right:** with the tools, the right lift and platform ids appear in <!--claim:eval_full_gemini_ids-->23/24<!--/claim--> answers; the same model without the graph manages <!--claim:eval_llm_only_gemini_ids-->5/24<!--/claim-->.
+- **Nothing ungrounded is shipped:** <!--claim:eval_full_gemini_raw_ungrounded-->8/25<!--/claim--> raw model answers failed the grounding validator and were replaced by the template built from the tool results (<!--claim:eval_full_gemini_fallback_to_template-->13/30<!--/claim--> template answers in all). The router alone (no language model) gets <!--claim:eval_router_verdicts-->7/7<!--/claim--> verdicts with <!--claim:eval_router_false_accessible-->0<!--/claim--> false-accessible answers.
+- **Where the small model still fails:** <!--claim:eval_full_gemini_false_accessible-->2<!--/claim--> false-accessible counts in run 3 come from one answer (Q01) that offered the ride-and-return route without saying the platform loses step-free access; it is listed, not hidden. Its <!--claim:eval_full_gemini_forbidden-->2<!--/claim--> forbidden-claim hits are a gold error (Q25 assumed lift 999 does not exist; it is at Downtown Crossing, and the answer said so correctly; errata E1). Abstaining on unmodelled lifts is the weakest category for every system (<!--claim:eval_full_gemini_abstain_must-->1/3<!--/claim-->).
+- **Baselines without max-flow:** counting lifts per station misses <!--claim:eval_bcount_wrong-->74<!--/claim--> of <!--claim:eval_bcount_platforms-->167<!--/claim--> single-lift platforms. A language model reading a small station's raw `pathways.txt` does well: k exactly right in <!--claim:eval_bllm_k-->27/30<!--/claim--> and the cut in <!--claim:eval_bllm_cut-->26/30<!--/claim--> (stations up to 150 pathway rows), so the graph's advantage there is certification, scale and what-ifs, not raw reading.
+
 ## Turn FalkorDB off, and here is exactly what stops working
 
 Everything LastLift computes is computed in FalkorDB: redundancy (`algo.maxFlow` on the step-free subgraph), closures (relationship-type swaps `SF` → `SF_CLOSED`), what-ifs (`GRAPH.COPY` of the live graph, closures applied to the copy), incident memory (`Incident` nodes linked to lifts), the repair ranking (`DEPENDS_ON` / `DEPENDS_NOW` relationships), the station drawings and the route certificates. Stop the database and:
@@ -107,13 +128,23 @@ Everything LastLift computes is computed in FalkorDB: redundancy (`algo.maxFlow`
 
 ## The agent acts through the same tools as everyone
 
-- Ten tools ([`lastlift/tools.py`](lastlift/tools.py)): `resolve_place`, `current_closures`, `platform_redundancy`, `what_if_close`, `step_free_route`, `repair_priority`, `lift_history`, `draft_action`, `network_impact`, `repair_order`. The LLM never writes Cypher; every tool runs fixed, parameterised queries and reports their ids.
+- Thirteen tools ([`lastlift/tools.py`](lastlift/tools.py)): `resolve_place`, `current_closures`, `platform_redundancy`, `what_if_close`, `step_free_route`, `repair_priority`, `lift_history`, `draft_action`, `network_impact`, `repair_order`, `recall_lift_history`, `lift_dossier`, `stress_test`. The LLM never writes Cypher; every tool runs fixed, parameterised queries and reports their ids.
 - The agent reaches the tools **only through MCP** (an in-memory MCP client; a test breaks every direct path and the agent still answers).
 - Every answer is grounded: an id or number that is not in a tool result, or wording our copy rules forbid, sends the answer back to a deterministic template built from the tool results.
 - Repair priority ranks lifts to repair now (closed, platforms cut off), to protect (working, but newly the last lift) and structural single points of failure; `draft_action` drafts a ticket and never files it.
 - Providers fail over in a fixed chain: Groq `qwen/qwen3.8-27b`, then `openai/gpt-oss-120b`, then Gemini `gemini-3.1-flash-lite`, then the template. Each switch appears in the run's trace, the answer names the model that wrote it, and a daily token budget (counted from the providers' usage figures) stops LLM calls before the free quotas run out. A fault-injection test (`tests/test_chain.py`) fails each tier in turn.
 - Every run has a W3C trace id (send a `traceparent` header to join your own trace); each tool call has its own span id, and LLM calls are logged with OpenTelemetry GenAI attribute names (`gen_ai.system`, `gen_ai.request.model`, `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`).
 - Seven recorded runs in `web/public/replay/` re-execute against the graph in CI (`scripts/verify_replays.py`): a recorded fact that no longer matches the graph fails the build.
+
+## Operations agents: no language model in the critical path
+
+Three roles in one process act on every lift closure ([`lastlift/agents/`](lastlift/agents/)), handing off by writing nodes so every decision can be read back in Cypher:
+
+- **Monitor** reads MBTA's alerts. **Analyst** chooses a playbook from graph facts (lift not modelled: *abstain*; a platform-direction's k went to 0: *access lost*; another lift became the last one: *preventive*; otherwise *no loss*; a lift in the top quarter of closures in the archive's last year adds *chronic*, so memory changes the action), calls the tools through MCP and writes `(:Assessment)-[:ABOUT]->(:Lift)`. **Dispatcher** proposes actions from a fixed policy table, and only if a Cypher guard confirms the assessment was made at the graph's current `state_version`: a stale belief cannot act.
+- Policy: repair and protect tickets need a person's approval (website inbox, `POST /v1/approvals/{id}` with an `Idempotency-Key`, or MCP elicitation on `/mcp-ops`); approved tickets become GitHub issues on the ops repository only when filing is switched on, as a lift dossier with a Mermaid drawing of the station, deduplicated per lift. Rider notices ("follow a station" in the free ntfy app; no subscriber data stored) go out automatically only when notifications are switched on, once per change of state.
+- No language model is given a write tool, so text in an alert (a prompt injection included) cannot cause an action; a test checks it.
+- Memory and provenance: every chat run is recorded as `(:Run)-[:CALLED]->(:ToolCall)-[:READ]->(:Lift|:Platform|:Station)` with its `(:Answer)`; when a lift changes state, the answers that read it are marked stale in the same step. `recall_lift_history` and `lift_dossier` read it back. Memory means observed history and provenance; nothing is learned.
+- Recorded runs are hash-chained: the website's "Verify this replay" button recomputes the chain in the browser, and one edited byte fails.
 
 ## Use the same tools from any MCP client
 
@@ -123,7 +154,7 @@ Point any MCP client that supports streamable HTTP at the endpoint:
 { "mcpServers": { "lastlift": { "url": "https://lastlift-api.onrender.com/mcp/" } } }
 ```
 
-All ten tools are read-only (`readOnlyHint`); `what_if_close` works on a throwaway copy. The free host sleeps when idle, so the first call may take a minute.
+All thirteen tools are read-only (`readOnlyHint`), with an output schema; `what_if_close` works on a throwaway copy. The server also offers resources (`lastlift://model`, `lastlift://stations/{id}` and its Mermaid drawing `graph.mmd`, `lastlift://lifts/{id}/dossier.md`, `lastlift://incidents/open`, `lastlift://runs/{id}`, `lastlift://eval/latest`) and prompts (`triage_closure`, `station_briefing`, `plan_step_free_trip`, `explain_certificate`). The free host sleeps when idle, so the first call may take a minute.
 
 ## Built for the people it is about
 
@@ -231,7 +262,7 @@ FalkorDB algorithms used: `algo.maxFlow` (redundancy, certified), `algo.WCC` (lo
 | `Q_STATION_EDGES` | `MATCH (a:Node {cx:$cx})-[e]->(b:Node) WHERE type(e) IN ['SF','SF_CLOSED','STEP'] RETURN e.eid, a.uid, b.uid, type(e), e.kind, e.facility_id, e.pathway_ids` |
 | `Q_STATION_NODES` | `MATCH (n:Node {cx:$cx}) RETURN n.uid, labels(n), n.name, n.platform_name, n.facility_id, n.unit, coalesce(n.closed, false), n.stop_id, n.wheelchair_boarding` |
 | `Q_STATION_PLATFORMS` | `MATCH (p:Node:Platform {cx:$cx}) RETURN p.stop_id AS stop, collect(p.uid), head(collect(p.name)), head(collect(p.platform_name)), min(p.k_board), min(p.k_exit), min(p.k_board_base), min(p.k_exit_base), head(collect(p.at_grade_board)), head(collect(p.at_grade_exit)), head(collect(p.at_grade_board_now)), head(collect(p.at_grade_exit_now)), head(collect(p.cut_board_now)), head(collect(p.cut_exit_now)), coalesce(head(collect(p.no_accessible_entrance)), false) ORDER BY stop` |
-| `Q_STATION_SEARCH` | `CALL db.idx.fulltext.queryNodes('Station', $q) YIELD node, score RETURN node.uid, node.name, node.has_pathways, node.has_street, score ORDER BY score DESC LIMIT 5` |
+| `Q_STATION_SEARCH` | `CALL db.idx.fulltext.queryNodes('Station', $q) YIELD node, score RETURN node.uid, node.name, node.has_pathways, node.has_street, score ORDER BY score DESC, node.uid LIMIT 5` |
 | `Q_STATION_UNMODELLED_LIFTS` | `MATCH (l:Lift) WHERE l.station_id = $sid AND NOT l:Node RETURN l.facility_id, l.name ORDER BY l.facility_id` |
 | `Q_WRITE_INCIDENTS` | `UNWIND $rows AS r CREATE (i:Incident) SET i = r.p WITH i, r UNWIND r.fids AS fid MATCH (l:Lift {facility_id:fid}) MERGE (l)-[:CLOSED_IN]->(i)` |
 <!--/generated-->
@@ -274,7 +305,9 @@ No API key is needed: without an LLM key the agent answers through its determini
 
 ## We found defects in the published data
 
-Five overrides correct the published layout, each with evidence ([`data/overrides.csv`](data/overrides.csv)): centre platforms at Sullivan Square and Wellington that the data joined to the side platforms (which made them look reachable when they are not), two Quincy Adams pathways tagged with the wrong elevator, and a Copley entrance. _Reported to MBTA's developer contact: to be added by the author._
+Five overrides correct the published layout, each with evidence ([`data/overrides.csv`](data/overrides.csv)): centre platforms at Sullivan Square and Wellington that the data joined to the side platforms (which made them look reachable when they are not), two Quincy Adams pathways tagged with the wrong elevator, and a Copley entrance.
+
+A self-audit of the feed (`scripts/gtfs_audit.py`) found <!--claim:audit_items-->8<!--/claim--> kinds of possible issue that matter for step-free routing, from swapped elevator ids at South Station to `excludes-stop` values that contradict the pathways; MobilityData's gtfs-validator (<!--claim:audit_validator_version-->8.0.1<!--/claim-->) was run first and flags none of them. The write-up, with evidence rows, is [`docs/mbta_data_report.md`](docs/mbta_data_report.md). _Reported to MBTA's developer contact: to be added by the author._
 
 ## Decisions I made, and a correction I made
 

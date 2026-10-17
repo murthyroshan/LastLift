@@ -1,0 +1,450 @@
+{
+ "b_bfs": {
+  "lastlift_maxflow_calls": 734,
+  "network_pair_searches": 1735767,
+  "network_single_searches": 17622,
+  "platform_pair_searches": 3995,
+  "platform_single_searches": 1394
+ },
+ "b_count": {
+  "agree": 93,
+  "misses_single": 74,
+  "platforms": 167,
+  "rule_wrong": 74,
+  "says_single_but_not": 0
+ },
+ "b_llm": {
+  "cut_exact": {
+   "n": 30,
+   "rate": 0.867,
+   "wilson95": [
+    0.703,
+    0.947
+   ],
+   "x": 26
+  },
+  "k_exact": {
+   "n": 30,
+   "rate": 0.9,
+   "wilson95": [
+    0.744,
+    0.965
+   ],
+   "x": 27
+  },
+  "model": "gemini-3.1-flash-lite",
+  "n": 30,
+  "rows": [
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "867",
+     "868"
+    ],
+    "k": 1,
+    "k_ok": true,
+    "k_pred": 1,
+    "rows": 42,
+    "station": "place-brdwy",
+    "stop_id": "70082"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "765",
+     "766"
+    ],
+    "k": 2,
+    "k_ok": true,
+    "k_pred": 2,
+    "rows": 34,
+    "station": "place-gilmn",
+    "stop_id": "70505"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "922"
+    ],
+    "k": 1,
+    "k_ok": true,
+    "k_pred": 1,
+    "rows": 46,
+    "station": "place-chncl",
+    "stop_id": "70018"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "933"
+    ],
+    "k": 1,
+    "k_ok": true,
+    "k_pred": 1,
+    "rows": 29,
+    "station": "place-ccmnl",
+    "stop_id": "70029"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "876"
+    ],
+    "k": 1,
+    "k_ok": true,
+    "k_pred": 1,
+    "rows": 46,
+    "station": "place-chncl",
+    "stop_id": "70019"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "846"
+    ],
+    "k": 1,
+    "k_ok": true,
+    "k_pred": 1,
+    "rows": 29,
+    "station": "place-jaksn",
+    "stop_id": "70006"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "767",
+     "768"
+    ],
+    "k": 2,
+    "k_ok": true,
+    "k_pred": 2,
+    "rows": 30,
+    "station": "place-mgngl",
+    "stop_id": "70508"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "770",
+     "772"
+    ],
+    "k": 2,
+    "k_ok": true,
+    "k_pred": 2,
+    "rows": 26,
+    "station": "place-mdftf",
+    "stop_id": "70512"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "847"
+    ],
+    "k": 1,
+    "k_ok": true,
+    "k_pred": 1,
+    "rows": 27,
+    "station": "place-rcmnl",
+    "stop_id": "70009"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "977"
+    ],
+    "k": 1,
+    "k_ok": true,
+    "k_pred": 1,
+    "rows": 31,
+    "station": "place-coecl",
+    "stop_id": "70155"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "844"
+    ],
+    "k": 1,
+    "k_ok": true,
+    "k_pred": 1,
+    "rows": 27,
+    "station": "place-grnst",
+    "stop_id": "70002"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "845"
+    ],
+    "k": 1,
+    "k_ok": true,
+    "k_pred": 1,
+    "rows": 27,
+    "station": "place-sbmnl",
+    "stop_id": "70005"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "951"
+    ],
+    "k": 1,
+    "k_ok": true,
+    "k_pred": 1,
+    "rows": 38,
+    "station": "place-chmnl",
+    "stop_id": "70073"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "844"
+    ],
+    "k": 1,
+    "k_ok": true,
+    "k_pred": 1,
+    "rows": 27,
+    "station": "place-grnst",
+    "stop_id": "70003"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "845"
+    ],
+    "k": 1,
+    "k_ok": true,
+    "k_pred": 1,
+    "rows": 27,
+    "station": "place-sbmnl",
+    "stop_id": "70004"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "816",
+     "817"
+    ],
+    "k": 1,
+    "k_ok": false,
+    "k_pred": 2,
+    "rows": 106,
+    "station": "place-davis",
+    "stop_id": "70064"
+   },
+   {
+    "cut_ok": false,
+    "error": null,
+    "ids_pred": [
+     "716",
+     "717",
+     "718",
+     "719"
+    ],
+    "k": 2,
+    "k_ok": true,
+    "k_pred": 2,
+    "rows": 72,
+    "station": "place-astao",
+    "stop_id": "70278"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "884"
+    ],
+    "k": 1,
+    "k_ok": true,
+    "k_pred": 1,
+    "rows": 64,
+    "station": "place-rbmnl",
+    "stop_id": "70057"
+   },
+   {
+    "cut_ok": false,
+    "error": null,
+    "ids_pred": [
+     "743",
+     "744",
+     "745",
+     "746"
+    ],
+    "k": 2,
+    "k_ok": false,
+    "k_pred": 4,
+    "rows": 132,
+    "station": "place-ogmnl",
+    "stop_id": "70036"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "720",
+     "721"
+    ],
+    "k": 2,
+    "k_ok": true,
+    "k_pred": 2,
+    "rows": 125,
+    "station": "place-gover",
+    "stop_id": "70202"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "972"
+    ],
+    "k": 1,
+    "k_ok": true,
+    "k_pred": 1,
+    "rows": 111,
+    "station": "place-kencl",
+    "stop_id": "71150"
+   },
+   {
+    "cut_ok": false,
+    "error": null,
+    "ids_pred": [
+     "913",
+     "915",
+     "924",
+     "925"
+    ],
+    "k": 2,
+    "k_ok": false,
+    "k_pred": 3,
+    "rows": 138,
+    "station": "place-aqucl",
+    "stop_id": "70044"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "811"
+    ],
+    "k": 1,
+    "k_ok": true,
+    "k_pred": 1,
+    "rows": 97,
+    "station": "place-brntn",
+    "stop_id": "Braintree-01"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "981"
+    ],
+    "k": 1,
+    "k_ok": true,
+    "k_pred": 1,
+    "rows": 62,
+    "station": "place-spmnl",
+    "stop_id": "70207"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "756",
+     "757"
+    ],
+    "k": 2,
+    "k_ok": true,
+    "k_pred": 2,
+    "rows": 86,
+    "station": "place-knncl",
+    "stop_id": "70071"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "957"
+    ],
+    "k": 1,
+    "k_ok": true,
+    "k_pred": 1,
+    "rows": 69,
+    "station": "place-fldcr",
+    "stop_id": "70090"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "946"
+    ],
+    "k": 1,
+    "k_ok": true,
+    "k_pred": 1,
+    "rows": 57,
+    "station": "place-shmnl",
+    "stop_id": "70087"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "762",
+     "763",
+     "764"
+    ],
+    "k": 3,
+    "k_ok": true,
+    "k_pred": 3,
+    "rows": 62,
+    "station": "place-lech",
+    "stop_id": "70501"
+   },
+   {
+    "cut_ok": false,
+    "error": null,
+    "ids_pred": [
+     "733",
+     "734",
+     "735"
+    ],
+    "k": 2,
+    "k_ok": true,
+    "k_pred": 2,
+    "rows": 134,
+    "station": "place-wlsta",
+    "stop_id": "70099"
+   },
+   {
+    "cut_ok": true,
+    "error": null,
+    "ids_pred": [
+     "885"
+    ],
+    "k": 1,
+    "k_ok": true,
+    "k_pred": 1,
+    "rows": 64,
+    "station": "place-rbmnl",
+    "stop_id": "70058"
+   }
+  ]
+ }
+}

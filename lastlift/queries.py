@@ -72,7 +72,7 @@ Q_PRIORITY = (
 # --- names --------------------------------------------------------------------------------
 Q_STATION_SEARCH = (
     "CALL db.idx.fulltext.queryNodes('Station', $q) YIELD node, score "
-    "RETURN node.uid, node.name, node.has_pathways, node.has_street, score ORDER BY score DESC LIMIT 5"
+    "RETURN node.uid, node.name, node.has_pathways, node.has_street, score ORDER BY score DESC, node.uid LIMIT 5"
 )
 Q_STATION = "MATCH (s:Station {uid:$sid}) RETURN s.uid, s.name, s.cx, s.has_pathways, s.has_street"
 

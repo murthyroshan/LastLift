@@ -43,6 +43,10 @@ async def run(question: str, call) -> None:
     if lifts and re.search(r"what if|if .*\b(fail|fails|close|closes|closed|break)|simulate", q):
         await call("what_if_close", {"facility_ids": lifts})
         return
+    if re.search(r"worst (case|day)|stress test|how fragile|unluckiest", q):
+        n = re.search(r"\b([1-9]|10)\b (lifts?|failures?)", q)
+        await call("stress_test", {"budget": int(n.group(1)) if n else 5})
+        return
     if re.search(r"journeys?|network|cut off|between stations|critical pair|last link|whole system", q):
         await call("network_impact", {"facility_ids": lifts} if lifts else {})
         return

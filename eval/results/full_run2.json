@@ -899,7 +899,98 @@
    "verdicts": []
   }
  ],
+ "scoring": "S1 (eval/gold_errata.md)",
  "summary": {
+  "abstain_must": {
+   "n": 3,
+   "rate": 0.333,
+   "wilson95": [
+    0.061,
+    0.792
+   ],
+   "x": 1
+  },
+  "failovers": 52,
+  "fallback_to_template": {
+   "n": 30,
+   "rate": 0.367,
+   "wilson95": [
+    0.219,
+    0.545
+   ],
+   "x": 11
+  },
+  "false_accessible": 0,
+  "forbidden_claims": 0,
+  "ids": {
+   "n": 24,
+   "rate": 1.0,
+   "wilson95": [
+    0.862,
+    1.0
+   ],
+   "x": 24
+  },
+  "latency_ms": {
+   "p50": 4923,
+   "p95": 26789
+  },
+  "mcp_equal": {
+   "n": 74,
+   "rate": 0.973,
+   "wilson95": [
+    0.907,
+    0.993
+   ],
+   "x": 72
+  },
+  "models": [
+   "openai/gpt-oss-120b"
+  ],
+  "no_needless_abstain": {
+   "n": 27,
+   "rate": 1.0,
+   "wilson95": [
+    0.875,
+    1.0
+   ],
+   "x": 27
+  },
+  "provider_errors": 0,
+  "raw_ungrounded": {
+   "n": 19,
+   "rate": 0.0,
+   "wilson95": [
+    0.0,
+    0.168
+   ],
+   "x": 0
+  },
+  "shipped_ungrounded": 0,
+  "tokens_per_question": {
+   "in": 4243,
+   "out": 434
+  },
+  "tool_set": {
+   "n": 30,
+   "rate": 0.833,
+   "wilson95": [
+    0.664,
+    0.927
+   ],
+   "x": 25
+  },
+  "verdicts": {
+   "n": 7,
+   "rate": 1.0,
+   "wilson95": [
+    0.646,
+    1.0
+   ],
+   "x": 7
+  }
+ },
+ "summary_as_scored": {
   "abstain_must": {
    "n": 3,
    "rate": 0.333,

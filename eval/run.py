@@ -44,8 +44,11 @@ SAMPLING = json.loads((ROOT / "eval" / "sampling.json").read_text(encoding="utf-
 PACE_S = 30                                      # at most 2 questions a minute for the LLM systems
 TPM_LIMIT = 8000                                 # provider tokens-per-minute limit (x-ratelimit-limit-tokens)
 TPM = {"groq": 8000, "gemini": 250000}           # Amendment 2: --provider gemini pins both arms to gemini-3.1-flash-lite
-LOSS = re.compile(r"\b(lose|loses|lost|losing|no step-free|not step-free|cannot (reach|get)|can't (reach|get)|"
-                  r"cut off|no route|unavailable)\b", re.I)
+LOSS_V1 = re.compile(r"\b(lose|loses|lost|losing|no step-free|not step-free|cannot (reach|get)|can't (reach|get)|"
+                     r"cut off|no route|unavailable)\b", re.I)
+# Scoring note S1 (eval/gold_errata.md): V1 missed "cannot access"; every run is reported with both rules.
+LOSS = re.compile(r"\b(lose|loses|lost|losing|no step-free|not step-free|cannot (reach|get|access)|"
+                  r"can't (reach|get|access)|cut off|no route|unavailable)\b", re.I)
 SINGLE = re.compile(r"\b(only|single|one lift|last lift|sole|alone)\b", re.I)
 ABSTAIN = re.compile(r"((?<!\d )cannot assess|can't assess|not in the step-free model|no published station layout|"
                      r"not (a )?modelled|no data|i can only answer|unknown station|isn't in|is not in|"
@@ -200,6 +203,53 @@ def run(system, provider="groq"):
     return 0
 
 
+def rescore(path: Path) -> dict:
+    """Re-score a stored run from its answers with the current rules; the first score is kept as summary_as_scored."""
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    gold = {q["id"]: q for q in GOLD["questions"]}
+    doc.setdefault("summary_as_scored", doc["summary"])
+    for r in doc["rows"]:
+        vs = gold[r["id"]].get("gold_verdicts", [])
+        r["verdicts"] = [verdict_ok(v, r["answer"]) for v in vs]
+        r["false_accessible"] = sum(1 for v in vs if v["verdict"] == "lost" and not LOSS.search(r["answer"]))
+    doc["summary"] = summarise(doc["rows"], doc["system"])
+    doc["scoring"] = "S1 (eval/gold_errata.md)"
+    path.write_text(json.dumps(doc, indent=1, sort_keys=True, ensure_ascii=False) + "\n", encoding="utf-8",
+                    newline="\n")
+    return doc
+
+
+def retry_errors(system: str, provider: str) -> int:
+    """Re-ask, once, the questions whose answer failed with a provider error (timeout, HTTP 503). The failed
+    attempt is kept in the row (first_attempt_error)."""
+    path = OUT / (f"{system}.json" if provider == "groq" else f"{system}_{provider}.json")
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    if provider == "gemini":
+        gem = llm.tiers
+        llm.tiers = lambda: gem()[2:]
+    llm.TIMEOUT_S = 60
+    llm.RETRY_WAIT_S = 60
+    gold = {q["id"]: q for q in GOLD["questions"]}
+    ctx = llm_only_context() if system == "llm_only" else None
+    for i, r in enumerate(doc["rows"]):
+        if not r.get("error"):
+            continue
+        q = gold[r["id"]]
+        out = asyncio.run(run_one(q, system, ctx))
+        new = score(q, out["answer"], out["results"], out["called"], system)
+        new.update(answer=out["answer"], source=out["source"], tools=out["called"], mcp_equal=r["mcp_equal"],
+                   ms=out["ms"], model=out["model"], tokens=out["tokens"], raw_grounding_failed=None,
+                   shipped_ungrounded=False, failovers=0, error=out.get("error"),
+                   first_attempt_error=r["error"], retried=True)
+        doc["rows"][i] = new
+        print(f"retry {r['id']}: {'ok' if not new['error'] else new['error']}", flush=True)
+        time.sleep(PACE_S)
+    doc["summary"] = summarise(doc["rows"], system)
+    path.write_text(json.dumps(doc, indent=1, sort_keys=True, ensure_ascii=False) + "\n", encoding="utf-8",
+                    newline="\n")
+    return 0
+
+
 def summarise(rows, system):
     s = {}
     t = [r["tools_ok"] for r in rows if "tools_ok" in r]
@@ -252,7 +302,7 @@ def combine():
     claims_path = ROOT / "claims.json"
     claims = {k: v for k, v in json.loads(claims_path.read_text(encoding="utf-8")).items() if not k.startswith("eval_")}
     for name, s in latest["systems"].items():
-        if "_run1_" in name:
+        if "_run" in name:                      # runs 1 and 2 are published, but the claims come from run 3 and the router
             continue
         for key in ("tool_set", "ids", "verdicts", "abstain_must", "fallback_to_template", "raw_ungrounded"):
             if key in s:
@@ -275,5 +325,13 @@ if __name__ == "__main__":
     ap.add_argument("--system", choices=["router", "full", "llm_only", "fallback"])
     ap.add_argument("--provider", choices=["groq", "gemini"], default="groq")
     ap.add_argument("--summary", action="store_true")
+    ap.add_argument("--retry-errors", action="store_true")
+    ap.add_argument("--rescore", action="store_true")
     a = ap.parse_args()
-    sys.exit(combine() if a.summary else run(a.system, a.provider))
+    if a.rescore:
+        for p in sorted(OUT.glob("*.json")):
+            if p.stem not in ("latest", "baselines"):
+                rescore(p)
+        sys.exit(0)
+    sys.exit(combine() if a.summary else retry_errors(a.system, a.provider) if a.retry_errors
+             else run(a.system, a.provider))

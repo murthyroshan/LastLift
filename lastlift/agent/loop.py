@@ -39,6 +39,11 @@ SYSTEM = (
     "Answer in at most 5 short sentences, plain language, and end with: "
     "Check mbta.com/alerts/access."
 )
+CLAIMS_PROMPT = (
+    "Now write the answer as JSON only, no other text: {\"claims\": [{\"kind\": \"verdict|route|count|lift_role|"
+    "caveat\", \"text\": \"one short sentence\", \"cites\": [step numbers]}]}. The tool results above are steps "
+    "1, 2, 3 ... in order. Every claim must use only facts from the steps it cites. At most 5 claims."
+)
 _llm_calls_today = {"day": None, "n": 0}
 _TRACEPARENT = re.compile(r"^00-([0-9a-f]{32})-([0-9a-f]{16})-[0-9a-f]{2}$")
 
@@ -101,7 +106,7 @@ async def ask(question: str, scope: str = "demo", mode: str | None = None, emit=
     def send(kind, **payload):
         nonlocal seq
         seq += 1
-        ev = {"v": EVENT_SCHEMA_VERSION, "seq": seq, "type": kind,
+        ev = {"v": EVENT_SCHEMA_VERSION, "seq": seq, "type": kind, "agent": "chat",
               "t_ms": round((time.perf_counter() - started) * 1000, 1), **payload}
         events.append(ev)
         if emit:
@@ -121,8 +126,10 @@ async def ask(question: str, scope: str = "demo", mode: str | None = None, emit=
             if "scope" in params.get(name, ()):
                 args["scope"] = scope                       # set by the server, never by the model
             res = await client.call_tool(name, args, raise_on_error=False)
-            env = res.structured_content or {"ok": False, "tool": name,
-                                             "summary": f"tool error: {res.content[0].text if res.content else ''}"[:300],
+            text = res.content[0].text if res.content else ""
+            if settings.falkordb_host:
+                text = text.replace(settings.falkordb_host, "<graph server>")
+            env = res.structured_content or {"ok": False, "tool": name, "summary": f"tool error: {text}"[:300],
                                              "data": {}, "entities": []}
             results.append(env)
             send("tool_result", tool=name, span_id=span, ok=env.get("ok"), summary=env.get("summary"), via=env.get("via"),
@@ -140,7 +147,13 @@ async def ask(question: str, scope: str = "demo", mode: str | None = None, emit=
             except llm.LLMError as exc:
                 _drain_failovers(chain, send)
                 send("error", stage="llm", message=str(exc)[:200])
-        if text is not None:
+        if isinstance(text, list):                  # structured claims: each one checked against its cited steps
+            text, report = grounding.assemble(text, results)
+            problems = [f"claim {i + 1}: {p}" for i, c in enumerate(report) for p in c["problems"]]
+            send("grounding", ok=not problems, problems=problems, claims=report)
+            if not any(c["ok"] for c in report) or not text:
+                text, source = None, "template"
+        elif text is not None:
             problems = grounding.check(text, results)
             if problems:
                 send("grounding", ok=False, problems=problems)
@@ -155,7 +168,21 @@ async def ask(question: str, scope: str = "demo", mode: str | None = None, emit=
          tools=[r.get("tool") for r in results], model=chain.models[-1] if source == "llm" and chain.models else None,
          usage={"input_tokens": chain.tokens["input"], "output_tokens": chain.tokens["output"]})
     send("done", ms=round((time.perf_counter() - started) * 1000, 1))
+    try:                                        # provenance in the graph (lastlift/memory.py); never changes the answer
+        from .. import memory, state
+        g = state.graph_name(scope)
+        ver = db_version(g)
+        memory.record_run(g, "lastlift-chat", question, events, results,
+                          next((e for e in events if e["type"] == "answer"), None), ver)
+    except Exception:
+        pass
     return {"answer": text, "source": source, "events": events, "results": results, "trace_id": trace_id}
+
+
+def db_version(graph):
+    from .. import db
+    rs = db.client().select_graph(graph).ro_query("MATCH (m:Meta) RETURN m.state_version LIMIT 1").result_set
+    return rs[0][0] if rs else None
 
 
 def _drain_failovers(chain, send):
@@ -164,9 +191,11 @@ def _drain_failovers(chain, send):
         send("error", stage="llm_failover", message=f["message"], from_model=f["from_model"], to_model=f["to_model"])
 
 
-async def _llm_answer(question, client, mcp_tools, call, send, chain) -> str:
+async def _llm_answer(question, client, mcp_tools, call, send, chain):
+    """The answer as structured claims (a list) when the model follows CLAIMS_PROMPT, else as text."""
     tools_schema = _openai_tools(mcp_tools)
     messages = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": question}]
+    step = 0
     for round_no in range(MAX_ROUNDS):
         _spend()
         msg = await asyncio.to_thread(llm.chat, messages, tools_schema, "auto", chain)
@@ -175,8 +204,9 @@ async def _llm_answer(question, client, mcp_tools, call, send, chain) -> str:
         if not calls:
             if round_no == 0:
                 raise llm.LLMError("model answered without calling a tool")
-            if (msg.get("content") or "").strip():
-                return msg["content"].strip()        # it already wrote the answer: no extra call
+            if (msg.get("content") or "").strip():   # it already wrote the answer: no extra call
+                content = msg["content"].strip()
+                return grounding.parse_claims(content) or content
             break
         messages.append({"role": "assistant", "content": msg.get("content") or "", "tool_calls": calls})
         for tc in calls:
@@ -185,8 +215,11 @@ async def _llm_answer(question, client, mcp_tools, call, send, chain) -> str:
             except ValueError:
                 args = {}
             env = await call(tc["function"]["name"], args)
-            messages.append({"role": "tool", "tool_call_id": tc["id"], "content": _compact(env)})
+            step += 1
+            messages.append({"role": "tool", "tool_call_id": tc["id"], "content": f"step {step}: {_compact(env)}"})
     _spend()
+    messages.append({"role": "user", "content": CLAIMS_PROMPT})
     final = await asyncio.to_thread(llm.chat, messages, tools_schema, "none", chain)
     _drain_failovers(chain, send)
-    return (final.get("content") or "").strip()
+    content = (final.get("content") or "").strip()
+    return grounding.parse_claims(content) or content

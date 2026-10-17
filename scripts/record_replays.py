@@ -43,6 +43,7 @@ async def main(mode, pause, only):
         rec = {"id": rid, "question": question, "schema": "contracts/ask_events.schema.json",
                "recorded_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                "answer": r["answer"], "source": r["source"], "events": r["events"]}
+        replay.seal(rec)
         (replay.REPLAY_DIR / f"{rid}.json").write_text(json.dumps(rec, indent=1, ensure_ascii=False) + "\n",
                                                        encoding="utf-8", newline="\n")
         index.append({"id": rid, "question": question, "source": r["source"]})

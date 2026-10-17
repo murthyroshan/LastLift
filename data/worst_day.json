@@ -1,0 +1,797 @@
+{
+ "assessed_platform_directions": 333,
+ "checks": {
+  "1": {
+   "brute_force": [
+    6,
+    472
+   ],
+   "dp": [
+    6,
+    472
+   ],
+   "equal": true
+  },
+  "2": {
+   "brute_force": [
+    18,
+    3232
+   ],
+   "dp": [
+    18,
+    3232
+   ],
+   "equal": true
+  },
+  "3": {
+   "brute_force": [
+    24,
+    3704
+   ],
+   "dp": [
+    24,
+    3704
+   ],
+   "equal": true
+  }
+ },
+ "monotone": true,
+ "per_complex_cap": 3,
+ "rows": [
+  {
+   "B": 1,
+   "departures": 472,
+   "lifts": [
+    {
+     "facility_id": "811",
+     "station": "Braintree",
+     "station_id": "place-brntn"
+    }
+   ],
+   "lost": [
+    "70105:board",
+    "70105:exit",
+    "Braintree-01:board",
+    "Braintree-01:exit",
+    "Braintree-02:board",
+    "Braintree-02:exit"
+   ],
+   "platform_directions": 6,
+   "used": 1
+  },
+  {
+   "B": 2,
+   "departures": 3232,
+   "lifts": [
+    {
+     "facility_id": "821",
+     "station": "Harvard",
+     "station_id": "place-harsq"
+    },
+    {
+     "facility_id": "973",
+     "station": "Harvard",
+     "station_id": "place-harsq"
+    }
+   ],
+   "lost": [
+    "70067:board",
+    "70067:exit",
+    "70068:board",
+    "70068:exit",
+    "76121:board",
+    "76121:exit",
+    "76122:board",
+    "76122:exit",
+    "76123:board",
+    "76123:exit",
+    "76124:board",
+    "76124:exit",
+    "76125:board",
+    "76125:exit",
+    "76126:board",
+    "76126:exit",
+    "76129:board",
+    "76129:exit"
+   ],
+   "platform_directions": 18,
+   "used": 2
+  },
+  {
+   "B": 3,
+   "departures": 3704,
+   "lifts": [
+    {
+     "facility_id": "811",
+     "station": "Braintree",
+     "station_id": "place-brntn"
+    },
+    {
+     "facility_id": "821",
+     "station": "Harvard",
+     "station_id": "place-harsq"
+    },
+    {
+     "facility_id": "973",
+     "station": "Harvard",
+     "station_id": "place-harsq"
+    }
+   ],
+   "lost": [
+    "70067:board",
+    "70067:exit",
+    "70068:board",
+    "70068:exit",
+    "70105:board",
+    "70105:exit",
+    "76121:board",
+    "76121:exit",
+    "76122:board",
+    "76122:exit",
+    "76123:board",
+    "76123:exit",
+    "76124:board",
+    "76124:exit",
+    "76125:board",
+    "76125:exit",
+    "76126:board",
+    "76126:exit",
+    "76129:board",
+    "76129:exit",
+    "Braintree-01:board",
+    "Braintree-01:exit",
+    "Braintree-02:board",
+    "Braintree-02:exit"
+   ],
+   "platform_directions": 24,
+   "used": 3
+  },
+  {
+   "B": 4,
+   "departures": 3796,
+   "lifts": [
+    {
+     "facility_id": "811",
+     "station": "Braintree",
+     "station_id": "place-brntn"
+    },
+    {
+     "facility_id": "821",
+     "station": "Harvard",
+     "station_id": "place-harsq"
+    },
+    {
+     "facility_id": "841",
+     "station": "Forest Hills",
+     "station_id": "place-forhl"
+    },
+    {
+     "facility_id": "973",
+     "station": "Harvard",
+     "station_id": "place-harsq"
+    }
+   ],
+   "lost": [
+    "70067:board",
+    "70067:exit",
+    "70068:board",
+    "70068:exit",
+    "70105:board",
+    "70105:exit",
+    "76121:board",
+    "76121:exit",
+    "76122:board",
+    "76122:exit",
+    "76123:board",
+    "76123:exit",
+    "76124:board",
+    "76124:exit",
+    "76125:board",
+    "76125:exit",
+    "76126:board",
+    "76126:exit",
+    "76129:board",
+    "76129:exit",
+    "Braintree-01:board",
+    "Braintree-01:exit",
+    "Braintree-02:board",
+    "Braintree-02:exit",
+    "NEC-2237:board",
+    "NEC-2237:exit",
+    "NEC-2237-03:board",
+    "NEC-2237-03:exit",
+    "NEC-2237-05:board",
+    "NEC-2237-05:exit"
+   ],
+   "platform_directions": 30,
+   "used": 4
+  },
+  {
+   "B": 5,
+   "departures": 6884,
+   "lifts": [
+    {
+     "facility_id": "804",
+     "station": "Park Street",
+     "station_id": "place-pktrm"
+    },
+    {
+     "facility_id": "821",
+     "station": "Harvard",
+     "station_id": "place-harsq"
+    },
+    {
+     "facility_id": "892",
+     "station": "Downtown Crossing",
+     "station_id": "place-dwnxg"
+    },
+    {
+     "facility_id": "973",
+     "station": "Harvard",
+     "station_id": "place-harsq"
+    },
+    {
+     "facility_id": "978",
+     "station": "Park Street",
+     "station_id": "place-pktrm"
+    }
+   ],
+   "lost": [
+    "70020:board",
+    "70020:exit",
+    "70067:board",
+    "70067:exit",
+    "70068:board",
+    "70068:exit",
+    "70075:board",
+    "70075:exit",
+    "70076:board",
+    "70076:exit",
+    "70196:board",
+    "70196:exit",
+    "70197:board",
+    "70197:exit",
+    "70198:board",
+    "70198:exit",
+    "70199:board",
+    "70199:exit",
+    "70200:board",
+    "70200:exit",
+    "71199:board",
+    "71199:exit",
+    "76121:board",
+    "76121:exit",
+    "76122:board",
+    "76122:exit",
+    "76123:board",
+    "76123:exit",
+    "76124:board",
+    "76124:exit",
+    "76125:board",
+    "76125:exit",
+    "76126:board",
+    "76126:exit",
+    "76129:board",
+    "76129:exit"
+   ],
+   "platform_directions": 36,
+   "used": 5
+  },
+  {
+   "B": 6,
+   "departures": 7356,
+   "lifts": [
+    {
+     "facility_id": "804",
+     "station": "Park Street",
+     "station_id": "place-pktrm"
+    },
+    {
+     "facility_id": "811",
+     "station": "Braintree",
+     "station_id": "place-brntn"
+    },
+    {
+     "facility_id": "821",
+     "station": "Harvard",
+     "station_id": "place-harsq"
+    },
+    {
+     "facility_id": "892",
+     "station": "Downtown Crossing",
+     "station_id": "place-dwnxg"
+    },
+    {
+     "facility_id": "973",
+     "station": "Harvard",
+     "station_id": "place-harsq"
+    },
+    {
+     "facility_id": "978",
+     "station": "Park Street",
+     "station_id": "place-pktrm"
+    }
+   ],
+   "lost": [
+    "70020:board",
+    "70020:exit",
+    "70067:board",
+    "70067:exit",
+    "70068:board",
+    "70068:exit",
+    "70075:board",
+    "70075:exit",
+    "70076:board",
+    "70076:exit",
+    "70105:board",
+    "70105:exit",
+    "70196:board",
+    "70196:exit",
+    "70197:board",
+    "70197:exit",
+    "70198:board",
+    "70198:exit",
+    "70199:board",
+    "70199:exit",
+    "70200:board",
+    "70200:exit",
+    "71199:board",
+    "71199:exit",
+    "76121:board",
+    "76121:exit",
+    "76122:board",
+    "76122:exit",
+    "76123:board",
+    "76123:exit",
+    "76124:board",
+    "76124:exit",
+    "76125:board",
+    "76125:exit",
+    "76126:board",
+    "76126:exit",
+    "76129:board",
+    "76129:exit",
+    "Braintree-01:board",
+    "Braintree-01:exit",
+    "Braintree-02:board",
+    "Braintree-02:exit"
+   ],
+   "platform_directions": 42,
+   "used": 6
+  },
+  {
+   "B": 7,
+   "departures": 7448,
+   "lifts": [
+    {
+     "facility_id": "804",
+     "station": "Park Street",
+     "station_id": "place-pktrm"
+    },
+    {
+     "facility_id": "811",
+     "station": "Braintree",
+     "station_id": "place-brntn"
+    },
+    {
+     "facility_id": "821",
+     "station": "Harvard",
+     "station_id": "place-harsq"
+    },
+    {
+     "facility_id": "841",
+     "station": "Forest Hills",
+     "station_id": "place-forhl"
+    },
+    {
+     "facility_id": "892",
+     "station": "Downtown Crossing",
+     "station_id": "place-dwnxg"
+    },
+    {
+     "facility_id": "973",
+     "station": "Harvard",
+     "station_id": "place-harsq"
+    },
+    {
+     "facility_id": "978",
+     "station": "Park Street",
+     "station_id": "place-pktrm"
+    }
+   ],
+   "lost": [
+    "70020:board",
+    "70020:exit",
+    "70067:board",
+    "70067:exit",
+    "70068:board",
+    "70068:exit",
+    "70075:board",
+    "70075:exit",
+    "70076:board",
+    "70076:exit",
+    "70105:board",
+    "70105:exit",
+    "70196:board",
+    "70196:exit",
+    "70197:board",
+    "70197:exit",
+    "70198:board",
+    "70198:exit",
+    "70199:board",
+    "70199:exit",
+    "70200:board",
+    "70200:exit",
+    "71199:board",
+    "71199:exit",
+    "76121:board",
+    "76121:exit",
+    "76122:board",
+    "76122:exit",
+    "76123:board",
+    "76123:exit",
+    "76124:board",
+    "76124:exit",
+    "76125:board",
+    "76125:exit",
+    "76126:board",
+    "76126:exit",
+    "76129:board",
+    "76129:exit",
+    "Braintree-01:board",
+    "Braintree-01:exit",
+    "Braintree-02:board",
+    "Braintree-02:exit",
+    "NEC-2237:board",
+    "NEC-2237:exit",
+    "NEC-2237-03:board",
+    "NEC-2237-03:exit",
+    "NEC-2237-05:board",
+    "NEC-2237-05:exit"
+   ],
+   "platform_directions": 48,
+   "used": 7
+  },
+  {
+   "B": 8,
+   "departures": 7524,
+   "lifts": [
+    {
+     "facility_id": "804",
+     "station": "Park Street",
+     "station_id": "place-pktrm"
+    },
+    {
+     "facility_id": "811",
+     "station": "Braintree",
+     "station_id": "place-brntn"
+    },
+    {
+     "facility_id": "821",
+     "station": "Harvard",
+     "station_id": "place-harsq"
+    },
+    {
+     "facility_id": "841",
+     "station": "Forest Hills",
+     "station_id": "place-forhl"
+    },
+    {
+     "facility_id": "892",
+     "station": "Downtown Crossing",
+     "station_id": "place-dwnxg"
+    },
+    {
+     "facility_id": "973",
+     "station": "Harvard",
+     "station_id": "place-harsq"
+    },
+    {
+     "facility_id": "978",
+     "station": "Park Street",
+     "station_id": "place-pktrm"
+    },
+    {
+     "facility_id": "986",
+     "station": "Porter",
+     "station_id": "place-portr"
+    }
+   ],
+   "lost": [
+    "70020:board",
+    "70020:exit",
+    "70067:board",
+    "70067:exit",
+    "70068:board",
+    "70068:exit",
+    "70075:board",
+    "70075:exit",
+    "70076:board",
+    "70076:exit",
+    "70105:board",
+    "70105:exit",
+    "70196:board",
+    "70196:exit",
+    "70197:board",
+    "70197:exit",
+    "70198:board",
+    "70198:exit",
+    "70199:board",
+    "70199:exit",
+    "70200:board",
+    "70200:exit",
+    "71199:board",
+    "71199:exit",
+    "76121:board",
+    "76121:exit",
+    "76122:board",
+    "76122:exit",
+    "76123:board",
+    "76123:exit",
+    "76124:board",
+    "76124:exit",
+    "76125:board",
+    "76125:exit",
+    "76126:board",
+    "76126:exit",
+    "76129:board",
+    "76129:exit",
+    "Braintree-01:board",
+    "Braintree-01:exit",
+    "Braintree-02:board",
+    "Braintree-02:exit",
+    "FR-0034:board",
+    "FR-0034:exit",
+    "FR-0034-01:board",
+    "FR-0034-01:exit",
+    "FR-0034-02:board",
+    "FR-0034-02:exit",
+    "NEC-2237:board",
+    "NEC-2237:exit",
+    "NEC-2237-03:board",
+    "NEC-2237-03:exit",
+    "NEC-2237-05:board",
+    "NEC-2237-05:exit"
+   ],
+   "platform_directions": 54,
+   "used": 8
+  },
+  {
+   "B": 9,
+   "departures": 10558,
+   "lifts": [
+    {
+     "facility_id": "720",
+     "station": "Government Center",
+     "station_id": "place-gover"
+    },
+    {
+     "facility_id": "721",
+     "station": "Government Center",
+     "station_id": "place-gover"
+    },
+    {
+     "facility_id": "804",
+     "station": "Park Street",
+     "station_id": "place-pktrm"
+    },
+    {
+     "facility_id": "811",
+     "station": "Braintree",
+     "station_id": "place-brntn"
+    },
+    {
+     "facility_id": "821",
+     "station": "Harvard",
+     "station_id": "place-harsq"
+    },
+    {
+     "facility_id": "841",
+     "station": "Forest Hills",
+     "station_id": "place-forhl"
+    },
+    {
+     "facility_id": "892",
+     "station": "Downtown Crossing",
+     "station_id": "place-dwnxg"
+    },
+    {
+     "facility_id": "973",
+     "station": "Harvard",
+     "station_id": "place-harsq"
+    },
+    {
+     "facility_id": "978",
+     "station": "Park Street",
+     "station_id": "place-pktrm"
+    }
+   ],
+   "lost": [
+    "70020:board",
+    "70020:exit",
+    "70039:board",
+    "70039:exit",
+    "70040:board",
+    "70040:exit",
+    "70067:board",
+    "70067:exit",
+    "70068:board",
+    "70068:exit",
+    "70075:board",
+    "70075:exit",
+    "70076:board",
+    "70076:exit",
+    "70105:board",
+    "70105:exit",
+    "70196:board",
+    "70196:exit",
+    "70197:board",
+    "70197:exit",
+    "70198:board",
+    "70198:exit",
+    "70199:board",
+    "70199:exit",
+    "70200:board",
+    "70200:exit",
+    "70201:board",
+    "70201:exit",
+    "70202:board",
+    "70202:exit",
+    "71199:board",
+    "71199:exit",
+    "76121:board",
+    "76121:exit",
+    "76122:board",
+    "76122:exit",
+    "76123:board",
+    "76123:exit",
+    "76124:board",
+    "76124:exit",
+    "76125:board",
+    "76125:exit",
+    "76126:board",
+    "76126:exit",
+    "76129:board",
+    "76129:exit",
+    "Braintree-01:board",
+    "Braintree-01:exit",
+    "Braintree-02:board",
+    "Braintree-02:exit",
+    "Government Center-Brattle:board",
+    "Government Center-Brattle:exit",
+    "NEC-2237:board",
+    "NEC-2237:exit",
+    "NEC-2237-03:board",
+    "NEC-2237-03:exit",
+    "NEC-2237-05:board",
+    "NEC-2237-05:exit"
+   ],
+   "platform_directions": 58,
+   "used": 9
+  },
+  {
+   "B": 10,
+   "departures": 10634,
+   "lifts": [
+    {
+     "facility_id": "720",
+     "station": "Government Center",
+     "station_id": "place-gover"
+    },
+    {
+     "facility_id": "721",
+     "station": "Government Center",
+     "station_id": "place-gover"
+    },
+    {
+     "facility_id": "804",
+     "station": "Park Street",
+     "station_id": "place-pktrm"
+    },
+    {
+     "facility_id": "811",
+     "station": "Braintree",
+     "station_id": "place-brntn"
+    },
+    {
+     "facility_id": "821",
+     "station": "Harvard",
+     "station_id": "place-harsq"
+    },
+    {
+     "facility_id": "841",
+     "station": "Forest Hills",
+     "station_id": "place-forhl"
+    },
+    {
+     "facility_id": "892",
+     "station": "Downtown Crossing",
+     "station_id": "place-dwnxg"
+    },
+    {
+     "facility_id": "973",
+     "station": "Harvard",
+     "station_id": "place-harsq"
+    },
+    {
+     "facility_id": "978",
+     "station": "Park Street",
+     "station_id": "place-pktrm"
+    },
+    {
+     "facility_id": "986",
+     "station": "Porter",
+     "station_id": "place-portr"
+    }
+   ],
+   "lost": [
+    "70020:board",
+    "70020:exit",
+    "70039:board",
+    "70039:exit",
+    "70040:board",
+    "70040:exit",
+    "70067:board",
+    "70067:exit",
+    "70068:board",
+    "70068:exit",
+    "70075:board",
+    "70075:exit",
+    "70076:board",
+    "70076:exit",
+    "70105:board",
+    "70105:exit",
+    "70196:board",
+    "70196:exit",
+    "70197:board",
+    "70197:exit",
+    "70198:board",
+    "70198:exit",
+    "70199:board",
+    "70199:exit",
+    "70200:board",
+    "70200:exit",
+    "70201:board",
+    "70201:exit",
+    "70202:board",
+    "70202:exit",
+    "71199:board",
+    "71199:exit",
+    "76121:board",
+    "76121:exit",
+    "76122:board",
+    "76122:exit",
+    "76123:board",
+    "76123:exit",
+    "76124:board",
+    "76124:exit",
+    "76125:board",
+    "76125:exit",
+    "76126:board",
+    "76126:exit",
+    "76129:board",
+    "76129:exit",
+    "Braintree-01:board",
+    "Braintree-01:exit",
+    "Braintree-02:board",
+    "Braintree-02:exit",
+    "FR-0034:board",
+    "FR-0034:exit",
+    "FR-0034-01:board",
+    "FR-0034-01:exit",
+    "FR-0034-02:board",
+    "FR-0034-02:exit",
+    "Government Center-Brattle:board",
+    "Government Center-Brattle:exit",
+    "NEC-2237:board",
+    "NEC-2237:exit",
+    "NEC-2237-03:board",
+    "NEC-2237-03:exit",
+    "NEC-2237-05:board",
+    "NEC-2237-05:exit"
+   ],
+   "platform_directions": 64,
+   "used": 10
+  }
+ ]
+}

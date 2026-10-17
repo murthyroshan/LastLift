@@ -85,6 +85,12 @@ def main():
     write(OUT / "disclaimers.json", DISCLAIMERS)
     total += contingency()
     total += history()
+    total += operations()
+    total += system_and_map()
+    if (ROOT / "data" / "one_lift.json").is_file():
+        total += write(OUT / "one_lift.json", json.loads((ROOT / "data" / "one_lift.json").read_text(encoding="utf-8")))
+    if (ROOT / "data" / "worst_day.json").is_file():
+        total += write(OUT / "worst_day.json", json.loads((ROOT / "data" / "worst_day.json").read_text(encoding="utf-8")))
     print(f"mirror: {len(stations)} stations, {len(STORY_WHATIFS)} what-ifs, {total // 1024} KB, "
           f"{time.time() - started:.0f} s")
     return 0
@@ -113,6 +119,81 @@ def contingency() -> int:
     for sid, plats in by_station.items():
         total += write(OUT / "cuts" / f"{sid}.json", {"q_assumed": doc["q_assumed"], "platforms": plats})
     return total
+
+
+def _bin(k, at_grade, no_entrance):
+    """The Count's bins, defined exactly as claims.json counts them (scripts/analyze.py)."""
+    if no_entrance:
+        return "none"
+    if at_grade:
+        return "grade"
+    if k is None:
+        return "none"
+    return "lost" if k == 0 else "one" if k == 1 else "many"
+
+
+def system_and_map() -> int:
+    """m/system.json: every modelled platform's bin, at baseline and now (The Count); m/map.json: every station at
+    its coordinates with its worst bin, closures and new last lifts, and the station-to-station ride links."""
+    g = db.client().select_graph(state.graph_name("demo"))
+    rows = g.ro_query(
+        "MATCH (p:Node:Platform) WITH p.stop_id AS stop, head(collect(p)) AS p "
+        "RETURN stop, p.station_id, p.name, p.platform_name, p.k_board_base, p.k_exit_base, p.k_board, p.k_exit, "
+        "coalesce(p.at_grade_board, false), coalesce(p.at_grade_exit, false), "
+        "coalesce(p.at_grade_board_now, false), coalesce(p.at_grade_exit_now, false), "
+        "coalesce(p.no_accessible_entrance, false) ORDER BY stop").result_set
+    platforms = []
+    for stop, sid, name, pname, kbb, keb, kb, ke, agb, age, agbn, agen, noe in rows:
+        platforms.append({"stop": stop, "station": sid, "name": " ".join(x for x in (name, pname) if x),
+                          "board": {"base": _bin(kbb, agb, noe), "now": _bin(kb, agbn, noe)},
+                          "exit": {"base": _bin(keb, age, noe), "now": _bin(ke, agen, noe)}})
+    total = write(OUT / "system.json", {"platforms": platforms})
+    order = {"lost": 0, "one": 1, "many": 2, "grade": 3}
+    worst = {}
+    for p in platforms:
+        for when in ("base", "now"):
+            bins = [p[d][when] for d in ("board", "exit") if p[d][when] in order]
+            if bins:
+                w = min(bins, key=order.get)
+                cur = worst.setdefault(p["station"], {}).get(when)
+                if cur is None or order[w] < order[cur]:
+                    worst[p["station"]][when] = w
+    closed = {}
+    for fid, sid in g.ro_query("MATCH (l:Lift)-[:SF_CLOSED]->() RETURN DISTINCT l.facility_id, l.station_id").result_set:
+        closed.setdefault(sid, []).append(fid)
+    newly = {r[0] for r in g.ro_query("MATCH (p:Node:Platform)-[n:DEPENDS_NOW]->(l:Lift) "
+                                      "WHERE NOT (p)-[:DEPENDS_ON {dir:n.dir}]->(l) RETURN DISTINCT p.station_id").result_set}
+    stations = [{"id": sid, "name": name, "lat": round(lat, 5), "lon": round(lon, 5), "data": bool(hp),
+                 "base": worst.get(sid, {}).get("base"), "now": worst.get(sid, {}).get("now"),
+                 "closed": sorted(closed.get(sid, [])), "new_last": sid in newly}
+                for sid, name, lat, lon, hp in g.ro_query(
+                    "MATCH (s:Station) WHERE s.lat IS NOT NULL RETURN s.uid, s.name, s.lat, s.lon, s.has_pathways "
+                    "ORDER BY s.uid").result_set]
+    links = [{"a": a, "b": b, "rail": bool(rail)} for a, b, rail in g.ro_query(
+        "MATCH (x:Platform)-[r:RIDE]->(y:Platform) WHERE x.station_id < y.station_id "
+        "RETURN DISTINCT x.station_id, y.station_id, max(CASE WHEN r.route_type <> '3' THEN 1 ELSE 0 END) "
+        "ORDER BY x.station_id, y.station_id").result_set]
+    total += write(OUT / "map.json", {"stations": stations, "links": links})
+    return total
+
+
+def operations() -> int:
+    """m/ops.json: one tick of the operations agents on the demo scope (assessments, proposals, rider notices in dry
+    run). The live inbox comes from the API; this snapshot keeps the page readable when the API is asleep."""
+    import asyncio
+    from lastlift.agents import roles
+    g = db.client().select_graph(state.graph_name("demo"))
+    g.query("MATCH (n) WHERE n:Assessment OR n:ActionProposal DETACH DELETE n")
+    g.query("MATCH (n:Notice) DETACH DELETE n")
+    t = asyncio.run(roles.tick("demo"))
+    keep = ("facility_id", "station_id", "playbook", "verdict", "chronic", "targets", "finds", "proposals")
+    return write(OUT / "ops.json", {
+        "assessments": [{k: a.get(k) for k in keep} for a in t["assessments"]],
+        "notices": [{k: n.get(k) for k in ("station_id", "kind", "title", "body", "topic")} for n in t["notices"]
+                    if n.get("kind")],
+        "policy": roles.POLICY,
+        "events": [{k: e.get(k) for k in ("agent", "type", "tool", "facility_id", "playbook", "kind", "ok")}
+                   for e in t["events"]]})
 
 
 def history() -> int:

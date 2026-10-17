@@ -61,13 +61,47 @@ def counts_table():
     return "\n".join(rows)
 
 
+def eval_table():
+    path = ROOT / "eval" / "results" / "latest.json"
+    if not path.is_file():
+        return "_No evaluation run yet._"
+    systems = json.loads(path.read_text(encoding="utf-8"))["systems"]
+    order = [s for s in ("full_gemini", "llm_only_gemini", "router", "full_run2", "fallback_run2",
+                         "full_run1_rate_limited", "fallback_run1_rate_limited") if s in systems]
+    names = {"full_gemini": "Run 3: full agent (MCP tools + grounding), gemini-3.1-flash-lite",
+             "llm_only_gemini": "Run 3: same model, no graph (FalkorDB off)",
+             "router": "Router + templates (no LLM)",
+             "full_run2": "Run 2: full agent (qwen at its daily cap; see amendment 2)",
+             "fallback_run2": "Run 2: fallback subset, 12 q",
+             "full_run1_rate_limited": "Run 1: full agent (rate-limited; amendment 1)",
+             "fallback_run1_rate_limited": "Run 1: fallback subset (rate-limited)"}
+
+    def cell(s, k):
+        v = s.get(k)
+        if v is None:
+            return "–"
+        if isinstance(v, dict):
+            return f"{v['x']}/{v['n']}" if v.get("n") else "–"
+        return str(v)
+    head = ["System", "Right tools", "Gold ids", "Verdicts", "False accessible", "Abstains when it must",
+            "Forbidden claims", "Template fallback", "Models"]
+    rows = ["| " + " | ".join(head) + " |", "|" + "---|" * len(head)]
+    for s in order:
+        x = systems[s]
+        rows.append("| " + " | ".join([names.get(s, s), cell(x, "tool_set"), cell(x, "ids"), cell(x, "verdicts"),
+                                      cell(x, "false_accessible"), cell(x, "abstain_must"),
+                                      cell(x, "forbidden_claims"), cell(x, "fallback_to_template"),
+                                      ", ".join(x.get("models", [])) or "–"]) + " |")
+    return "\n".join(rows)
+
+
 def render(text):
     claims = json.loads((ROOT / "claims.json").read_text(encoding="utf-8"))
     missing = [k for k in CLAIM.findall(text) if k[0] not in claims]
     if missing:
         raise SystemExit(f"README cites claims that do not exist: {sorted({k[0] for k in missing})}")
     text = CLAIM.sub(lambda m: f"<!--claim:{m.group(1)}-->{fmt(claims[m.group(1)], m.group(1))}<!--/claim-->", text)
-    gens = {"cypher": cypher_table, "counts": counts_table}
+    gens = {"cypher": cypher_table, "counts": counts_table, "eval": eval_table}
     return GEN.sub(lambda m: f"{m.group(1)}\n{gens[m.group(2)]()}\n{m.group(4)}", text)
 
 

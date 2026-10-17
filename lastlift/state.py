@@ -14,7 +14,7 @@ import os
 import threading
 from collections import OrderedDict
 
-from . import db, redundancy
+from . import db, memory, redundancy
 from .config import settings
 from .queries import (Q_CLEAR_DEPENDS_NOW, Q_CLOSE_LIFTS, Q_CLOSED_FACILITIES, Q_COMPLEX_PLATFORMS,
                       Q_COMPLEX_STREETS, Q_CREATE_DEPENDS, Q_LIFT_COMPLEXES, Q_REOPEN_LIFTS, Q_SET_PLATFORM_NOW)
@@ -84,7 +84,15 @@ def sync(name: str, closed_fids) -> dict:
         changed = sorted(before ^ set(want))
         cxs = g.ro_query(Q_LIFT_COMPLEXES, {"fids": changed}).result_set[0][0] if changed else []
         results = recompute(name, cxs) if cxs else {}
-    return {"graph": name, "closed": want, "changed": changed, "complexes": sorted(cxs), "recomputed": results}
+        # the closed set's fingerprint: the agents' Dispatcher acts only on assessments made at this version
+        g.query("MATCH (m:Meta) SET m.state_version = $v", {"v": state_version(want)})
+        stale = memory.invalidate(name, changed)      # answers that read a lift that changed are no longer true
+    return {"graph": name, "closed": want, "changed": changed, "complexes": sorted(cxs), "recomputed": results,
+            "answers_made_stale": stale}
+
+
+def state_version(closed_fids) -> str:
+    return hashlib.sha1(",".join(sorted(set(closed_fids))).encode()).hexdigest()[:12]
 
 
 def what_if(scope: str, extra_fids) -> dict:

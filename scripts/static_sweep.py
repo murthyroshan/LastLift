@@ -84,16 +84,18 @@ def prefill(fid, text):
 
 
 def make_gold():
-    """validation/gold_static.csv from the author's sheet: author labels for flagged rows (all must be
-    filled), the regex pre-fill for the rest, marked as such. Never copies the alternate-service text."""
+    """validation/gold_static.csv from the author's sheet: author labels for flagged rows and for the audit sample
+    (scripts/validation_study.py --sheets; all must be filled), the regex pre-fill for the rest, marked as such.
+    Never copies the alternate-service text."""
     sheet = list(csv.DictReader((PRIVATE / "static_review.csv").open(encoding="utf-8")))
-    missing = [r["facility_id"] for r in sheet if r["review_required"] == "Y" and not r["author_verdict"].strip()]
+    labelled = lambda r: r["review_required"] == "Y" or r.get("audit") == "Y"   # noqa: E731
+    missing = [r["facility_id"] for r in sheet if labelled(r) and not r["author_verdict"].strip()]
     if missing:
-        print(f"{len(missing)} flagged rows have no author_verdict yet, e.g. {missing[:5]}")
+        print(f"{len(missing)} rows to label have no author_verdict yet, e.g. {missing[:5]}")
         return 1
     out = []
     for r in sheet:
-        if r["review_required"] == "Y":
+        if labelled(r):
             lab = {"author_board_class": r["author_board_class"], "author_exit_class": r["author_exit_class"],
                    "author_named_elevators": r["author_named_elevators"], "author_verdict": r["author_verdict"],
                    "labelled_by": "author (from MBTA alternate-service text)", "notes": r["author_notes"]}
@@ -106,7 +108,7 @@ def make_gold():
         w = csv.DictWriter(fh, fieldnames=list(out[0].keys()), lineterminator="\n")
         w.writeheader()
         w.writerows(out)
-    print(f"validation/gold_static.csv: {len(out)} rows ({sum(r['review_required'] == 'Y' for r in sheet)} author-labelled)")
+    print(f"validation/gold_static.csv: {len(out)} rows ({sum(labelled(r) for r in sheet)} author-labelled)")
     return 0
 
 

@@ -363,7 +363,98 @@
    "verdicts": []
   }
  ],
+ "scoring": "S1 (eval/gold_errata.md)",
  "summary": {
+  "abstain_must": {
+   "n": 1,
+   "rate": 1.0,
+   "wilson95": [
+    0.207,
+    1.0
+   ],
+   "x": 1
+  },
+  "failovers": 16,
+  "fallback_to_template": {
+   "n": 12,
+   "rate": 0.417,
+   "wilson95": [
+    0.193,
+    0.68
+   ],
+   "x": 5
+  },
+  "false_accessible": 2,
+  "forbidden_claims": 2,
+  "ids": {
+   "n": 8,
+   "rate": 0.75,
+   "wilson95": [
+    0.409,
+    0.929
+   ],
+   "x": 6
+  },
+  "latency_ms": {
+   "p50": 28976,
+   "p95": 44821
+  },
+  "mcp_equal": {
+   "n": 26,
+   "rate": 0.962,
+   "wilson95": [
+    0.811,
+    0.993
+   ],
+   "x": 25
+  },
+  "models": [
+   "gemini-3.1-flash-lite"
+  ],
+  "no_needless_abstain": {
+   "n": 11,
+   "rate": 0.909,
+   "wilson95": [
+    0.623,
+    0.984
+   ],
+   "x": 10
+  },
+  "provider_errors": 0,
+  "raw_ungrounded": {
+   "n": 8,
+   "rate": 0.125,
+   "wilson95": [
+    0.022,
+    0.471
+   ],
+   "x": 1
+  },
+  "shipped_ungrounded": 0,
+  "tokens_per_question": {
+   "in": 5131,
+   "out": 99
+  },
+  "tool_set": {
+   "n": 12,
+   "rate": 0.75,
+   "wilson95": [
+    0.468,
+    0.911
+   ],
+   "x": 9
+  },
+  "verdicts": {
+   "n": 4,
+   "rate": 0.5,
+   "wilson95": [
+    0.15,
+    0.85
+   ],
+   "x": 2
+  }
+ },
+ "summary_as_scored": {
   "abstain_must": {
    "n": 1,
    "rate": 1.0,

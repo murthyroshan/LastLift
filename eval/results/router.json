@@ -1,5 +1,7 @@
 {
+ "code": null,
  "date": null,
+ "provider": "groq",
  "questions": 30,
  "rows": [
   {
@@ -473,7 +475,7 @@
   },
   {
    "abstain_ok": false,
-   "answer": "South Station (place-sstat); North Station (place-north); Norwood Central (place-FB-0148). Results describe the open-data model and may differ on site. Check mbta.com/alerts/access.",
+   "answer": "North Station (place-north); South Station (place-sstat); Norwood Central (place-FB-0148). Results describe the open-data model and may differ on site. Check mbta.com/alerts/access.",
    "category": "must_abstain",
    "false_accessible": 0,
    "forbidden": [],
@@ -592,21 +594,20 @@
   },
   {
    "abstain_ok": true,
-   "answer": "Kendall/MIT: 2 platforms; 1 depends on a single lift (Alewife platform: lift 866 is newly the only lift (with lift(s) 777 closed here, its other lift routes are gone)); lift(s) closed here now: 777. 2 step-free route(s); best ~7.5 min: lift 866 (Alewife platform to Main Street). Backup avoiding lifts 866: ~16.6 min. Results describe the open-data model and may differ on site. Check mbta.com/alerts/access.",
+   "answer": "Alewife: 10 platforms; 3 depend on a single lift (Track 1 platform: lift 813 is newly the only lift (with lift(s) 961 closed here, its other lift routes are gone); Red Line platform: lift 813 is newly the only lift (with lift(s) 961 closed here, its other lift routes are gone); Track 2 platform: lift 813 is newly the only lift (with lift(s) 961 closed here, its other lift routes are gone)); lift(s) closed here now: 961. Results describe the open-data model and may differ on site. Check mbta.com/alerts/access.",
    "category": "multi_intent",
    "false_accessible": 0,
    "forbidden": [],
    "id": "Q30",
-   "ids_ok": true,
+   "ids_ok": false,
    "mcp_equal": [
-    3,
-    3
+    2,
+    2
    ],
    "source": "template",
    "tools": [
     "resolve_place",
-    "platform_redundancy",
-    "step_free_route"
+    "platform_redundancy"
    ],
    "tools_ok": true,
    "verdicts": []
@@ -626,21 +627,21 @@
   "forbidden_claims": 0,
   "ids": {
    "n": 24,
-   "rate": 0.958,
+   "rate": 0.917,
    "wilson95": [
-    0.798,
-    0.993
+    0.742,
+    0.977
    ],
-   "x": 23
+   "x": 22
   },
   "mcp_equal": {
-   "n": 57,
+   "n": 56,
    "rate": 1.0,
    "wilson95": [
-    0.937,
+    0.936,
     1.0
    ],
-   "x": 57
+   "x": 56
   },
   "no_needless_abstain": {
    "n": 27,

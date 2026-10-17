@@ -1,0 +1,14 @@
+[
+ {
+  "facility_id": "803",
+  "mbta": "LOSS",
+  "model": "ENTRANCE_ONLY",
+  "source": "live validation L04"
+ },
+ {
+  "facility_id": "777",
+  "mbta": "NO_LOSS",
+  "model": "ENTRANCE_ONLY",
+  "source": "live validation L12"
+ }
+]

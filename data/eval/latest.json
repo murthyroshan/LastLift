@@ -1,0 +1,637 @@
+{
+ "baselines": {
+  "b_bfs": {
+   "lastlift_maxflow_calls": 734,
+   "network_pair_searches": 1735767,
+   "network_single_searches": 17622,
+   "platform_pair_searches": 3995,
+   "platform_single_searches": 1394
+  },
+  "b_count": {
+   "agree": 93,
+   "misses_single": 74,
+   "platforms": 167,
+   "rule_wrong": 74,
+   "says_single_but_not": 0
+  },
+  "b_llm": {
+   "cut_exact": {
+    "n": 30,
+    "rate": 0.867,
+    "wilson95": [
+     0.703,
+     0.947
+    ],
+    "x": 26
+   },
+   "k_exact": {
+    "n": 30,
+    "rate": 0.9,
+    "wilson95": [
+     0.744,
+     0.965
+    ],
+    "x": 27
+   },
+   "model": "gemini-3.1-flash-lite",
+   "n": 30
+  }
+ },
+ "systems": {
+  "fallback_run1_rate_limited": {
+   "abstain_must": {
+    "n": 1,
+    "rate": 0.0,
+    "wilson95": [
+     0.0,
+     0.793
+    ],
+    "x": 0
+   },
+   "date": "2026-10-17",
+   "failovers": 10,
+   "fallback_to_template": {
+    "n": 12,
+    "rate": 0.5,
+    "wilson95": [
+     0.254,
+     0.746
+    ],
+    "x": 6
+   },
+   "false_accessible": 0,
+   "forbidden_claims": 0,
+   "ids": {
+    "n": 8,
+    "rate": 1.0,
+    "wilson95": [
+     0.676,
+     1.0
+    ],
+    "x": 8
+   },
+   "latency_ms": {
+    "p50": 5245,
+    "p95": 59776
+   },
+   "mcp_equal": {
+    "n": 31,
+    "rate": 1.0,
+    "wilson95": [
+     0.89,
+     1.0
+    ],
+    "x": 31
+   },
+   "models": [
+    "openai/gpt-oss-120b"
+   ],
+   "no_needless_abstain": {
+    "n": 11,
+    "rate": 1.0,
+    "wilson95": [
+     0.741,
+     1.0
+    ],
+    "x": 11
+   },
+   "provider_errors": 0,
+   "questions": 12,
+   "raw_ungrounded": {
+    "n": 7,
+    "rate": 0.143,
+    "wilson95": [
+     0.026,
+     0.513
+    ],
+    "x": 1
+   },
+   "shipped_ungrounded": 0,
+   "tokens_per_question": {
+    "in": 4352,
+    "out": 440
+   },
+   "tool_set": {
+    "n": 12,
+    "rate": 0.833,
+    "wilson95": [
+     0.552,
+     0.953
+    ],
+    "x": 10
+   },
+   "verdicts": {
+    "n": 4,
+    "rate": 1.0,
+    "wilson95": [
+     0.51,
+     1.0
+    ],
+    "x": 4
+   }
+  },
+  "fallback_run2": {
+   "abstain_must": {
+    "n": 1,
+    "rate": 1.0,
+    "wilson95": [
+     0.207,
+     1.0
+    ],
+    "x": 1
+   },
+   "date": "2026-10-17",
+   "failovers": 16,
+   "fallback_to_template": {
+    "n": 12,
+    "rate": 0.417,
+    "wilson95": [
+     0.193,
+     0.68
+    ],
+    "x": 5
+   },
+   "false_accessible": 2,
+   "forbidden_claims": 2,
+   "ids": {
+    "n": 8,
+    "rate": 0.75,
+    "wilson95": [
+     0.409,
+     0.929
+    ],
+    "x": 6
+   },
+   "latency_ms": {
+    "p50": 28976,
+    "p95": 44821
+   },
+   "mcp_equal": {
+    "n": 26,
+    "rate": 0.962,
+    "wilson95": [
+     0.811,
+     0.993
+    ],
+    "x": 25
+   },
+   "models": [
+    "gemini-3.1-flash-lite"
+   ],
+   "no_needless_abstain": {
+    "n": 11,
+    "rate": 0.909,
+    "wilson95": [
+     0.623,
+     0.984
+    ],
+    "x": 10
+   },
+   "provider_errors": 0,
+   "questions": 12,
+   "raw_ungrounded": {
+    "n": 8,
+    "rate": 0.125,
+    "wilson95": [
+     0.022,
+     0.471
+    ],
+    "x": 1
+   },
+   "shipped_ungrounded": 0,
+   "tokens_per_question": {
+    "in": 5131,
+    "out": 99
+   },
+   "tool_set": {
+    "n": 12,
+    "rate": 0.75,
+    "wilson95": [
+     0.468,
+     0.911
+    ],
+    "x": 9
+   },
+   "verdicts": {
+    "n": 4,
+    "rate": 0.5,
+    "wilson95": [
+     0.15,
+     0.85
+    ],
+    "x": 2
+   }
+  },
+  "full_gemini": {
+   "abstain_must": {
+    "n": 3,
+    "rate": 0.333,
+    "wilson95": [
+     0.061,
+     0.792
+    ],
+    "x": 1
+   },
+   "date": "2026-10-17",
+   "failovers": 5,
+   "fallback_to_template": {
+    "n": 30,
+    "rate": 0.433,
+    "wilson95": [
+     0.274,
+     0.608
+    ],
+    "x": 13
+   },
+   "false_accessible": 2,
+   "forbidden_claims": 2,
+   "ids": {
+    "n": 24,
+    "rate": 0.958,
+    "wilson95": [
+     0.798,
+     0.993
+    ],
+    "x": 23
+   },
+   "latency_ms": {
+    "p50": 18744,
+    "p95": 71449
+   },
+   "mcp_equal": {
+    "n": 72,
+    "rate": 1.0,
+    "wilson95": [
+     0.949,
+     1.0
+    ],
+    "x": 72
+   },
+   "models": [
+    "gemini-3.1-flash-lite"
+   ],
+   "no_needless_abstain": {
+    "n": 27,
+    "rate": 0.963,
+    "wilson95": [
+     0.817,
+     0.993
+    ],
+    "x": 26
+   },
+   "provider_errors": 0,
+   "questions": 30,
+   "raw_ungrounded": {
+    "n": 25,
+    "rate": 0.32,
+    "wilson95": [
+     0.172,
+     0.516
+    ],
+    "x": 8
+   },
+   "shipped_ungrounded": 0,
+   "tokens_per_question": {
+    "in": 5538,
+    "out": 100
+   },
+   "tool_set": {
+    "n": 30,
+    "rate": 0.7,
+    "wilson95": [
+     0.521,
+     0.833
+    ],
+    "x": 21
+   },
+   "verdicts": {
+    "n": 7,
+    "rate": 0.714,
+    "wilson95": [
+     0.359,
+     0.918
+    ],
+    "x": 5
+   }
+  },
+  "full_run1_rate_limited": {
+   "abstain_must": {
+    "n": 3,
+    "rate": 0.333,
+    "wilson95": [
+     0.061,
+     0.792
+    ],
+    "x": 1
+   },
+   "date": "2026-10-17",
+   "failovers": 31,
+   "fallback_to_template": {
+    "n": 30,
+    "rate": 0.267,
+    "wilson95": [
+     0.142,
+     0.444
+    ],
+    "x": 8
+   },
+   "false_accessible": 0,
+   "forbidden_claims": 0,
+   "ids": {
+    "n": 24,
+    "rate": 0.958,
+    "wilson95": [
+     0.798,
+     0.993
+    ],
+    "x": 23
+   },
+   "latency_ms": {
+    "p50": 14624,
+    "p95": 76923
+   },
+   "mcp_equal": {
+    "n": 78,
+    "rate": 1.0,
+    "wilson95": [
+     0.953,
+     1.0
+    ],
+    "x": 78
+   },
+   "models": [
+    "openai/gpt-oss-120b",
+    "qwen/qwen3.8-27b"
+   ],
+   "no_needless_abstain": {
+    "n": 27,
+    "rate": 1.0,
+    "wilson95": [
+     0.875,
+     1.0
+    ],
+    "x": 27
+   },
+   "provider_errors": 0,
+   "questions": 30,
+   "raw_ungrounded": {
+    "n": 24,
+    "rate": 0.083,
+    "wilson95": [
+     0.023,
+     0.258
+    ],
+    "x": 2
+   },
+   "shipped_ungrounded": 0,
+   "tokens_per_question": {
+    "in": 5476,
+    "out": 327
+   },
+   "tool_set": {
+    "n": 30,
+    "rate": 0.833,
+    "wilson95": [
+     0.664,
+     0.927
+    ],
+    "x": 25
+   },
+   "verdicts": {
+    "n": 7,
+    "rate": 1.0,
+    "wilson95": [
+     0.646,
+     1.0
+    ],
+    "x": 7
+   }
+  },
+  "full_run2": {
+   "abstain_must": {
+    "n": 3,
+    "rate": 0.333,
+    "wilson95": [
+     0.061,
+     0.792
+    ],
+    "x": 1
+   },
+   "date": "2026-10-17",
+   "failovers": 52,
+   "fallback_to_template": {
+    "n": 30,
+    "rate": 0.367,
+    "wilson95": [
+     0.219,
+     0.545
+    ],
+    "x": 11
+   },
+   "false_accessible": 0,
+   "forbidden_claims": 0,
+   "ids": {
+    "n": 24,
+    "rate": 1.0,
+    "wilson95": [
+     0.862,
+     1.0
+    ],
+    "x": 24
+   },
+   "latency_ms": {
+    "p50": 4923,
+    "p95": 26789
+   },
+   "mcp_equal": {
+    "n": 74,
+    "rate": 0.973,
+    "wilson95": [
+     0.907,
+     0.993
+    ],
+    "x": 72
+   },
+   "models": [
+    "openai/gpt-oss-120b"
+   ],
+   "no_needless_abstain": {
+    "n": 27,
+    "rate": 1.0,
+    "wilson95": [
+     0.875,
+     1.0
+    ],
+    "x": 27
+   },
+   "provider_errors": 0,
+   "questions": 30,
+   "raw_ungrounded": {
+    "n": 19,
+    "rate": 0.0,
+    "wilson95": [
+     0.0,
+     0.168
+    ],
+    "x": 0
+   },
+   "shipped_ungrounded": 0,
+   "tokens_per_question": {
+    "in": 4243,
+    "out": 434
+   },
+   "tool_set": {
+    "n": 30,
+    "rate": 0.833,
+    "wilson95": [
+     0.664,
+     0.927
+    ],
+    "x": 25
+   },
+   "verdicts": {
+    "n": 7,
+    "rate": 1.0,
+    "wilson95": [
+     0.646,
+     1.0
+    ],
+    "x": 7
+   }
+  },
+  "llm_only_gemini": {
+   "abstain_must": {
+    "n": 3,
+    "rate": 0.333,
+    "wilson95": [
+     0.061,
+     0.792
+    ],
+    "x": 1
+   },
+   "date": "2026-10-17",
+   "failovers": 0,
+   "fallback_to_template": {
+    "n": 30,
+    "rate": 0.0,
+    "wilson95": [
+     0.0,
+     0.114
+    ],
+    "x": 0
+   },
+   "false_accessible": 2,
+   "forbidden_claims": 0,
+   "ids": {
+    "n": 24,
+    "rate": 0.208,
+    "wilson95": [
+     0.092,
+     0.405
+    ],
+    "x": 5
+   },
+   "latency_ms": {
+    "p50": 6714,
+    "p95": 60132
+   },
+   "models": [
+    "gemini-3.1-flash-lite"
+   ],
+   "no_needless_abstain": {
+    "n": 27,
+    "rate": 0.444,
+    "wilson95": [
+     0.276,
+     0.627
+    ],
+    "x": 12
+   },
+   "provider_errors": 4,
+   "questions": 30,
+   "raw_ungrounded": {
+    "n": 0,
+    "rate": null,
+    "wilson95": [
+     0,
+     0
+    ],
+    "x": 0
+   },
+   "shipped_ungrounded": 0,
+   "tokens_per_question": {
+    "in": 766,
+    "out": 55
+   },
+   "verdicts": {
+    "n": 7,
+    "rate": 0.571,
+    "wilson95": [
+     0.25,
+     0.842
+    ],
+    "x": 4
+   }
+  },
+  "router": {
+   "abstain_must": {
+    "n": 3,
+    "rate": 0.333,
+    "wilson95": [
+     0.061,
+     0.792
+    ],
+    "x": 1
+   },
+   "date": null,
+   "false_accessible": 0,
+   "forbidden_claims": 0,
+   "ids": {
+    "n": 24,
+    "rate": 0.917,
+    "wilson95": [
+     0.742,
+     0.977
+    ],
+    "x": 22
+   },
+   "mcp_equal": {
+    "n": 56,
+    "rate": 1.0,
+    "wilson95": [
+     0.936,
+     1.0
+    ],
+    "x": 56
+   },
+   "no_needless_abstain": {
+    "n": 27,
+    "rate": 1.0,
+    "wilson95": [
+     0.875,
+     1.0
+    ],
+    "x": 27
+   },
+   "questions": 30,
+   "tool_set": {
+    "n": 30,
+    "rate": 0.9,
+    "wilson95": [
+     0.744,
+     0.965
+    ],
+    "x": 27
+   },
+   "verdicts": {
+    "n": 7,
+    "rate": 1.0,
+    "wilson95": [
+     0.646,
+     1.0
+    ],
+    "x": 7
+   }
+  }
+ }
+}

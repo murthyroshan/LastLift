@@ -1,0 +1,192 @@
+[
+ {
+  "id": "mdb-205",
+  "provider": "Metro Transit",
+  "country": "US",
+  "url": "https://files.mobilitydatabase.org/mdb-205/latest.zip",
+  "license": "",
+  "zip_bytes": 23149017,
+  "members": {
+   "feed_info.txt": "a3911d66ddfcb7b4bd9fa2b83daf4def65c41cb4a1209d2b6e0c772a1abd25d3",
+   "levels.txt": "5cb7cfca18f266f2c0bc5c75e52d2190fdfbb273787451d2856bc602ae501194",
+   "pathways.txt": "a8049eedb77d6d8fc33ae8768b06fb2df240521798e96268393493ff0fdc8ea1",
+   "stops.txt": "6e2fbf95f05329873cefdc5ea3d335750b0da3e07aba9ae817c833d9bdffefde"
+  }
+ },
+ {
+  "id": "mdb-437",
+  "provider": "Massachusetts Bay Transportation Authority (MBTA)",
+  "country": "US",
+  "url": "https://files.mobilitydatabase.org/mdb-437/latest.zip",
+  "license": "https://www.mass.gov/files/documents/2017/10/27/develop_license_agree_0.pdf",
+  "zip_bytes": 24482787,
+  "members": {
+   "facilities.txt": "8b3cab7adbbbcae9d96948b1949f7899a3b0e933279a1273898a06d6fb7f9508",
+   "feed_info.txt": "01b1b62acd9b80095bdb76ca0e04e91450cf6f08f1d2d651ef7c69a3f8d96535",
+   "levels.txt": "cc8fde412c8906eedb55fec1de677ce029d5822a6b1c556e4c6a0efc0fe6e02c",
+   "pathways.txt": "6742775faabbf74ca3ec3ed5f623b9c140d031bb3bc71525b2767d6e80a4cbdc",
+   "stops.txt": "3eba8bae28bff63274c2040babbccbc5e404cfa477d69dd1881487d88a551396"
+  }
+ },
+ {
+  "id": "mdb-470",
+  "provider": "Maryland Transit Administration Metro Subway",
+  "country": "US",
+  "url": "https://files.mobilitydatabase.org/mdb-470/latest.zip",
+  "license": "",
+  "zip_bytes": 56280,
+  "members": {
+   "levels.txt": "43ddc9d40dc1c61be7a20235ef4221e1f5e81659028e23ced1a64b174b736f96",
+   "pathways.txt": "cd24fc573551bdac39d9d2fa4778e76e49c3e67c3eb0211a7bdf3de2e12761be",
+   "stops.txt": "a9219bfe4e15d7c889f0dc69651fe17a253337bfd27871674e268bcc2e832948"
+  }
+ },
+ {
+  "id": "mdb-502",
+  "provider": "Southeastern Pennsylvania Transportation Authority (SEPTA)",
+  "country": "US",
+  "url": "https://files.mobilitydatabase.org/mdb-502/latest.zip",
+  "license": "https://www3.septa.org/developer/",
+  "zip_bytes": 21287034,
+  "members": {
+   "feed_info.txt": "a2c06e34f257c63c9c171217c5a2464a8e5e3ef55d9ec84c9ba4cb2753c89339",
+   "levels.txt": "edee96840e01aa3926937f28b6c38a7db00c8ffa8e6f494ea1434b04083f1159",
+   "pathways.txt": "60081cd3c6c165ea992faad6f73b007678ca528f8be113cae04baf23c2803fde",
+   "stops.txt": "04751b0792a08434edebde08a51426c94e6e2fbe66b870c6d134432fce7753c9"
+  }
+ },
+ {
+  "id": "mdb-714",
+  "provider": "Edmonton Transit System",
+  "country": "CA",
+  "url": "https://files.mobilitydatabase.org/mdb-714/latest.zip",
+  "license": "https://data.strathcona.ca/Transportation/Transit-Bus-Schedule-GTFS-Data-Feed-Zip-File/2ek5-rxs5/data?no_mobile=true",
+  "zip_bytes": 18704644,
+  "members": {
+   "feed_info.txt": "188fd92142689d71db975b03e23c63e98bfb682fc36dae24d590cb63a459b3c4",
+   "levels.txt": "fea5f2e54856621fbf767a02ec1eda524fc8df69f02c259a2e2890959724e1dd",
+   "pathways.txt": "720cabf9ea842d79d356808b130808e0e72d088485c0a0d205f885d1c8efe0ae",
+   "stops.txt": "218864b042c7a986ce5461a3b51279c1e5d8b978cddea9869068f5e20ab9fe49"
+  }
+ },
+ {
+  "id": "mdb-782",
+  "provider": "Verkehrsverbund Berlin-Brandenburg (VBB)",
+  "country": "DE",
+  "url": "https://files.mobilitydatabase.org/mdb-782/latest.zip",
+  "license": "http://vbb.de/vbbgtfs",
+  "zip_bytes": 66754214,
+  "members": {
+   "levels.txt": "a8bcac2b73825ba744188b282dfcdcfb53cb62d528e9045c451aec7e74741b63",
+   "pathways.txt": "b61193e9c9ae406ae43eafcc25b91ba515ff5615d15ca5841a8d6619ebaea1b1",
+   "stops.txt": "1a729b630fe5245fe4c98b07dde2e31ee46bf5612b9056652701f8f659d23057"
+  }
+ },
+ {
+  "id": "mdb-1985",
+  "provider": "Aeroexpreso",
+  "country": "PE",
+  "url": "https://files.mobilitydatabase.org/mdb-1985/latest.zip",
+  "license": "",
+  "zip_bytes": 191390,
+  "members": {
+   "feed_info.txt": "b106ada2839e470e9163af1808cd938d30a74c9c86e2c150c9a48ca99e572c39",
+   "levels.txt": "885dc4aa12fa956d5c39003a672e6e1ffddceb9bcf924cf14b732db52ab232bf",
+   "pathways.txt": "0295e039a5d785f7146b0c1ef909efa71baf91d8259df0d45425fd508143421d",
+   "stops.txt": "3b10d33d43afe2f8ac2d79ac87124876016dbf05819450c61b2bd7708a053165"
+  }
+ },
+ {
+  "id": "mdb-2098",
+  "provider": "Asociația de Dezvoltare Intercomunitară pentru Transport Public București – Ilfov (TPBI)",
+  "country": "RO",
+  "url": "https://files.mobilitydatabase.org/mdb-2098/latest.zip",
+  "license": "",
+  "zip_bytes": 9510090,
+  "members": {
+   "feed_info.txt": "c88864ffbda6df3fdf5bb3200214e39e0381d5645b4ec1ea0844239389a2c31b",
+   "levels.txt": "2a64b51ff65918d82dd2d81731c8cb2bd185aad00aa23be67a64443168ae28ee",
+   "pathways.txt": "6e48c4c47cbea969d199874074b948cd5c72010668b2baa529925bbe070db87f",
+   "stops.txt": "26e1f137e2f38e9965ec0751c0119804db92665eb8b036e1992df0368582c081"
+  }
+ },
+ {
+  "id": "mdb-2141",
+  "provider": "Consorcio de Transportes de Mallorca",
+  "country": "ES",
+  "url": "https://files.mobilitydatabase.org/mdb-2141/latest.zip",
+  "license": "https://www.tib.org/en/sobre-ctm/portal-de-transparencia/dades-obertes",
+  "zip_bytes": 6783719,
+  "members": {
+   "feed_info.txt": "072155b87c7944561992dd82c6a4bfb9e3cf6d44760752af06cd05f7a04e9fa7",
+   "levels.txt": "ec384ee55962c57e4eb41ff9e4500e83ff35410abe8873a293d308822538d097",
+   "pathways.txt": "dc1149c5bd95392ff7b7fedbb1b5114911fdf2b2cdad14c8165fb978e2e585b2",
+   "stops.txt": "91769d43b622b5d85aa5594fa56febab81372dd7efe8cc4171507bf400385aa8"
+  }
+ },
+ {
+  "id": "mdb-2848",
+  "provider": "Urban Mobility Center - Sofia Traffic",
+  "country": "BG",
+  "url": "https://files.mobilitydatabase.org/mdb-2848/latest.zip",
+  "license": "https://www.sofiatraffic.bg/bg/info-center/gtfs-danni",
+  "zip_bytes": 19034547,
+  "members": {
+   "feed_info.txt": "fe6e50d3562d06823ad6948e88ff3bd58379e5cf4c50adad8c021b098e55a4fe",
+   "levels.txt": "0695487b0980d6ccd6e7ec0dd92f993f880f0f487f296faaf6f52e687f57d953",
+   "pathways.txt": "228a8efd8c823872ab4e5919e0ae6d6e54a41813670110220f69ca3de08c1f85",
+   "stops.txt": "54eec40c99f8739eb4fdddcb9f46d2c160daf9badca4cdcd35b96cca3785d816"
+  }
+ },
+ {
+  "id": "mdb-3357",
+  "provider": "Red Metropolitana de Movilida, EFE Trenes de Chile, Bus de Acercamiento Aeropuerto, Metro de Santiago",
+  "country": "CL",
+  "url": "https://files.mobilitydatabase.org/mdb-3357/latest.zip",
+  "license": "https://www.dtpm.cl/index.php/gtfs-vigente",
+  "zip_bytes": 10747530,
+  "members": {
+   "feed_info.txt": "b85176370f94e7a53d24450294234217fb57d23fb6bb0775a6b105d061e164dd",
+   "levels.txt": "fee0e5a89d9b8be7ec9d1df0753211e5809228fab0cb3e8488047a694bf3a270",
+   "pathways.txt": "076ac9f0ba926a59c8d991baf29e5658bf889710810a6017f20fc3e7e87eb013",
+   "stops.txt": "4b32f0c8c641a6e15369bbc1b88f2ffb60db4aa5ca89433e7cf3245ca3e37bff"
+  }
+ },
+ {
+  "id": "mdb-3360",
+  "provider": "Chennai Transport Corporation",
+  "country": "IN",
+  "url": "https://files.mobilitydatabase.org/mdb-3360/latest.zip",
+  "license": "https://opendata.iiitd.edu.in/terms",
+  "zip_bytes": 9822908,
+  "members": {
+   "feed_info.txt": "1c917a908849e95b1cd62ffe51d3d65891e74b2846702ec9c16b0fcd9a855da8",
+   "pathways.txt": "3c90f0ed9b7c0ddad20ad7d3a927962cfffb4290db7a4d776bc68ab657ba1df3",
+   "stops.txt": "fb983b01f5cdbf6a23fdecd8578ce1327c0be5641e5c3a60268ad037307b1167"
+  }
+ },
+ {
+  "id": "tdg-67595",
+  "provider": "SNCF",
+  "country": "FR",
+  "url": "https://files.mobilitydatabase.org/tdg-67595/latest.zip",
+  "license": "https://opendatacommons.org/licenses/odbl/1.0/",
+  "zip_bytes": 11961368,
+  "members": {
+   "pathways.txt": "4368d70103ab87e58cdc81ffd1aaf8baed45602b180454691b417b12fdd88555",
+   "stops.txt": "f5336bef68b22c87aeb553ea6fc6c9c610bf379d8a50ecdf25b5df930d51d60d"
+  }
+ },
+ {
+  "id": "tdg-80921",
+  "provider": "Île-de-France Mobilités",
+  "country": "FR",
+  "url": "https://files.mobilitydatabase.org/tdg-80921/latest.zip",
+  "license": "https://wiki.lafabriquedesmobilites.fr/wiki/Licence_Mobilit%C3%A9s",
+  "zip_bytes": 158956038,
+  "members": {
+   "pathways.txt": "6c7b8b58d703ed4e83b039f89d47621fabb20e62449cfeed6e9970d4968cc43d",
+   "stops.txt": "cf70832e05edb399e347949db4a9d4bd476976169c7c20195b0049940548a44e"
+  }
+ }
+]

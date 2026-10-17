@@ -10,7 +10,7 @@ import time
 from contextlib import asynccontextmanager
 from typing import Literal
 
-from fastapi import Body, FastAPI, Header, HTTPException, Query
+from fastapi import Body, FastAPI, Header, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from redis.exceptions import ConnectionError as RedisConnectionError
@@ -24,6 +24,11 @@ from .config import settings
 STARTED = time.time()
 log = logging.getLogger("lastlift")
 mcp_app = mcp.http_app(path="/", stateless_http=True)        # MCP over streamable HTTP at /mcp/
+OPS_TOKEN = os.environ.get("OPS_MCP_TOKEN", "")
+ops_app = None
+if OPS_TOKEN:                                                # operations MCP (approvals): only with a token set
+    from .mcp_server import build_ops
+    ops_app = build_ops(OPS_TOKEN).http_app(path="/", stateless_http=True)
 
 
 @asynccontextmanager
@@ -38,7 +43,11 @@ async def lifespan(_app):
     poller = asyncio.create_task(live.run_forever(settings.live_poll_s)) if settings.live_feed == "on" else None
     try:
         async with mcp_app.lifespan(mcp_app):
-            yield
+            if ops_app is not None:
+                async with ops_app.lifespan(ops_app):
+                    yield
+            else:
+                yield
     finally:
         if poller:
             poller.cancel()
@@ -50,9 +59,11 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=list(settings.allowed_origins),
     allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type", "traceparent"],
+    allow_headers=["Content-Type", "traceparent", "Idempotency-Key"],
 )
 app.mount("/mcp", mcp_app)
+if ops_app is not None:
+    app.mount("/mcp-ops", ops_app)
 
 
 @app.exception_handler(RedisConnectionError)
@@ -222,6 +233,121 @@ def live_status():
     """The live feed: on/off, when it last polled the MBTA, whether that is stale (over 5 minutes), the state
     version and the modelled closed lifts. With the feed off the live scope is the committed alert harvest."""
     return live.status()
+
+
+_STT_CALLS: list[float] = []
+STT_PER_MIN, STT_PER_DAY = 20, 200
+
+
+@app.post("/v1/stt")
+async def speech_to_text(request: Request):
+    """Eyes-free mode's fallback when the browser has no speech recognition: up to 8 s of audio (webm/ogg/wav body)
+    transcribed by Groq Whisper (English, biased to station names). Capped at 20 a minute and 200 a day."""
+    if not settings.groq_api_key:
+        raise HTTPException(503, "speech recognition is not configured")
+    audio = await request.body()
+    if not audio or len(audio) > 2_000_000:
+        raise HTTPException(400, "send up to 2 MB of audio")
+    now = time.time()
+    _STT_CALLS[:] = [t for t in _STT_CALLS if now - t < 86400]
+    if len([t for t in _STT_CALLS if now - t < 60]) >= STT_PER_MIN or len(_STT_CALLS) >= STT_PER_DAY:
+        raise HTTPException(429, "speech recognition limit reached; type the question instead")
+    _STT_CALLS.append(now)
+    import httpx
+    ctype = request.headers.get("content-type", "audio/webm").split(";")[0]
+    ext = {"audio/ogg": "ogg", "audio/wav": "wav", "audio/mpeg": "mp3"}.get(ctype, "webm")
+    prompt = ("Boston MBTA stations: Alewife, Revere Beach, Wonderland, Chinatown, Back Bay, South Station, "
+              "Downtown Crossing, Park Street, Harvard, Kendall, North Station, elevator")
+    try:
+        r = await asyncio.to_thread(lambda: httpx.post(
+            "https://api.groq.com/openai/v1/audio/transcriptions", timeout=30,
+            headers={"Authorization": f"Bearer {settings.groq_api_key}"},
+            data={"model": "whisper-large-v3-turbo", "language": "en", "prompt": prompt, "response_format": "json"},
+            files={"file": (f"speech.{ext}", audio, ctype)}))
+    except httpx.HTTPError:
+        raise HTTPException(502, "speech recognition unavailable")
+    if r.status_code != 200:
+        raise HTTPException(502, f"speech recognition HTTP {r.status_code}")
+    return {"text": (r.json().get("text") or "").strip()}
+
+
+@app.post("/v1/verify-cut")
+def verify_cut(body: dict = Body(...)):
+    """Re-check a minimum cut in FalkorDB: close the cut's lifts on a throwaway copy of the scope and run the
+    certified max-flow for that platform-direction. {station_id, stop_id, dir, cut: [facility ids], scope?}"""
+    from . import redundancy
+    from .queries import Q_COMPLEX_PLATFORMS, Q_COMPLEX_STREETS, Q_STATION
+    scope = body.get("scope", "demo")
+    cut, stop, d = [str(x) for x in body.get("cut") or []], str(body.get("stop_id", "")), body.get("dir")
+    if scope not in ("demo", "live") or d not in ("board", "exit") or not cut or len(cut) > 6:
+        raise HTTPException(400, "need stop_id, dir board|exit, and a cut of 1-6 lift ids")
+    _require_graph()
+    started = time.perf_counter()
+    tools._scope_graph(scope)
+    res = state.what_if(scope, cut)
+    g = db.client().select_graph(res["copy"])
+    srs = g.ro_query(Q_STATION, {"sid": body.get("station_id")}).result_set
+    if not srs:
+        raise HTTPException(404, "unknown station")
+    cx = srs[0][2]
+    streets = g.ro_query(Q_COMPLEX_STREETS, {"cx": cx}).result_set[0][0]
+    uids = {r[0]: r[1] for r in g.ro_query(Q_COMPLEX_PLATFORMS, {"cx": cx}).result_set}
+    if stop not in uids:
+        raise HTTPException(404, "unknown platform at this station")
+    edges, lf = redundancy.complex_edges(g, cx)
+    src, dst = (streets, uids[stop]) if d == "board" else (uids[stop], streets)
+    r = redundancy.direction(g, edges, lf, src, dst)
+    return {"cut": cut, "stop_id": stop, "dir": d, "max_flow": 0 if r.k is None and not r.at_grade else r.k,
+            "at_grade": r.at_grade, "certified": r.outcome, "graph": res["copy"],
+            "ms": round((time.perf_counter() - started) * 1000, 1)}
+
+
+@app.get("/v1/incidents")
+def agent_incidents(scope: Literal["demo", "live"] = "demo"):
+    """The Analyst's assessments (playbook, verdict, platform-directions found, whether still current)."""
+    from .agents import roles
+    return {"scope": scope, "assessments": roles.incidents(scope)}
+
+
+@app.get("/v1/approvals")
+def agent_approvals(scope: Literal["demo", "live"] = "demo", status: str | None = None):
+    """Action proposals from the Dispatcher (proposed / approved_draft / rejected / superseded / dry_run)."""
+    from .agents import roles
+    return {"scope": scope, "proposals": roles.proposals(scope, status), "policy": roles.POLICY}
+
+
+@app.post("/v1/approvals/{pid}")
+def agent_decide(pid: str, body: dict = Body(...), scope: Literal["demo", "live"] = "demo",
+                 idempotency_key: str | None = Header(default=None)):
+    """A human decision: {"decision": "approve" | "reject"}. Needs an Idempotency-Key header; a repeat with the same
+    key returns the first result. Refused if the graph changed since the proposal (the proposal is superseded)."""
+    from .agents import roles
+    if body.get("decision") not in ("approve", "reject"):
+        raise HTTPException(400, "decision must be approve or reject")
+    if not idempotency_key:
+        raise HTTPException(400, "Idempotency-Key header required")
+    return _call(roles.decide, {"scope": scope, "pid": pid, "decision": body["decision"], "idem_key": idempotency_key})
+
+
+@app.post("/internal/tick", include_in_schema=False)
+async def agent_tick(scope: Literal["demo", "live"] = "live", x_tick_token: str | None = Header(default=None)):
+    """Monitor -> Analyst -> Dispatcher once (for a scheduled job). Needs the TICK_TOKEN secret."""
+    from .agents import roles
+    if not settings.tick_token or x_tick_token != settings.tick_token:
+        raise HTTPException(403, "tick token required")
+    _require_graph()
+    r = await roles.tick(scope)
+    return {k: r[k] for k in ("scope", "trace_id", "assessments")}
+
+
+@app.get("/v1/eval/latest")
+def eval_latest():
+    """The agent evaluation (eval/protocol.md): every system's metrics with Wilson intervals, and the baselines."""
+    path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "eval", "latest.json")
+    if not os.path.isfile(path):
+        raise HTTPException(404, "no evaluation run yet")
+    with open(path, encoding="utf-8") as fh:
+        return json.load(fh)
 
 
 @app.get("/v1/disclaimers")

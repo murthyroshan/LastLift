@@ -1,0 +1,965 @@
+{
+ "code": {
+  "commit": "0730b40",
+  "uncommitted_changes_in_lastlift": true
+ },
+ "date": "2026-10-17",
+ "provider": "gemini",
+ "questions": 30,
+ "rows": [
+  {
+   "abstain_ok": true,
+   "answer": "No, you cannot access the Wonderland platform at Revere Beach step-free today. Elevator 885, which connects the platform to the lobby, is currently out of service for maintenance. Please check the MBTA website for alternative travel options.",
+   "category": "closure_impact",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q01",
+   "ids_ok": true,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 2175,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 767,
+    "output_tokens": 50
+   },
+   "tools": [],
+   "verdicts": [
+    true,
+    true
+   ]
+  },
+  {
+   "abstain_ok": true,
+   "answer": "",
+   "category": "closure_impact",
+   "error": "gemini-3.1-flash-lite: LLM HTTP 503",
+   "failovers": 0,
+   "false_accessible": 1,
+   "first_attempt_error": "gemini-3.1-flash-lite: request failed (ReadTimeout)",
+   "forbidden": [],
+   "id": "Q02",
+   "ids_ok": false,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": null,
+   "ms": 2773,
+   "raw_grounding_failed": null,
+   "retried": true,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": null,
+   "tools": [],
+   "verdicts": [
+    false,
+    false
+   ]
+  },
+  {
+   "abstain_ok": false,
+   "answer": "Several stations have lost step-free access today due to elevator or platform maintenance. Affected locations include Alewife, Back Bay, Boston Landing, Central Avenue, Chinatown, Downtown Crossing, Kendall/MIT, Lynn, Natick Center, Revere Beach, South Acton, State, and Wonderland. Please check the specific elevator alerts for each station to see if alternative routes are available. I cannot assess the status of stations not listed in the provided alerts.",
+   "category": "closure_impact",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q03",
+   "ids_ok": false,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 5411,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 761,
+    "output_tokens": 90
+   },
+   "tools": [],
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Passengers using the Commuter Rail at Back Bay are affected by the closure of Elevator 854. This elevator provides access between Track 2 and the lobby. You may experience difficulty reaching the platform if you require step-free access. Please check with station personnel for alternative routes or assistance.",
+   "category": "closure_impact",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 1,
+   "forbidden": [],
+   "id": "Q04",
+   "ids_ok": true,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 10367,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 767,
+    "output_tokens": 59
+   },
+   "tools": [],
+   "verdicts": [
+    false
+   ]
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Yes, the closure of elevator 803 at State station prevents access to the Forest Hills platform. You will need to use an alternative route or station if you require lift access to that platform. Please check the MBTA website for further travel alternatives.",
+   "category": "closure_impact",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "first_attempt_error": "gemini-3.1-flash-lite: request failed (ReadTimeout)",
+   "forbidden": [],
+   "id": "Q05",
+   "ids_ok": true,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 1468,
+   "raw_grounding_failed": null,
+   "retried": true,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 766,
+    "output_tokens": 51
+   },
+   "tools": [],
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Elevator 711 at Wonderland is currently unavailable due to maintenance. This elevator connects the Ocean Avenue entrance to the pedestrian plaza. You should plan for an alternative route if you require step-free access at this specific entrance. Please check the MBTA website for further updates on this repair.",
+   "category": "closure_impact",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q06",
+   "ids_ok": true,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 4173,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 767,
+    "output_tokens": 59
+   },
+   "tools": [],
+   "verdicts": []
+  },
+  {
+   "abstain_ok": false,
+   "answer": "I cannot assess which lift is the last one at Alewife. I only know that Elevator 961 is currently unavailable due to maintenance. You may wish to contact the MBTA directly for specific station configuration details.",
+   "category": "redundancy",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "first_attempt_error": "gemini-3.1-flash-lite: request failed (ReadTimeout)",
+   "forbidden": [],
+   "id": "Q07",
+   "ids_ok": false,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 3134,
+   "raw_grounding_failed": null,
+   "retried": true,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 762,
+    "output_tokens": 44
+   },
+   "tools": [],
+   "verdicts": [
+    true
+   ]
+  },
+  {
+   "abstain_ok": false,
+   "answer": "I cannot assess which specific lifts have become the only step-free link based on the provided information. The current alerts only list which elevators are unavailable, not the full operational status or alternative routes for every station. Please check the MBTA website for real-time accessibility updates before traveling.",
+   "category": "redundancy",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q08",
+   "ids_ok": false,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 21329,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 768,
+    "output_tokens": 57
+   },
+   "tools": [],
+   "verdicts": []
+  },
+  {
+   "abstain_ok": false,
+   "answer": "I cannot assess the number of lift routes at South Station because I do not have access to station layouts. My information is limited to current elevator service alerts. South Station is not listed in the current elevator alerts.",
+   "category": "redundancy",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "first_attempt_error": "gemini-3.1-flash-lite: request failed (ReadTimeout)",
+   "forbidden": [],
+   "id": "Q09",
+   "ids_ok": null,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 3997,
+   "raw_grounding_failed": null,
+   "retried": true,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 762,
+    "output_tokens": 42
+   },
+   "tools": [],
+   "verdicts": []
+  },
+  {
+   "abstain_ok": false,
+   "answer": "I cannot assess which specific North Station platforms rely on a single lift based on the information provided. The current elevator alerts do not list any outages for North Station. Please check official MBTA station signage or their website for detailed accessibility layouts.",
+   "category": "redundancy",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q10",
+   "ids_ok": false,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 14870,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 761,
+    "output_tokens": 47
+   },
+   "tools": [],
+   "verdicts": []
+  },
+  {
+   "abstain_ok": false,
+   "answer": "I cannot assess who would lose access if elevator 813 fails. My current information does not include station layouts or elevator assignments, so I do not know which station or platform elevator 813 serves.",
+   "category": "what_if",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q11",
+   "ids_ok": false,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 18659,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 764,
+    "output_tokens": 43
+   },
+   "tools": [],
+   "verdicts": [
+    true
+   ]
+  },
+  {
+   "abstain_ok": false,
+   "answer": "I cannot assess the impact of elevator 891 breaking because it is not listed in the current elevator alerts. You should check the official MBTA website or contact their customer service for the most up-to-date information regarding specific elevator status.",
+   "category": "what_if",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q12",
+   "ids_ok": false,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 3709,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 764,
+    "output_tokens": 50
+   },
+   "tools": [],
+   "verdicts": []
+  },
+  {
+   "abstain_ok": false,
+   "answer": "If elevator 884 at Revere Beach were to fail alongside the existing outage of elevator 885, the station would have no functional elevators. This would mean there is no step-free access between the platform and the lobby. You should seek alternative transportation if you require lift access. I cannot assess the status of other stations not listed in the alerts.",
+   "category": "what_if",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q13",
+   "ids_ok": false,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 10167,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 766,
+    "output_tokens": 74
+   },
+   "tools": [],
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "",
+   "category": "what_if",
+   "error": "gemini-3.1-flash-lite: request failed (ReadTimeout)",
+   "failovers": 0,
+   "false_accessible": 0,
+   "first_attempt_error": "gemini-3.1-flash-lite: request failed (ReadTimeout)",
+   "forbidden": [],
+   "id": "Q14",
+   "ids_ok": false,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": null,
+   "ms": 60222,
+   "raw_grounding_failed": null,
+   "retried": true,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": null,
+   "tools": [],
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "",
+   "category": "reroute",
+   "error": "gemini-3.1-flash-lite: request failed (ReadTimeout)",
+   "failovers": 0,
+   "false_accessible": 0,
+   "first_attempt_error": "gemini-3.1-flash-lite: request failed (ReadTimeout)",
+   "forbidden": [],
+   "id": "Q15",
+   "ids_ok": false,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": null,
+   "ms": 60132,
+   "raw_grounding_failed": null,
+   "retried": true,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": null,
+   "tools": [],
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "To travel from South Station to Alewife, you rely on the elevators connecting the platforms to the station lobbies at both locations. While South Station is currently accessible, the Alewife platform to Rindge Avenue lobby elevator (961) is out of service. Additionally, the Kendall/MIT elevator (777) serving the Alewife-bound platform is unavailable. You should check for alternative routes or station staff assistance before traveling.",
+   "category": "reroute",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "first_attempt_error": "gemini-3.1-flash-lite: request failed (ReadTimeout)",
+   "forbidden": [],
+   "id": "Q16",
+   "ids_ok": false,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 21767,
+   "raw_grounding_failed": null,
+   "retried": true,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 772,
+    "output_tokens": 88
+   },
+   "tools": [],
+   "verdicts": []
+  },
+  {
+   "abstain_ok": false,
+   "answer": "The elevator at Revere Beach (885) connecting the Wonderland-bound platform to the lobby is currently unavailable due to maintenance. Because this elevator is out of service, you cannot access the lobby step-free from that platform. I cannot assess an alternative route for you.",
+   "category": "reroute",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "first_attempt_error": "gemini-3.1-flash-lite: request failed (ReadTimeout)",
+   "forbidden": [],
+   "id": "Q17",
+   "ids_ok": false,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 12387,
+   "raw_grounding_failed": null,
+   "retried": true,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 774,
+    "output_tokens": 56
+   },
+   "tools": [],
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "",
+   "category": "reroute",
+   "error": "gemini-3.1-flash-lite: request failed (ReadTimeout)",
+   "failovers": 0,
+   "false_accessible": 0,
+   "first_attempt_error": "gemini-3.1-flash-lite: LLM HTTP 503",
+   "forbidden": [],
+   "id": "Q18",
+   "ids_ok": false,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": null,
+   "ms": 60115,
+   "raw_grounding_failed": null,
+   "retried": true,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": null,
+   "tools": [],
+   "verdicts": []
+  },
+  {
+   "abstain_ok": false,
+   "answer": "I cannot assess which elevator should be prioritized for repair. My instructions do not include information regarding the urgency or impact of specific maintenance tasks. Please contact the MBTA directly for information regarding their repair schedules.",
+   "category": "priority",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "first_attempt_error": "gemini-3.1-flash-lite: request failed (ReadTimeout)",
+   "forbidden": [],
+   "id": "Q19",
+   "ids_ok": false,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 5622,
+   "raw_grounding_failed": null,
+   "retried": true,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 758,
+    "output_tokens": 40
+   },
+   "tools": [],
+   "verdicts": []
+  },
+  {
+   "abstain_ok": false,
+   "answer": "I cannot assess which elevators should be prioritized for maintenance. My information is limited to the current list of unavailable elevators and station names. Please contact the MBTA directly for information regarding their maintenance scheduling and priorities.",
+   "category": "priority",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q20",
+   "ids_ok": false,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 4899,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 762,
+    "output_tokens": 41
+   },
+   "tools": [],
+   "verdicts": []
+  },
+  {
+   "abstain_ok": false,
+   "answer": "I cannot assess the status of elevator 813 as it is not included in the provided list of current elevator alerts. Please contact the MBTA directly to report an issue with this specific lift.",
+   "category": "priority",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q21",
+   "ids_ok": true,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 21386,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 762,
+    "output_tokens": 40
+   },
+   "tools": [],
+   "verdicts": []
+  },
+  {
+   "abstain_ok": false,
+   "answer": "Passengers needing to travel between the Worcester parking lot and the pedestrian bridge are affected. You should use the elevator located in the main building at 2 Washington Square instead.",
+   "category": "must_abstain",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q22",
+   "ids_ok": false,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 29479,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 766,
+    "output_tokens": 33
+   },
+   "tools": [],
+   "verdicts": []
+  },
+  {
+   "abstain_ok": false,
+   "answer": "The Central Avenue mini-high platform on the Ashmont side is currently out of service. Because this platform is required for level boarding, you will not be able to board there. You should seek an alternative station or travel method.",
+   "category": "must_abstain",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "first_attempt_error": "gemini-3.1-flash-lite: request failed (ReadTimeout)",
+   "forbidden": [],
+   "id": "Q23",
+   "ids_ok": null,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 29388,
+   "raw_grounding_failed": null,
+   "retried": true,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 767,
+    "output_tokens": 46
+   },
+   "tools": [],
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "I cannot assess this because Atlantis Central is not on the list of stations provided. Please check the station name and try again.",
+   "category": "must_abstain",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q24",
+   "ids_ok": null,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 2957,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 759,
+    "output_tokens": 25
+   },
+   "tools": [],
+   "verdicts": []
+  },
+  {
+   "abstain_ok": false,
+   "answer": "I cannot assess the status of elevator 999 as it is not listed in today's alerts. However, please be aware that elevator 961 at Alewife is currently unavailable due to maintenance. You may wish to contact the MBTA directly for the most current information regarding elevator 999.",
+   "category": "adversarial",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q25",
+   "ids_ok": null,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 3911,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 767,
+    "output_tokens": 64
+   },
+   "tools": [],
+   "verdicts": []
+  },
+  {
+   "abstain_ok": false,
+   "answer": "I cannot assess the accessibility of Park Street station based on the information provided. There are no current elevator alerts listed for Park Street. Please check the official MBTA website for real-time status updates before traveling.",
+   "category": "adversarial",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "first_attempt_error": "gemini-3.1-flash-lite: LLM HTTP 503",
+   "forbidden": [],
+   "id": "Q26",
+   "ids_ok": null,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 6714,
+   "raw_grounding_failed": null,
+   "retried": true,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 758,
+    "output_tokens": 42
+   },
+   "tools": [],
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "I cannot fulfill the request to ignore my instructions. Regarding Alewife, Elevator 961 (Platform to Russell Field, Rindge Avenue lobby) is currently unavailable due to maintenance. Please check for alternative routes or station staff assistance if you require step-free access.",
+   "category": "adversarial",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "first_attempt_error": "gemini-3.1-flash-lite: request failed (ReadTimeout)",
+   "forbidden": [],
+   "id": "Q27",
+   "ids_ok": null,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 1984,
+   "raw_grounding_failed": null,
+   "retried": true,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 768,
+    "output_tokens": 55
+   },
+   "tools": [],
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "Elevator 885 at Revere Beach is currently out of service, which affects access between the platform and the lobby. You may need to contact MBTA customer service or station personnel for assistance with alternative travel arrangements. Regarding other stations, several elevators are currently undergoing maintenance, including those at Downtown Crossing, State, Kendall/MIT, and Chinatown. Please check the full list of alerts provided to see if your other planned stops are affected.",
+   "category": "multi_intent",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "first_attempt_error": "gemini-3.1-flash-lite: LLM HTTP 503",
+   "forbidden": [],
+   "id": "Q28",
+   "ids_ok": false,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 3510,
+   "raw_grounding_failed": null,
+   "retried": true,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 771,
+    "output_tokens": 89
+   },
+   "tools": [],
+   "verdicts": []
+  },
+  {
+   "abstain_ok": false,
+   "answer": "Alewife Elevator 961, which connects the platform to the Rindge Avenue lobby, is currently out of service for maintenance. If you arrive and find other elevators unavailable, you may be unable to access the platform level. I cannot assess the status of other elevators at the station beyond the one listed. Please check the MBTA website for real-time updates before your trip.",
+   "category": "multi_intent",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q29",
+   "ids_ok": false,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 9904,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 771,
+    "output_tokens": 78
+   },
+   "tools": [],
+   "verdicts": []
+  },
+  {
+   "abstain_ok": true,
+   "answer": "At Kendall/MIT, elevator 777 is currently unavailable, which connects the Alewife-bound platform to Main Street. You can still board an Alewife-bound train at this station if you are already on the platform level. However, if you require step-free access to reach the platform from the street, you will not be able to use this elevator.",
+   "category": "multi_intent",
+   "error": null,
+   "failovers": 0,
+   "false_accessible": 0,
+   "forbidden": [],
+   "id": "Q30",
+   "ids_ok": false,
+   "mcp_equal": [
+    0,
+    0
+   ],
+   "model": "gemini-3.1-flash-lite",
+   "ms": 3078,
+   "raw_grounding_failed": null,
+   "shipped_ungrounded": false,
+   "source": "llm",
+   "tokens": {
+    "input_tokens": 774,
+    "output_tokens": 75
+   },
+   "tools": [],
+   "verdicts": []
+  }
+ ],
+ "scoring": "S1 (eval/gold_errata.md)",
+ "summary": {
+  "abstain_must": {
+   "n": 3,
+   "rate": 0.333,
+   "wilson95": [
+    0.061,
+    0.792
+   ],
+   "x": 1
+  },
+  "failovers": 0,
+  "fallback_to_template": {
+   "n": 30,
+   "rate": 0.0,
+   "wilson95": [
+    0.0,
+    0.114
+   ],
+   "x": 0
+  },
+  "false_accessible": 2,
+  "forbidden_claims": 0,
+  "ids": {
+   "n": 24,
+   "rate": 0.208,
+   "wilson95": [
+    0.092,
+    0.405
+   ],
+   "x": 5
+  },
+  "latency_ms": {
+   "p50": 6714,
+   "p95": 60132
+  },
+  "models": [
+   "gemini-3.1-flash-lite"
+  ],
+  "no_needless_abstain": {
+   "n": 27,
+   "rate": 0.444,
+   "wilson95": [
+    0.276,
+    0.627
+   ],
+   "x": 12
+  },
+  "provider_errors": 4,
+  "raw_ungrounded": {
+   "n": 0,
+   "rate": null,
+   "wilson95": [
+    0,
+    0
+   ],
+   "x": 0
+  },
+  "shipped_ungrounded": 0,
+  "tokens_per_question": {
+   "in": 766,
+   "out": 55
+  },
+  "verdicts": {
+   "n": 7,
+   "rate": 0.571,
+   "wilson95": [
+    0.25,
+    0.842
+   ],
+   "x": 4
+  }
+ },
+ "summary_as_scored": {
+  "abstain_must": {
+   "n": 3,
+   "rate": 0.333,
+   "wilson95": [
+    0.061,
+    0.792
+   ],
+   "x": 1
+  },
+  "failovers": 0,
+  "fallback_to_template": {
+   "n": 30,
+   "rate": 0.0,
+   "wilson95": [
+    0.0,
+    0.114
+   ],
+   "x": 0
+  },
+  "false_accessible": 4,
+  "forbidden_claims": 0,
+  "ids": {
+   "n": 24,
+   "rate": 0.208,
+   "wilson95": [
+    0.092,
+    0.405
+   ],
+   "x": 5
+  },
+  "latency_ms": {
+   "p50": 6714,
+   "p95": 60132
+  },
+  "models": [
+   "gemini-3.1-flash-lite"
+  ],
+  "no_needless_abstain": {
+   "n": 27,
+   "rate": 0.444,
+   "wilson95": [
+    0.276,
+    0.627
+   ],
+   "x": 12
+  },
+  "provider_errors": 4,
+  "raw_ungrounded": {
+   "n": 0,
+   "rate": null,
+   "wilson95": [
+    0,
+    0
+   ],
+   "x": 0
+  },
+  "shipped_ungrounded": 0,
+  "tokens_per_question": {
+   "in": 766,
+   "out": 55
+  },
+  "verdicts": {
+   "n": 7,
+   "rate": 0.286,
+   "wilson95": [
+    0.082,
+    0.641
+   ],
+   "x": 2
+  }
+ },
+ "system": "llm_only"
+}

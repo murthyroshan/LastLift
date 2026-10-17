@@ -1,0 +1,36 @@
+{
+ "tools": [
+  "current_closures",
+  "draft_action",
+  "lift_dossier",
+  "lift_history",
+  "network_impact",
+  "platform_redundancy",
+  "recall_lift_history",
+  "repair_order",
+  "repair_priority",
+  "resolve_place",
+  "step_free_route",
+  "stress_test",
+  "what_if_close"
+ ],
+ "resources": [
+  "lastlift://eval/latest",
+  "lastlift://incidents/open",
+  "lastlift://model"
+ ],
+ "templates": [
+  "lastlift://lifts/{facility_id}/dossier.md",
+  "lastlift://runs/{run_id}",
+  "lastlift://stations/{station_id}",
+  "lastlift://stations/{station_id}/graph.mmd"
+ ],
+ "prompts": [
+  "explain_certificate",
+  "plan_step_free_trip",
+  "station_briefing",
+  "triage_closure"
+ ],
+ "all_read_only": true,
+ "all_have_output_schema": true
+}

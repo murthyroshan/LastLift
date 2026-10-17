@@ -1,0 +1,1228 @@
+diff --git a/lastlift/agent/loop.py b/lastlift/agent/loop.py
+index e37d12b..4fd234d 100644
+--- a/lastlift/agent/loop.py
++++ b/lastlift/agent/loop.py
+@@ -101,7 +101,7 @@ async def ask(question: str, scope: str = "demo", mode: str | None = None, emit=
+     def send(kind, **payload):
+         nonlocal seq
+         seq += 1
+-        ev = {"v": EVENT_SCHEMA_VERSION, "seq": seq, "type": kind,
++        ev = {"v": EVENT_SCHEMA_VERSION, "seq": seq, "type": kind, "agent": "chat",
+               "t_ms": round((time.perf_counter() - started) * 1000, 1), **payload}
+         events.append(ev)
+         if emit:
+@@ -121,8 +121,10 @@ async def ask(question: str, scope: str = "demo", mode: str | None = None, emit=
+             if "scope" in params.get(name, ()):
+                 args["scope"] = scope                       # set by the server, never by the model
+             res = await client.call_tool(name, args, raise_on_error=False)
+-            env = res.structured_content or {"ok": False, "tool": name,
+-                                             "summary": f"tool error: {res.content[0].text if res.content else ''}"[:300],
++            text = res.content[0].text if res.content else ""
++            if settings.falkordb_host:
++                text = text.replace(settings.falkordb_host, "<graph server>")
++            env = res.structured_content or {"ok": False, "tool": name, "summary": f"tool error: {text}"[:300],
+                                              "data": {}, "entities": []}
+             results.append(env)
+             send("tool_result", tool=name, span_id=span, ok=env.get("ok"), summary=env.get("summary"), via=env.get("via"),
+@@ -155,9 +157,23 @@ async def ask(question: str, scope: str = "demo", mode: str | None = None, emit=
+          tools=[r.get("tool") for r in results], model=chain.models[-1] if source == "llm" and chain.models else None,
+          usage={"input_tokens": chain.tokens["input"], "output_tokens": chain.tokens["output"]})
+     send("done", ms=round((time.perf_counter() - started) * 1000, 1))
++    try:                                        # provenance in the graph (lastlift/memory.py); never changes the answer
++        from .. import memory, state
++        g = state.graph_name(scope)
++        ver = db_version(g)
++        memory.record_run(g, "lastlift-chat", question, events, results,
++                          next((e for e in events if e["type"] == "answer"), None), ver)
++    except Exception:
++        pass
+     return {"answer": text, "source": source, "events": events, "results": results, "trace_id": trace_id}
+ 
+ 
++def db_version(graph):
++    from .. import db
++    rs = db.client().select_graph(graph).ro_query("MATCH (m:Meta) RETURN m.state_version LIMIT 1").result_set
++    return rs[0][0] if rs else None
++
++
+ def _drain_failovers(chain, send):
+     while chain.failovers:
+         f = chain.failovers.pop(0)
+diff --git a/lastlift/agent/replay.py b/lastlift/agent/replay.py
+index ff63e95..51d0ab9 100644
+--- a/lastlift/agent/replay.py
++++ b/lastlift/agent/replay.py
+@@ -4,6 +4,11 @@ A replay stores every event of one run. Each tool_result carries a digest of the
+ volatile parts removed (timings, what-if copy names, the via stamp). Verifying a replay re-executes every
+ recorded tool call through the MCP server on the same scope and compares digests: no drift = the graph
+ still gives exactly the recorded answers. The LLM's wording is not re-run; only the facts it was given.
++
++Every replay is also hash-chained: chain[i] = sha256(chain[i-1] + canonical JSON of event i), and `head` is the last
++link. Editing any byte of any event breaks the chain from that event on. The canonical JSON (sorted keys, no spaces,
++integral floats written as integers) is the one a browser's JSON.stringify produces, so the website can check a
++replay itself ("Verify this replay").
+ """
+ import hashlib
+ import json
+@@ -31,12 +36,56 @@ def digest(env: dict) -> str:
+     return hashlib.sha256(json.dumps(canonical(env), sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:16]
+ 
+ 
++def jscanon(x) -> str:
++    """Canonical JSON, identical to the website's canon() (web/src/components/AgentDrawer.tsx)."""
++    def norm(v):
++        if isinstance(v, dict):
++            return {k: norm(v[k]) for k in sorted(v)}
++        if isinstance(v, list):
++            return [norm(i) for i in v]
++        if isinstance(v, float) and v.is_integer():
++            return int(v)
++        return v
++    return json.dumps(norm(x), separators=(",", ":"), ensure_ascii=False)
++
++
++def chain(events) -> list[str]:
++    h, out = "", []
++    for e in events:
++        h = hashlib.sha256((h + jscanon(e)).encode("utf-8")).hexdigest()
++        out.append(h)
++    return out
++
++
++def seal(rec: dict) -> dict:
++    rec["chain"] = chain(rec["events"])
++    rec["head"] = rec["chain"][-1] if rec["chain"] else ""
++    return rec
++
++
++def chain_problems(rec: dict) -> list[str]:
++    """Empty when the replay's events still hash to its recorded chain."""
++    got = chain(rec.get("events", []))
++    want = rec.get("chain") or []
++    if not want:
++        return [f"{rec.get('id')}: not sealed (no hash chain)"]
++    for i, (a, b) in enumerate(zip(got, want)):
++        if a != b:
++            return [f"{rec.get('id')}: hash chain broken at event {i + 1}"]
++    if len(got) != len(want) or rec.get("head") != (want[-1] if want else ""):
++        return [f"{rec.get('id')}: hash chain length or head does not match"]
++    return []
++
++
+ def load(replay_id: str) -> dict:
+     return json.loads((REPLAY_DIR / f"{replay_id}.json").read_text(encoding="utf-8"))
+ 
+ 
+ async def verify(rec: dict, mcp) -> list[str]:
+-    """Re-execute a replay's tool calls; return the list of drifts (empty = verified)."""
++    """Check the hash chain, then re-execute the tool calls; return the list of drifts (empty = verified)."""
++    broken = chain_problems(rec)
++    if broken:
++        return broken
+     scope = next(e["scope"] for e in rec["events"] if e["type"] == "start")
+     calls = [e for e in rec["events"] if e["type"] == "tool_call"]
+     results = [e for e in rec["events"] if e["type"] == "tool_result"]
+diff --git a/lastlift/agents/__init__.py b/lastlift/agents/__init__.py
+new file mode 100644
+index 0000000..4d96ed1
+--- /dev/null
++++ b/lastlift/agents/__init__.py
+@@ -0,0 +1,11 @@
++"""Operations agents: three roles in one process, with no language model in the critical path.
++
++  Monitor     reads the scope's lift closures (the alert feed);
++  Analyst     chooses a playbook from graph facts (Cypher), calls the tools through MCP, writes an Assessment;
++  Dispatcher  proposes actions from a fixed policy table, only for assessments made at the graph's current
++              state_version (a Cypher guard); a stale belief cannot act. Humans approve; nothing is filed here.
++
++Roles hand off by writing nodes ((:Assessment)-[:ABOUT]->(:Lift), (:ActionProposal)-[:BASED_ON]->(:Assessment)),
++so every decision can be read back in Cypher. No language model is given a write tool, so text in an alert (or a
++prompt injection in it) cannot cause an action.
++"""
+diff --git a/lastlift/agents/notify.py b/lastlift/agents/notify.py
+new file mode 100644
+index 0000000..be54cfd
+--- /dev/null
++++ b/lastlift/agents/notify.py
+@@ -0,0 +1,91 @@
++"""Rider notices through ntfy ("Follow a station"): one notice when a station loses or regains step-free access in
++the open-data model, none when nothing changed. LastLift stores nothing about subscribers: following is a
++subscription in the rider's own ntfy app to a public topic.
++
++Topic: lastlift-<salt>-<station slug>. Off unless NOTIFY_MODE=ntfy (the default is a dry run that returns the
++notice). Dedupe: the station's last notice hash is kept on its Station node; an identical state sends nothing, and
++two notices of the same kind are at least MIN_GAP_S apart.
++"""
++import hashlib
++import os
++import re
++import time
++
++import httpx
++
++from .. import db, state
++from ..wording import NEVER_SAY
++
++SALT = os.environ.get("NOTIFY_SALT", "ll7c3a91")
++MIN_GAP_S = 30 * 60
++NTFY = "https://ntfy.sh"
++SITE = os.environ.get("PUBLIC_SITE", "https://lastlift.vercel.app")
++
++
++def topic(station_id: str) -> str:
++    slug = re.sub(r"[^a-z0-9]+", "-", station_id.lower()).strip("-")
++    return f"lastlift-{SALT}-{slug}"
++
++
++def subscribe_url(station_id: str) -> str:
++    return f"{NTFY}/{topic(station_id)}"
++
++
++def compose(station_name: str, lost: list[dict], lifts: list[str]) -> dict:
++    """lost: [{"platform": name, "dir": board|exit}] (empty = access restored)."""
++    if lost:
++        what = "; ".join(f"{x['platform']} ({'getting on' if x['dir'] == 'board' else 'getting off'})" for x in lost)
++        body = (f"{station_name}: no step-free route in the open-data model for {what} while elevator "
++                f"{', '.join(lifts)} is out. Check mbta.com/alerts/access before travelling.")
++        return {"kind": "loss", "title": f"{station_name}: step-free access lost", "body": body, "priority": "4"}
++    body = (f"{station_name}: step-free access is back in the open-data model (elevator {', '.join(lifts)} back in "
++            "service per MBTA's feed). Check mbta.com/alerts/access before travelling.")
++    return {"kind": "restore", "title": f"{station_name}: step-free access restored", "body": body, "priority": "3"}
++
++
++def lint(text: str) -> list[str]:
++    return [p for p in NEVER_SAY if re.search(p, text, re.I)]
++
++
++Q_LAST = "MATCH (s:Station {uid:$sid}) RETURN s.notice_hash, s.notice_kind, s.notice_at, s.name, s.notice_lifts"
++Q_SET = ("MATCH (s:Station {uid:$sid}) SET s.notice_hash = $h, s.notice_kind = $k, s.notice_at = $t, "
++         "s.notice_lifts = $l")
++Q_OPEN_LOSSES = "MATCH (s:Station) WHERE s.notice_kind = 'loss' RETURN s.uid, s.notice_lifts"
++
++
++def open_losses(scope: str) -> dict:
++    g = db.client().select_graph(state.graph_name(scope))
++    return {sid: list(lifts or []) for sid, lifts in g.ro_query(Q_OPEN_LOSSES).result_set}
++
++
++def publish(scope: str, station_id: str, lost: list[dict], lifts: list[str], transport=None, now=None) -> dict:
++    """Send (or dry-run) one notice if the station's state changed. Returns what happened."""
++    g = db.client().select_graph(state.graph_name(scope))
++    rs = g.ro_query(Q_LAST, {"sid": station_id}).result_set
++    last_hash, last_kind, last_at, name, last_lifts = rs[0] if rs else (None, None, None, station_id, [])
++    lifts = lifts or list(last_lifts or [])
++    if not lost and last_kind != "loss":
++        return {"sent": False, "reason": "nothing to restore"}
++    msg = compose(name or station_id, lost, lifts)
++    h = hashlib.sha256((msg["kind"] + msg["body"]).encode()).hexdigest()[:16]
++    now = now if now is not None else time.time()
++    if h == last_hash:
++        return {"sent": False, "reason": "no change"}
++    if last_kind == msg["kind"] and last_at and now - last_at < MIN_GAP_S:
++        return {"sent": False, "reason": "rate limited"}
++    problems = lint(msg["body"] + " " + msg["title"])
++    if problems:
++        return {"sent": False, "reason": f"wording: {problems}"}
++    mode = os.environ.get("NOTIFY_MODE", "off")
++    headers = {"Title": msg["title"], "Tags": "wheelchair", "Priority": msg["priority"],
++               "Click": f"{SITE}/#/station/{station_id}"}
++    if transport is not None or mode == "ntfy":
++        post = transport or (lambda url, **kw: httpx.post(url, timeout=10, **kw))
++        r = post(f"{NTFY}/{topic(station_id)}", content=msg["body"].encode(), headers=headers)
++        if getattr(r, "status_code", 200) >= 300:
++            return {"sent": False, "reason": f"ntfy HTTP {r.status_code}"}
++        sent = True
++    else:
++        sent = False                                    # dry run: the notice is returned, not posted
++    g.query(Q_SET, {"sid": station_id, "h": h, "k": msg["kind"], "t": now, "l": lifts})
++    return {"sent": sent, "dry_run": not sent, "topic": topic(station_id), **msg}
+diff --git a/lastlift/agents/roles.py b/lastlift/agents/roles.py
+new file mode 100644
+index 0000000..fa81b63
+--- /dev/null
++++ b/lastlift/agents/roles.py
+@@ -0,0 +1,288 @@
++"""Monitor, Analyst and Dispatcher (see lastlift/agents/__init__.py), and tick() which runs them in order."""
++import hashlib
++import time
++import uuid
++
++from fastmcp import Client
++
++from .. import alerts, db, state, tools
++from ..config import settings
++from ..mcp_server import mcp
++
++CHRONIC_QUANTILE = 0.75   # +CHRONIC: the lift is in the top quarter of modelled lifts by closures in the archive's
++                          # last 12 months (computed from the graph on every tick)
++
++# Action policy table (printed in the README). Nothing is filed by this module: approved tickets are drafts until
++# the ticket executor (GitHub) runs; rider notices are dry runs unless a notifier is configured.
++POLICY = {
++    "repair_ticket": {"approval": "human", "for": ("ACCESS_LOST",)},
++    "protect_ticket": {"approval": "human", "for": ("PREVENTIVE",)},
++    "rider_notice": {"approval": "auto", "for": ("ACCESS_LOST",)},
++}
++
++Q_LIFT_FACTS = (
++    "MATCH (l:Lift) WHERE l.facility_id = $fid WITH l ORDER BY l.uid LIMIT 1 "
++    "OPTIONAL MATCH (s:Station {uid:l.station_id}) "
++    "RETURN l.uid, (l:Node) AS modelled, l.cx, l.station_id, coalesce(s.has_pathways, false), l.outages_12m"
++)
++Q_ACCESS_LOST_BY = (
++    "MATCH (p:Node:Platform {cx:$cx}) WHERE (p.k_board = 0 AND p.k_board_base > 0 AND $fid IN p.cut_board) "
++    "OR (p.k_exit = 0 AND p.k_exit_base > 0 AND $fid IN p.cut_exit) "
++    "RETURN DISTINCT p.stop_id, p.name, p.platform_name, p.k_board_base, p.k_board, p.k_exit_base, p.k_exit, "
++    "$fid IN p.cut_board AND p.k_board = 0, $fid IN p.cut_exit AND p.k_exit = 0 ORDER BY p.stop_id"
++)
++Q_NEW_LAST_AT = (
++    "MATCH (p:Node:Platform {cx:$cx})-[n:DEPENDS_NOW]->(l:Lift) WHERE NOT (p)-[:DEPENDS_ON {dir:n.dir}]->(l) "
++    "RETURN l.facility_id, collect(DISTINCT p.stop_id + ' ' + n.dir) ORDER BY l.facility_id"
++)
++Q_META_VERSION = "MATCH (m:Meta) RETURN m.state_version LIMIT 1"
++Q_GUARD = "MATCH (a:Assessment {aid:$aid}) MATCH (m:Meta) WHERE a.state_version = m.state_version RETURN count(a)"
++Q_SUPERSEDE = (
++    "MATCH (p:ActionProposal)-[:BASED_ON]->(a:Assessment) MATCH (m:Meta) "
++    "WHERE p.status = 'proposed' AND a.state_version <> m.state_version SET p.status = 'superseded' RETURN count(p)"
++)
++Q_WRITE_ASSESSMENT = (
++    "MERGE (a:Assessment {aid:$aid}) SET a += $p WITH a "
++    "MATCH (l:Lift {uid:$lift}) MERGE (a)-[:ABOUT]->(l)"
++)
++Q_WRITE_FINDS = (
++    "MATCH (a:Assessment {aid:$aid}) UNWIND $rows AS r MATCH (p:Node:Platform) WHERE p.stop_id = r.stop "
++    "MERGE (a)-[f:FINDS {dir:r.dir}]->(p) SET f.k_before = r.kb, f.k_after = r.ka"
++)
++Q_WRITE_PROPOSAL = (
++    "MATCH (a:Assessment {aid:$aid}) MERGE (p:ActionProposal {pid:$pid}) "
++    "ON CREATE SET p += $p, p.created_at = $now MERGE (p)-[:BASED_ON]->(a) RETURN p.status"
++)
++
++
++def _now():
++    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
++
++
++class Trace:
++    """Events for one tick, in the agent event format (with the role in `agent` and W3C-style span ids)."""
++
++    def __init__(self, scope):
++        self.events, self.trace_id, self.scope = [], uuid.uuid4().hex, scope
++
++    def emit(self, agent, event, **payload):
++        ev = {"agent": agent, "type": event, "span_id": uuid.uuid4().hex[:16], "trace_id": self.trace_id, **payload}
++        self.events.append(ev)
++        return ev
++
++
++def monitor(scope, trace):
++    """The scope's lift closures: one item per (alert, facility)."""
++    items = []
++    for c in alerts.closures_for(scope):
++        for fid in c["facility_ids"]:
++            items.append({"facility_id": fid, "alert_id": c["alert_id"], "header": c.get("header")})
++            trace.emit("monitor", "incident", facility_id=fid, alert_id=c["alert_id"])
++    return items
++
++
++def chronic_threshold(scope) -> int:
++    g = db.client().select_graph(state.graph_name(scope))
++    v = sorted(r[0] or 0 for r in g.ro_query(
++        "MATCH (l:Node:Lift) WITH l.facility_id AS f, max(l.outages_12m) AS n RETURN n").result_set)
++    return v[int(CHRONIC_QUANTILE * len(v))] if v else 10 ** 9
++
++
++async def analyse(item, scope, trace, client, chronic_min=None):
++    """Choose the playbook from graph facts, run its tools through MCP, write the Assessment."""
++    graph = state.graph_name(scope)
++    g = db.client().select_graph(graph)
++    fid = item["facility_id"]
++    version = (g.ro_query(Q_META_VERSION).result_set or [[None]])[0][0]
++    facts = g.ro_query(Q_LIFT_FACTS, {"fid": fid}).result_set
++    uid, modelled, cx, station, has_paths, outages = facts[0] if facts else (None, False, None, None, False, None)
++    chronic = bool(outages and chronic_min is not None and outages >= chronic_min)
++    calls = []
++
++    async def call(name, args):
++        res = await client.call_tool(name, {**args, **({"scope": scope} if name != "resolve_place" else {})},
++                                     raise_on_error=False)
++        env = res.structured_content or {}
++        calls.append({"tool": name, "ok": env.get("ok"), "summary": env.get("summary")})
++        trace.emit("analyst", "tool_result", tool=name, via="mcp", ok=env.get("ok"), summary=env.get("summary"))
++        return env
++
++    finds, targets = [], []
++    if not uid or not modelled or not has_paths:
++        playbook, verdict = "ABSTAIN", "CANNOT_ASSESS"
++        await call("resolve_place", {"query": fid})
++    else:
++        stranded = g.ro_query(Q_ACCESS_LOST_BY, {"cx": cx, "fid": fid}).result_set
++        new_last = g.ro_query(Q_NEW_LAST_AT, {"cx": cx}).result_set
++        if stranded:
++            playbook, verdict = "ACCESS_LOST", "LOSS"
++            await call("platform_redundancy", {"station_id": station})
++            for stop, _n, _pn, kbb, kb, keb, ke, lost_b, lost_e in stranded:
++                label = " ".join(x for x in (_pn, _n) if x)
++                if lost_b:
++                    finds.append({"stop": stop, "dir": "board", "kb": kbb, "ka": kb, "name": label})
++                    await call("step_free_route", {"from_station": station, "to_platform": stop})
++                if lost_e:
++                    finds.append({"stop": stop, "dir": "exit", "kb": keb, "ka": ke, "name": label})
++                    await call("step_free_route", {"from_station": station, "from_platform": stop})
++            await call("draft_action", {"facility_id": fid})
++        elif new_last:
++            playbook, verdict = "PREVENTIVE", "LAST_LIFT"
++            targets = [r[0] for r in new_last]
++            for t in targets:                       # re-check: closing the last lift too must cut access
++                await call("what_if_close", {"facility_ids": [t]})
++            await call("repair_priority", {})
++        else:
++            playbook, verdict = "NO_LOSS", "NO_LOSS"
++            await call("platform_redundancy", {"station_id": station})
++    aid = hashlib.sha1(f"{scope}|{fid}|{version}|{playbook}".encode()).hexdigest()[:16]
++    props = {"run_id": trace.trace_id, "facility_id": fid, "station_id": station or "", "state_version": version,
++             "playbook": playbook,
++             "verdict": verdict, "chronic": chronic, "targets": targets, "alert_id": item["alert_id"],
++             "created_at": _now(), "tools": [c["tool"] for c in calls]}
++    if uid:
++        g.query(Q_WRITE_ASSESSMENT, {"aid": aid, "p": props, "lift": uid})
++        if finds:
++            g.query(Q_WRITE_FINDS, {"aid": aid, "rows": [{k: f[k] for k in ("stop", "dir", "kb", "ka")} for f in finds]})
++    trace.emit("analyst", "assessment", aid=aid, facility_id=fid, playbook=playbook, verdict=verdict,
++               chronic=chronic, targets=targets, state_version=version)
++    return {"aid": aid if uid else None, **props, "finds": finds}
++
++
++def dispatch(assessment, scope, trace):
++    """Proposals from the policy table, guarded by the current state_version. Returns the proposals made."""
++    g = db.client().select_graph(state.graph_name(scope))
++    g.query(Q_SUPERSEDE)
++    aid = assessment.get("aid")
++    if not aid or not g.ro_query(Q_GUARD, {"aid": aid}).result_set[0][0]:
++        trace.emit("dispatcher", "guard", aid=aid, ok=False)
++        return []
++    trace.emit("dispatcher", "guard", aid=aid, ok=True)
++    made = []
++    fid, playbook = assessment["facility_id"], assessment["playbook"]
++    for kind, rule in POLICY.items():
++        if playbook not in rule["for"]:
++            continue
++        for target in (assessment["targets"] or [fid]) if kind == "protect_ticket" else [fid]:
++            priority = "priority-1" if playbook == "ACCESS_LOST" or assessment["chronic"] else "priority-2"
++            idem = f"lift-{target}:{playbook}:{kind}:{assessment['state_version']}"
++            pid = hashlib.sha1(idem.encode()).hexdigest()[:16]
++            status = "proposed" if rule["approval"] == "human" else "dry_run"
++            res = g.query(Q_WRITE_PROPOSAL, {"aid": aid, "pid": pid, "now": _now(), "p": {
++                "kind": kind, "status": status, "policy": rule["approval"], "idem_key": idem, "facility_id": target,
++                "about": fid, "playbook": playbook, "label": priority, "scope": scope,
++                "mode": settings.actions_mode}}).result_set
++            made.append({"pid": pid, "kind": kind, "facility_id": target, "status": res[0][0] if res else status,
++                         "label": priority})
++            trace.emit("dispatcher", "proposal", pid=pid, kind=kind, facility_id=target, label=priority,
++                       status=res[0][0] if res else status)
++    return made
++
++
++def notices(scope, assessments, trace, transport=None):
++    """Rider notices (policy: auto): a loss notice per station with stranded platforms, a restore notice for a station
++    whose last notice was a loss and which now has none."""
++    from . import notify
++    lost = {}
++    for a in assessments:
++        if a["playbook"] == "ACCESS_LOST" and a.get("station_id"):
++            x = lost.setdefault(a["station_id"], {"lost": [], "lifts": []})
++            x["lost"] += [{"platform": f["name"], "dir": f["dir"]} for f in a["finds"]]
++            x["lifts"].append(a["facility_id"])
++    out = []
++    for sid, x in sorted(lost.items()):
++        r = notify.publish(scope, sid, x["lost"], sorted(set(x["lifts"])), transport)
++        out.append({"station_id": sid, **r})
++        trace.emit("dispatcher", "rider_notice", station_id=sid, sent=r.get("sent"), reason=r.get("reason"),
++                   kind=r.get("kind"))
++    for sid, lifts in sorted(notify.open_losses(scope).items()):
++        if sid not in lost:
++            r = notify.publish(scope, sid, [], lifts, transport)
++            out.append({"station_id": sid, **r})
++            trace.emit("dispatcher", "rider_notice", station_id=sid, sent=r.get("sent"), reason=r.get("reason"),
++                       kind=r.get("kind"))
++    return out
++
++
++async def tick(scope="live", transport=None):
++    """Monitor -> Analyst -> Dispatcher for every current closure. Returns the trace and the outcome."""
++    tools.prepare_scope(scope)
++    trace = Trace(scope)
++    items = monitor(scope, trace)
++    chronic_min = chronic_threshold(scope)
++    trace.emit("analyst", "policy", chronic_min_closures_12m=chronic_min)
++    out = []
++    async with Client(mcp) as client:
++        for item in items:
++            a = await analyse(item, scope, trace, client, chronic_min)
++            out.append({**a, "proposals": dispatch(a, scope, trace)})
++    sent = notices(scope, out, trace, transport)
++    return {"scope": scope, "trace_id": trace.trace_id, "assessments": out, "notices": sent, "events": trace.events}
++
++
++Q_INCIDENTS = (
++    "MATCH (a:Assessment)-[:ABOUT]->(l:Lift) MATCH (m:Meta) "
++    "OPTIONAL MATCH (a)-[f:FINDS]->(p:Platform) "
++    "RETURN a.aid, a.facility_id, l.name, l.station_id, a.playbook, a.verdict, a.chronic, a.targets, a.state_version, "
++    "a.state_version = m.state_version, a.created_at, collect(DISTINCT [p.stop_id, f.dir, f.k_before, f.k_after]) "
++    "ORDER BY a.created_at DESC, a.facility_id"
++)
++Q_PROPOSALS = (
++    "MATCH (p:ActionProposal)-[:BASED_ON]->(a:Assessment) WHERE $status IS NULL OR p.status = $status "
++    "RETURN p.pid, p.kind, p.status, p.facility_id, p.about, p.playbook, p.label, p.policy, p.created_at, "
++    "p.decided_at, p.approved_via, a.aid ORDER BY p.created_at DESC, p.pid"
++)
++Q_DECIDE = (
++    "MATCH (p:ActionProposal {pid:$pid})-[:BASED_ON]->(a:Assessment) MATCH (m:Meta) "
++    "RETURN p.status, p.approved_via, a.state_version = m.state_version, p.kind, p.facility_id, p.playbook, "
++    "p.label, p.external_url"
++)
++
++
++def incidents(scope):
++    g = db.client().select_graph(state.graph_name(scope))
++    keys = ("aid", "facility_id", "name", "station_id", "playbook", "verdict", "chronic", "targets", "state_version",
++            "current", "created_at")
++    out = []
++    for r in g.ro_query(Q_INCIDENTS).result_set:
++        row = dict(zip(keys, r[:11]))
++        row["finds"] = [{"stop_id": s, "dir": d, "k_before": kb, "k_after": ka} for s, d, kb, ka in r[11] if s]
++        out.append(row)
++    return out
++
++
++def proposals(scope, status=None):
++    g = db.client().select_graph(state.graph_name(scope))
++    keys = ("pid", "kind", "status", "facility_id", "about", "playbook", "label", "policy", "created_at", "decided_at",
++            "approved_via", "aid")
++    return [dict(zip(keys, r)) for r in g.ro_query(Q_PROPOSALS, {"status": status}).result_set]
++
++
++def decide(scope, pid, decision, idem_key, http=None):
++    """A human decision on a proposal. Idempotent per key; refused if the assessment is no longer current."""
++    g = db.client().select_graph(state.graph_name(scope))
++    rs = g.ro_query(Q_DECIDE, {"pid": pid}).result_set
++    if not rs:
++        raise LookupError("no such proposal")
++    status, via, current, kind, fid, playbook, label, url = rs[0]
++    if via and via == idem_key:
++        return {"pid": pid, "status": status, "repeat": True, **({"url": url} if url else {})}
++    if status != "proposed":
++        return {"pid": pid, "status": status, "error": f"proposal is {status}"}
++    if not current:
++        g.query("MATCH (p:ActionProposal {pid:$pid}) SET p.status = 'superseded'", {"pid": pid})
++        return {"pid": pid, "status": "superseded", "error": "the graph changed since this was proposed"}
++    new = {"approve": "approved_draft", "reject": "rejected"}[decision]
++    out = {"pid": pid, "status": new, "kind": kind, "facility_id": fid}
++    if new == "approved_draft" and kind in ("repair_ticket", "protect_ticket"):
++        from . import tickets
++        done = tickets.file(scope, {"facility_id": fid, "kind": kind, "playbook": playbook, "label": label}, http)
++        out["draft"] = {**done["issue"], "filed": done["mode"] == "file"} if "issue" in done else None
++        if done.get("url"):
++            new = out["status"] = "executed"
++            out["url"] = done["url"]
++            out["action"] = done["action"]
++            g.query("MATCH (p:ActionProposal {pid:$pid}) SET p.external_url = $u", {"pid": pid, "u": done["url"]})
++    g.query("MATCH (p:ActionProposal {pid:$pid}) SET p.status = $s, p.approved_via = $k, p.decided_at = $t",
++            {"pid": pid, "s": new, "k": idem_key, "t": _now()})
++    return out
+diff --git a/lastlift/agents/tickets.py b/lastlift/agents/tickets.py
+new file mode 100644
+index 0000000..340fd52
+--- /dev/null
++++ b/lastlift/agents/tickets.py
+@@ -0,0 +1,92 @@
++"""Approved repair / protect tickets as GitHub issues on the ops repository: a lift dossier with a Mermaid drawing of
++the station's step-free graph. Files only when ACTIONS_MODE=file (the default, draft, returns the issue without
++sending it). Dedupe: a hidden marker and a `lift-<id>` label; if an open issue for the lift exists, a comment is
++added instead of a second issue. Each proposal files at most once (its external_url is kept on the proposal node).
++"""
++import re
++
++import httpx
++
++from .. import db, state, station_view, tools
++from ..config import settings
++
++API = "https://api.github.com"
++MAX_NODES = 40
++
++
++def _mid(x: str) -> str:
++    return "n" + re.sub(r"[^A-Za-z0-9]", "_", x)
++
++
++def mermaid(station_id: str, scope: str, lift: str, direction: str = "board") -> str:
++    """flowchart TB of the contracted station graph (at most MAX_NODES nodes): closed lifts red, the newly last lift
++    gold, the lift of this ticket emphasised."""
++    view = station_view.view(station_id, direction, scope)
++    nodes = view["nodes"][:MAX_NODES]
++    keep = {n["id"] for n in nodes}
++    edges = [e for e in view["edges"] if e["source"] in keep and e["target"] in keep]
++    lines = ["flowchart TB"]
++    for n in nodes:
++        label = re.sub(r'["\[\]{}()<>|]', " ", n.get("label") or n["id"]).strip()[:40] or n["id"]
++        lines.append(f'  {_mid(n["id"])}["{label}"]')
++    red, gold = [], []
++    for i, e in enumerate(edges):
++        arrow = "-->" if e.get("step_free") else "-.->"
++        lines.append(f"  {_mid(e['source'])} {arrow} {_mid(e['target'])}")
++        if e.get("kind") == "lift" and e.get("status") == "closed":
++            red.append(str(i))
++    for n in nodes:
++        if n.get("last_lift") and n.get("facility_id"):
++            gold.append(_mid(n["id"]))
++    lines.append("  classDef last fill:#f5b83d,stroke:#8a5300,stroke-width:3px")
++    lines.append("  classDef this stroke:#0b5cad,stroke-width:4px")
++    if gold:
++        lines.append(f"  class {','.join(gold)} last")
++    mine = [_mid(n["id"]) for n in nodes if n.get("facility_id") == lift]
++    if mine:
++        lines.append(f"  class {','.join(mine)} this")
++    if red:
++        lines.append(f"  linkStyle {','.join(red)} stroke:#d00,stroke-width:4px")
++    return "\n".join(lines)
++
++
++def issue(scope: str, proposal: dict) -> dict:
++    fid = proposal["facility_id"]
++    dossier = tools.lift_dossier(fid, scope)
++    info = db.client().select_graph(state.graph_name(scope)).ro_query(
++        "MATCH (l:Lift) WHERE l.facility_id = $f RETURN l.station_id, l.name LIMIT 1", {"f": fid}).result_set
++    station, name = info[0] if info else ("", f"Elevator {fid}")
++    kind = "Repair" if proposal["kind"] == "repair_ticket" else "Protect"
++    key = f"lift-{fid}:{proposal.get('playbook', '')}"
++    body = [f"<!-- lastlift:key={key} -->", (dossier.get("data") or {}).get("markdown", ""), ""]
++    if station:
++        body += ["## Station step-free graph", "", "```mermaid", mermaid(station, scope, fid), "```", "",
++                 "Solid arrows are step-free; dotted are stairs or escalators. Red: closed lift. Gold: now the last lift."]
++    body += ["", f"_Proposed by LastLift's Dispatcher ({proposal.get('playbook')}), approved by a human. Unofficial "
++                 "decision support from the open-data model; check mbta.com/alerts/access._"]
++    return {"title": f"[LastLift] {kind} lift {fid} ({name})", "body": "\n".join(body),
++            "labels": ["lastlift", f"lift-{fid}", proposal.get("label") or "priority-2"], "key": key}
++
++
++def file(scope: str, proposal: dict, http=None) -> dict:
++    """Create the issue (or comment on the open one for this lift). Returns {mode, url?, action, issue}."""
++    draft = issue(scope, proposal)
++    if settings.actions_mode != "file":
++        return {"mode": "draft", "action": "none", "issue": draft}
++    if not settings.github_token:
++        return {"mode": "draft", "action": "none", "issue": draft, "error": "no GitHub token configured"}
++    h = {"Authorization": f"Bearer {settings.github_token}", "Accept": "application/vnd.github+json"}
++    client = http or httpx.Client(timeout=20)
++    label = f"lift-{proposal['facility_id']}"
++    found = client.get(f"{API}/search/issues", headers=h,
++                       params={"q": f"repo:{settings.ops_repo} is:issue is:open label:{label}"}).json()
++    hit = next((i for i in found.get("items", []) if f"lastlift:key=lift-{proposal['facility_id']}" in (i.get("body") or "")),
++               None)
++    if hit:
++        r = client.post(f"{hit['url']}/comments", headers=h,
++                        json={"body": f"Still open per LastLift ({proposal.get('playbook')}).\n\n" + draft["body"]})
++        return {"mode": "file", "action": "comment", "url": hit["html_url"], "status": r.status_code}
++    r = client.post(f"{API}/repos/{settings.ops_repo}/issues", headers=h,
++                    json={"title": draft["title"], "body": draft["body"], "labels": draft["labels"]})
++    data = r.json()
++    return {"mode": "file", "action": "create", "url": data.get("html_url"), "status": r.status_code}
+diff --git a/lastlift/config.py b/lastlift/config.py
+index 60a0d69..6c3a7a3 100644
+--- a/lastlift/config.py
++++ b/lastlift/config.py
+@@ -48,6 +48,7 @@ class Settings:
+     live_daily_llm_cap: int
+     llm_daily_token_budget: int
+     live_poll_s: int
++    tick_token: str = field(repr=False, default="")
+ 
+     def graph(self, name: str) -> str:
+         """Full graph name, e.g. graph('base') -> 'dev_ll_base' locally, 'll_base' in production."""
+@@ -78,6 +79,7 @@ def load_settings() -> Settings:
+         live_daily_llm_cap=int(_get(f, "LIVE_DAILY_LLM_CAP", "150")),
+         llm_daily_token_budget=int(_get(f, "LLM_DAILY_TOKEN_BUDGET", "400000")),
+         live_poll_s=int(_get(f, "LIVE_POLL_S", "60")),
++        tick_token=_get(f, "TICK_TOKEN"),
+     )
+ 
+ 
+diff --git a/lastlift/main.py b/lastlift/main.py
+index af65596..280b4da 100644
+--- a/lastlift/main.py
++++ b/lastlift/main.py
+@@ -24,6 +24,11 @@ from .config import settings
+ STARTED = time.time()
+ log = logging.getLogger("lastlift")
+ mcp_app = mcp.http_app(path="/", stateless_http=True)        # MCP over streamable HTTP at /mcp/
++OPS_TOKEN = os.environ.get("OPS_MCP_TOKEN", "")
++ops_app = None
++if OPS_TOKEN:                                                # operations MCP (approvals): only with a token set
++    from .mcp_server import build_ops
++    ops_app = build_ops(OPS_TOKEN).http_app(path="/", stateless_http=True)
+ 
+ 
+ @asynccontextmanager
+@@ -38,7 +43,11 @@ async def lifespan(_app):
+     poller = asyncio.create_task(live.run_forever(settings.live_poll_s)) if settings.live_feed == "on" else None
+     try:
+         async with mcp_app.lifespan(mcp_app):
+-            yield
++            if ops_app is not None:
++                async with ops_app.lifespan(ops_app):
++                    yield
++            else:
++                yield
+     finally:
+         if poller:
+             poller.cancel()
+@@ -50,9 +59,11 @@ app.add_middleware(
+     CORSMiddleware,
+     allow_origins=list(settings.allowed_origins),
+     allow_methods=["GET", "POST"],
+-    allow_headers=["Content-Type", "traceparent"],
++    allow_headers=["Content-Type", "traceparent", "Idempotency-Key"],
+ )
+ app.mount("/mcp", mcp_app)
++if ops_app is not None:
++    app.mount("/mcp-ops", ops_app)
+ 
+ 
+ @app.exception_handler(RedisConnectionError)
+@@ -224,6 +235,54 @@ def live_status():
+     return live.status()
+ 
+ 
++@app.get("/v1/incidents")
++def agent_incidents(scope: Literal["demo", "live"] = "demo"):
++    """The Analyst's assessments (playbook, verdict, platform-directions found, whether still current)."""
++    from .agents import roles
++    return {"scope": scope, "assessments": roles.incidents(scope)}
++
++
++@app.get("/v1/approvals")
++def agent_approvals(scope: Literal["demo", "live"] = "demo", status: str | None = None):
++    """Action proposals from the Dispatcher (proposed / approved_draft / rejected / superseded / dry_run)."""
++    from .agents import roles
++    return {"scope": scope, "proposals": roles.proposals(scope, status), "policy": roles.POLICY}
++
++
++@app.post("/v1/approvals/{pid}")
++def agent_decide(pid: str, body: dict = Body(...), scope: Literal["demo", "live"] = "demo",
++                 idempotency_key: str | None = Header(default=None)):
++    """A human decision: {"decision": "approve" | "reject"}. Needs an Idempotency-Key header; a repeat with the same
++    key returns the first result. Refused if the graph changed since the proposal (the proposal is superseded)."""
++    from .agents import roles
++    if body.get("decision") not in ("approve", "reject"):
++        raise HTTPException(400, "decision must be approve or reject")
++    if not idempotency_key:
++        raise HTTPException(400, "Idempotency-Key header required")
++    return _call(roles.decide, {"scope": scope, "pid": pid, "decision": body["decision"], "idem_key": idempotency_key})
++
++
++@app.post("/internal/tick", include_in_schema=False)
++async def agent_tick(scope: Literal["demo", "live"] = "live", x_tick_token: str | None = Header(default=None)):
++    """Monitor -> Analyst -> Dispatcher once (for a scheduled job). Needs the TICK_TOKEN secret."""
++    from .agents import roles
++    if not settings.tick_token or x_tick_token != settings.tick_token:
++        raise HTTPException(403, "tick token required")
++    _require_graph()
++    r = await roles.tick(scope)
++    return {k: r[k] for k in ("scope", "trace_id", "assessments")}
++
++
++@app.get("/v1/eval/latest")
++def eval_latest():
++    """The agent evaluation (eval/protocol.md): every system's metrics with Wilson intervals, and the baselines."""
++    path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "eval", "latest.json")
++    if not os.path.isfile(path):
++        raise HTTPException(404, "no evaluation run yet")
++    with open(path, encoding="utf-8") as fh:
++        return json.load(fh)
++
++
+ @app.get("/v1/disclaimers")
+ def disclaimers():
+     """The exact disclaimer texts every surface uses (footer, validation, partial, cannot-assess, ...)."""
+diff --git a/lastlift/mcp_server.py b/lastlift/mcp_server.py
+index 189f7f4..9294706 100644
+--- a/lastlift/mcp_server.py
++++ b/lastlift/mcp_server.py
+@@ -1,16 +1,26 @@
+-"""The MCP server: the same fixed tools as the HTTP API, built from one registry.
++"""The MCP servers, built from one tool registry.
+ 
+-Every tool is read-only on the live state (what-if runs on a throwaway copy; draft_action never files
+-anything), so all are annotated readOnlyHint. Each result envelope is stamped `via: "mcp"` and counted:
+-the agent reaches the tools only through this server (in-memory client), and a test checks that.
++  /mcp      public and read-only: the tools (every result stamped `via: "mcp"`, with an output schema), resources
++            (the model, station dossiers and Mermaid drawings, lift dossiers, open incidents, recorded runs, the
++            evaluation) and prompts (triage a closure, brief a station, plan a trip, explain a certificate).
++  /mcp-ops  operations, only when OPS_MCP_TOKEN is set (bearer token): the same read tools plus the approvals
++            inbox. approve_proposal asks the human through MCP elicitation when the client supports it, and
++            otherwise returns the website's approval link; both paths write the same approved_via field.
++
++Every public tool is read-only on the live state (what-if runs on a throwaway copy; draft_action never files
++anything), so all are annotated readOnlyHint. The agent reaches the tools only through this server (in-memory
++client), and a test checks that.
+ """
+ import functools
+ import inspect
++import json
++import os
+ from collections import Counter
+ 
+-from fastmcp import FastMCP
++from fastmcp import Context, FastMCP
+ 
+ from . import tools
++from .config import REPO_ROOT
+ 
+ INSTRUCTIONS = (
+     "LastLift answers questions about step-free (lift) access at Boston's MBTA stations from a graph of the "
+@@ -18,25 +28,167 @@ INSTRUCTIONS = (
+     "Never invent station, lift or platform ids: use resolve_place first. Always check mbta.com/alerts/access."
+ )
+ CALLS: Counter = Counter()          # tool name -> calls served through MCP (read by tests and the trace)
++ENVELOPE_SCHEMA = {
++    "type": "object",
++    "required": ["ok", "tool", "summary", "data", "entities"],
++    "properties": {
++        "ok": {"type": "boolean"}, "tool": {"type": "string"},
++        "summary": {"type": "string", "description": "one-line result in plain language"},
++        "data": {"type": "object"}, "entities": {"type": "array", "items": {"type": "string"}},
++        "evidence": {"type": "object", "description": "Cypher query ids, graph, milliseconds"},
++        "highlight": {"type": "object"}, "via": {"type": "string"},
++    },
++}
++SITE = os.environ.get("PUBLIC_SITE", "https://lastlift.vercel.app")
+ 
+ 
+ def _via_mcp(fn):
+     @functools.wraps(fn)
+     def wrapper(*args, **kwargs):
++        from fastmcp.exceptions import ToolError
++        from redis.exceptions import RedisError
+         CALLS[fn.__name__] += 1
+-        result = fn(*args, **kwargs)
++        try:
++            result = fn(*args, **kwargs)
++        except RedisError as exc:           # never pass on a connection error's text: it names the server
++            raise ToolError("graph server unavailable: LastLift gives no answer without the graph") from exc
+         return {**result, "via": "mcp"}
+     wrapper.__signature__ = inspect.signature(fn)
+     return wrapper
+ 
+ 
++def _add_tools(server):
++    for name in sorted(tools.REGISTRY):
++        fn = tools.REGISTRY[name]
++        server.tool(_via_mcp(fn), name=name, description=inspect.getdoc(fn), output_schema=ENVELOPE_SCHEMA,
++                    annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True,
++                                 "openWorldHint": False})
++
++
++def _add_resources(server):
++    @server.resource("lastlift://model", mime_type="application/json")
++    def model() -> str:
++        """The model: rules, snapshot, headline numbers and licence."""
++        claims = json.loads((REPO_ROOT / "claims.json").read_text(encoding="utf-8")) \
++            if (REPO_ROOT / "claims.json").is_file() else {}
++        keep = ("snapshot_id", "seed_sha256", "feed_version", "platforms_step_free", "platforms_single_lift",
++                "spof_lifts", "net_spof_lifts", "n2_critical_pairs")
++        return json.dumps({"rules": "docs/model_rules.md", "claims": {k: claims.get(k) for k in keep},
++                           "licence": "MBTA GTFS and V3 API under the MassDOT Developers License Agreement; "
++                                      "unofficial, open-data model"})
++
++    @server.resource("lastlift://stations/{station_id}", mime_type="application/json")
++    def station(station_id: str) -> str:
++        """Every platform's certified lift redundancy at a station (demo state)."""
++        return json.dumps(tools.platform_redundancy(station_id, "demo"))
++
++    @server.resource("lastlift://stations/{station_id}/graph.mmd", mime_type="text/plain")
++    def station_graph(station_id: str) -> str:
++        """The station's step-free graph as a Mermaid flowchart (closed lifts red, last lifts gold)."""
++        from .agents import tickets
++        return tickets.mermaid(station_id, "demo", "")
++
++    @server.resource("lastlift://lifts/{facility_id}/dossier.md", mime_type="text/markdown")
++    def dossier(facility_id: str) -> str:
++        """A one-page brief on a lift (markdown)."""
++        return (tools.lift_dossier(facility_id, "demo").get("data") or {}).get("markdown", "")
++
++    @server.resource("lastlift://incidents/open", mime_type="application/json")
++    def incidents() -> str:
++        """The operations agents' current assessments (demo state)."""
++        from .agents import roles
++        return json.dumps([a for a in roles.incidents("demo") if a["current"]])
++
++    @server.resource("lastlift://runs/{run_id}", mime_type="application/json")
++    def run(run_id: str) -> str:
++        """A recorded agent run with its hash chain (see 'Verify this replay')."""
++        from .agent import replay
++        return json.dumps(replay.load(run_id), ensure_ascii=False)
++
++    @server.resource("lastlift://eval/latest", mime_type="application/json")
++    def evaluation() -> str:
++        """The pre-registered agent evaluation and the baselines."""
++        p = REPO_ROOT / "data" / "eval" / "latest.json"
++        return p.read_text(encoding="utf-8") if p.is_file() else "{}"
++
++
++def _add_prompts(server):
++    @server.prompt()
++    def triage_closure(facility_id: str) -> str:
++        """Assess a lift closure the way LastLift's Analyst does."""
++        return (f"Lift {facility_id} is reported closed. Use resolve_place, then platform_redundancy for its station, "
++                "network_impact with this lift, and step_free_route for any platform that loses step-free access. Say "
++                "'cannot assess' if the lift is not modelled. End with: Check mbta.com/alerts/access.")
++
++    @server.prompt()
++    def station_briefing(station: str) -> str:
++        """A short step-free briefing for one station."""
++        return (f"Brief me on step-free access at {station}: resolve_place, platform_redundancy, then lift_dossier "
++                "for any lift that is the only lift for a platform. Plain language, at most 6 sentences.")
++
++    @server.prompt()
++    def plan_step_free_trip(from_station: str, to_station: str) -> str:
++        """Plan a step-free trip and name the lifts it depends on."""
++        return (f"Plan a step-free trip from {from_station} to {to_station} with step_free_route, name every lift it "
++                "uses and the backup if one of them is out. Check mbta.com/alerts/access.")
++
++    @server.prompt()
++    def explain_certificate(platform_id: str, direction: str) -> str:
++        """Explain why a platform-direction has exactly k lift routes."""
++        return (f"Explain the redundancy certificate for platform {platform_id} ({direction}): call "
++                "platform_redundancy and lift_dossier, give k, the lift-disjoint routes, and every minimum cut, in "
++                "plain words.")
++
++
+ def build() -> FastMCP:
+-    mcp = FastMCP("lastlift", instructions=INSTRUCTIONS)
+-    for name, fn in tools.REGISTRY.items():
+-        mcp.tool(_via_mcp(fn), name=name, description=inspect.getdoc(fn),
+-                 annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True,
+-                              "openWorldHint": False})
+-    return mcp
++    server = FastMCP("lastlift", instructions=INSTRUCTIONS)
++    _add_tools(server)
++    _add_resources(server)
++    _add_prompts(server)
++    return server
++
++
++def build_ops(token: str) -> FastMCP:
++    from fastmcp.server.auth import StaticTokenVerifier
++    server = FastMCP("lastlift-ops", instructions=INSTRUCTIONS + " Operations: proposals need a human decision.",
++                     auth=StaticTokenVerifier(tokens={token: {"client_id": "ops", "scopes": ["ops"]}}))
++    _add_tools(server)
++
++    @server.tool(annotations={"readOnlyHint": True})
++    def list_proposals(status: str = "proposed", scope: str = "demo") -> dict:
++        """The approvals inbox: action proposals awaiting a human decision."""
++        from .agents import roles
++        return {"proposals": roles.proposals(scope, status)}
++
++    @server.tool(annotations={"readOnlyHint": False, "destructiveHint": False, "idempotentHint": True})
++    async def approve_proposal(proposal_id: str, ctx: Context, scope: str = "demo"):
++        """Approve or reject a proposal. A client that supports elicitation is asked for the decision (an
++        input-required round trip, MCP 2026-07-28); a client without elicitation gets the website's approval link.
++        Approvals are idempotent per proposal."""
++        import mcp.types as mt
++
++        from .agents import roles
++        try:
++            can_elicit = bool(ctx.session.client_params.capabilities.elicitation)
++        except Exception:
++            can_elicit = False
++        if not can_elicit:                      # hand the decision to the website's approvals inbox
++            return {"status": "awaiting_approval", "approval_url": f"{SITE}/#/approvals?pid={proposal_id}"}
++        answers = ctx.input_responses
++        if answers is None:                     # first round: ask the human through the client
++            schema = {"type": "object", "required": ["decision"],
++                      "properties": {"decision": {"type": "string", "enum": ["approve", "reject"]},
++                                     "note": {"type": "string"}}}
++            return mt.InputRequiredResult(inputRequests={"decision": mt.ElicitRequest(params=mt.ElicitRequestFormParams(
++                message=f"LastLift proposal {proposal_id}: approve or reject?", requestedSchema=schema))},
++                requestState=proposal_id)
++        res = answers.get("decision")
++        if getattr(res, "action", "") != "accept" or not (res.content or {}).get("decision"):
++            return {"status": "no_decision", "action": getattr(res, "action", "")}
++        return roles.decide(scope, ctx.request_state or proposal_id, res.content["decision"],
++                            f"mcp-elicit:{proposal_id}")
++
++    return server
+ 
+ 
+ mcp = build()
+diff --git a/lastlift/memory.py b/lastlift/memory.py
+new file mode 100644
+index 0000000..18b260d
+--- /dev/null
++++ b/lastlift/memory.py
+@@ -0,0 +1,123 @@
++"""Memory and provenance in the graph: every agent run, what it read, and whether its answer is still true.
++
++  (:Run {run_id, client, model, tokens_in, tokens_out, ms, state_version, at})
++     -[:CALLED {seq}]->(:ToolCall {tid, tool, args_sha, ok, query_ids})-[:READ]->(:Lift | :Platform | :Station)
++  (:Answer {run_id, source, grounded, stale, stale_reason, question})-[:CITES]->(:ToolCall)
++  (:Disagreement {facility_id, mbta, model, source})-[:ON]->(:Lift)    MBTA's advice differed from the model
++
++Self-invalidation: when a lift changes state (state.sync), every answer that read it is marked stale in the same
++step; an unrelated answer is untouched. "Memory" here means observed history, assessments, disagreements and
++provenance; nothing is learned. Runtime records are kept in the scope graph (at most MAX_RUNS runs) and are rebuilt
++empty on a new deployment; Disagreements are seeded from the committed validation (data/memory/disagreements.json).
++"""
++import hashlib
++import json
++import time
++import uuid
++
++from . import db
++from .config import REPO_ROOT
++
++MAX_RUNS = 500
++DISAGREEMENTS = REPO_ROOT / "data" / "memory" / "disagreements.json"
++
++Q_RUN = (
++    "CREATE (r:Run) SET r = $run WITH r UNWIND $calls AS c CREATE (t:ToolCall) SET t = c.p "
++    "CREATE (r)-[:CALLED {seq:c.seq}]->(t)"
++)
++Q_READS = (
++    "UNWIND $rows AS row MATCH (t:ToolCall {tid:row.tid}) "
++    "OPTIONAL MATCH (l:Lift) WHERE l.facility_id IN row.ents "
++    "OPTIONAL MATCH (p:Node:Platform) WHERE p.stop_id IN row.ents "
++    "OPTIONAL MATCH (s:Station) WHERE s.uid IN row.ents "
++    "WITH t, collect(DISTINCT l) + collect(DISTINCT p) + collect(DISTINCT s) AS targets "
++    "UNWIND targets AS x WITH t, x WHERE x IS NOT NULL MERGE (t)-[:READ]->(x)"
++)
++Q_ANSWER = (
++    "CREATE (a:Answer) SET a = $a WITH a MATCH (t:ToolCall) WHERE t.tid IN $tids MERGE (a)-[:CITES]->(t)"
++)
++Q_INVALIDATE = (
++    "MATCH (l:Lift)<-[:READ]-(:ToolCall)<-[:CITES]-(a:Answer) WHERE l.facility_id IN $changed AND a.stale = false "
++    "SET a.stale = true, a.stale_reason = 'lift ' + l.facility_id + ' changed state' RETURN count(DISTINCT a)"
++)
++Q_PRUNE = (
++    "MATCH (r:Run) WITH r ORDER BY r.at DESC SKIP $keep "
++    "OPTIONAL MATCH (r)-[:CALLED]->(t:ToolCall) OPTIONAL MATCH (a:Answer {run_id:r.run_id}) DETACH DELETE r, t, a"
++)
++Q_CLEAR_DISAGREE = "MATCH (d:Disagreement) DETACH DELETE d"
++Q_DISAGREE = (
++    "UNWIND $rows AS r MATCH (l:Lift) WHERE l.facility_id = r.facility_id WITH r, min(l.uid) AS lu "
++    "MATCH (l:Lift {uid:lu}) CREATE (d:Disagreement) SET d = r CREATE (d)-[:ON]->(l)"
++)
++
++
++def _now():
++    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
++
++
++def record_run(graph: str, client: str, question: str | None, events: list[dict], results: list[dict],
++               answer: dict | None, state_version: str | None) -> str:
++    """Write one run (best effort: a failure here never changes an answer)."""
++    run_id = uuid.uuid4().hex[:16]
++    calls = [e for e in events if e.get("type") == "tool_call"]
++    rows, reads = [], []
++    for seq, (c, res) in enumerate(zip(calls, results), 1):
++        tid = f"{run_id}:{seq}"
++        rows.append({"seq": seq, "p": {"tid": tid, "tool": c["tool"], "ok": bool(res.get("ok")),
++                                       "args_sha": hashlib.sha256(json.dumps(c.get("args", {}), sort_keys=True)
++                                                                  .encode()).hexdigest()[:16],
++                                       "query_ids": (res.get("evidence") or {}).get("query_ids", [])}})
++        reads.append({"tid": tid, "ents": [str(x) for x in res.get("entities", [])]})
++    usage = (answer or {}).get("usage") or {}
++    run = {"run_id": run_id, "client": client, "model": (answer or {}).get("model") or "",
++           "tokens_in": usage.get("input_tokens") or 0, "tokens_out": usage.get("output_tokens") or 0,
++           "state_version": state_version or "", "at": _now(), "tools": len(rows)}
++    g = db.client().select_graph(graph)
++    g.query(Q_RUN, {"run": run, "calls": rows})
++    if reads:
++        g.query(Q_READS, {"rows": reads})
++    if answer is not None:
++        g.query(Q_ANSWER, {"a": {"run_id": run_id, "source": answer.get("source", ""),
++                                 "grounded": bool(answer.get("grounded", True)), "stale": False, "stale_reason": "",
++                                 "question": (question or "")[:300], "at": run["at"]},
++                           "tids": [r["p"]["tid"] for r in rows]})
++    g.query(Q_PRUNE, {"keep": MAX_RUNS})
++    return run_id
++
++
++def invalidate(graph: str, changed) -> int:
++    if not changed:
++        return 0
++    rs = db.client().select_graph(graph).query(Q_INVALIDATE, {"changed": sorted(changed)}).result_set
++    return rs[0][0] if rs else 0
++
++
++def sync_disagreements(graph: str) -> int:
++    rows = json.loads(DISAGREEMENTS.read_text(encoding="utf-8")) if DISAGREEMENTS.is_file() else []
++    g = db.client().select_graph(graph)
++    g.query(Q_CLEAR_DISAGREE)
++    if rows:
++        g.query(Q_DISAGREE, {"rows": rows})
++    return len(rows)
++
++
++Q_RECALL = {
++    "assessments": "MATCH (a:Assessment)-[:ABOUT]->(l:Lift) WHERE l.facility_id = $fid "
++                   "RETURN a.created_at, a.playbook, a.verdict, a.state_version ORDER BY a.created_at DESC LIMIT 10",
++    "proposals": "MATCH (p:ActionProposal) WHERE p.facility_id = $fid OR p.about = $fid "
++                 "RETURN p.kind, p.status, p.label, p.created_at ORDER BY p.created_at DESC LIMIT 10",
++    "disagreements": "MATCH (d:Disagreement)-[:ON]->(l:Lift) WHERE l.facility_id = $fid "
++                     "RETURN d.mbta, d.model, d.source",
++    "answers": "MATCH (a:Answer)-[:CITES]->(:ToolCall)-[:READ]->(l:Lift) WHERE l.facility_id = $fid "
++               "RETURN count(DISTINCT a), sum(CASE WHEN a.stale THEN 1 ELSE 0 END)",
++}
++
++
++def recall(graph: str, fid: str) -> dict:
++    g = db.client().select_graph(graph)
++    out = {k: g.ro_query(q, {"fid": fid}).result_set for k, q in Q_RECALL.items()}
++    n, stale = (out["answers"][0] if out["answers"] else (0, 0))
++    return {"assessments": [dict(zip(("at", "playbook", "verdict", "state_version"), r)) for r in out["assessments"]],
++            "proposals": [dict(zip(("kind", "status", "label", "at"), r)) for r in out["proposals"]],
++            "disagreements": [dict(zip(("mbta", "model", "source"), r)) for r in out["disagreements"]],
++            "answers_citing": n or 0, "answers_stale": stale or 0}
+diff --git a/lastlift/queries.py b/lastlift/queries.py
+index 71c7bb4..e23a046 100644
+--- a/lastlift/queries.py
++++ b/lastlift/queries.py
+@@ -72,7 +72,7 @@ Q_PRIORITY = (
+ # --- names --------------------------------------------------------------------------------
+ Q_STATION_SEARCH = (
+     "CALL db.idx.fulltext.queryNodes('Station', $q) YIELD node, score "
+-    "RETURN node.uid, node.name, node.has_pathways, node.has_street, score ORDER BY score DESC LIMIT 5"
++    "RETURN node.uid, node.name, node.has_pathways, node.has_street, score ORDER BY score DESC, node.uid LIMIT 5"
+ )
+ Q_STATION = "MATCH (s:Station {uid:$sid}) RETURN s.uid, s.name, s.cx, s.has_pathways, s.has_street"
+ 
+diff --git a/lastlift/state.py b/lastlift/state.py
+index d00cb6f..76371b2 100644
+--- a/lastlift/state.py
++++ b/lastlift/state.py
+@@ -14,7 +14,7 @@ import os
+ import threading
+ from collections import OrderedDict
+ 
+-from . import db, redundancy
++from . import db, memory, redundancy
+ from .config import settings
+ from .queries import (Q_CLEAR_DEPENDS_NOW, Q_CLOSE_LIFTS, Q_CLOSED_FACILITIES, Q_COMPLEX_PLATFORMS,
+                       Q_COMPLEX_STREETS, Q_CREATE_DEPENDS, Q_LIFT_COMPLEXES, Q_REOPEN_LIFTS, Q_SET_PLATFORM_NOW)
+@@ -84,7 +84,15 @@ def sync(name: str, closed_fids) -> dict:
+         changed = sorted(before ^ set(want))
+         cxs = g.ro_query(Q_LIFT_COMPLEXES, {"fids": changed}).result_set[0][0] if changed else []
+         results = recompute(name, cxs) if cxs else {}
+-    return {"graph": name, "closed": want, "changed": changed, "complexes": sorted(cxs), "recomputed": results}
++        # the closed set's fingerprint: the agents' Dispatcher acts only on assessments made at this version
++        g.query("MATCH (m:Meta) SET m.state_version = $v", {"v": state_version(want)})
++        stale = memory.invalidate(name, changed)      # answers that read a lift that changed are no longer true
++    return {"graph": name, "closed": want, "changed": changed, "complexes": sorted(cxs), "recomputed": results,
++            "answers_made_stale": stale}
++
++
++def state_version(closed_fids) -> str:
++    return hashlib.sha1(",".join(sorted(set(closed_fids))).encode()).hexdigest()[:12]
+ 
+ 
+ def what_if(scope: str, extra_fids) -> dict:
+diff --git a/lastlift/tools.py b/lastlift/tools.py
+index 8c0fc47..1263de8 100644
+--- a/lastlift/tools.py
++++ b/lastlift/tools.py
+@@ -12,7 +12,7 @@ from typing import Annotated
+ 
+ from pydantic import Field
+ 
+-from . import alerts, db, incidents, network, redundancy, routing, sequence, state
++from . import alerts, db, incidents, memory, network, redundancy, routing, sequence, state
+ from .queries import (Q_CLOSED_AT_COMPLEX, Q_COMPLEX_PLATFORMS, Q_STATION_PLATFORMS, Q_COMPLEX_STREETS, Q_LIFT_HISTORY, Q_LIFT_INCIDENT_COUNT, Q_LIFT_INFO,
+                       Q_LOST_NOW, Q_NEWLY_LAST, Q_PRIORITY, Q_STATION, Q_STATION_SEARCH, Q_CRITICAL_PAIRS,
+                       Q_LIFT_BLAST, Q_LIFT_RECORD)
+@@ -47,6 +47,7 @@ def prepare_scope(scope):
+     fids = modelled_closed_facilities(alerts.closures_for(scope))
+     res = state.ensure_scope(scope, fids)
+     res["incidents"] = incidents.sync(scope)
++    res["disagreements"] = memory.sync_disagreements(state.graph_name(scope))
+     return res
+ 
+ 
+@@ -511,6 +512,75 @@ def repair_order(scope: str = "demo"):
+                      highlight={"nodes": [f"lift:{f}" for f in closed], "edges": []}, entities=closed)
+ 
+ 
++def recall_lift_history(facility_id: str, scope: str = "demo"):
++    """What LastLift remembers about a lift: closures on record, its archive record, the agents' past assessments and
++    proposals, disagreements with MBTA, and how many earlier answers cited it (and are now stale). Never a forecast."""
++    started = time.perf_counter()
++    graph = _scope_graph(scope)
++    hist = lift_history(facility_id, scope)["data"]
++    mem = memory.recall(graph, str(facility_id))
++    parts = [f"lift {facility_id}: {len(hist['incidents'])} closure alert(s) seen live"]
++    if hist.get("archive"):
++        a = hist["archive"]
++        parts.append(f"{a['closures']} closures in the archive since {a['from']}")
++    if mem["assessments"]:
++        last = mem["assessments"][0]
++        parts.append(f"last assessed {last['at']} as {last['playbook']} ({last['verdict']})")
++    if mem["proposals"]:
++        parts.append(f"{len(mem['proposals'])} action proposal(s), latest {mem['proposals'][0]['status']}")
++    if mem["disagreements"]:
++        d = mem["disagreements"][0]
++        parts.append(f"MBTA's advice differed from the model before ({d['source']}: MBTA {d['mbta']}, model "
++                     f"{d['model']}); follow MBTA's advice")
++    if mem["answers_citing"]:
++        parts.append(f"{mem['answers_citing']} earlier answer(s) cited it, {mem['answers_stale']} now stale")
++    return _envelope("recall_lift_history", True, "; ".join(parts) + " (observed history, not a forecast)",
++                     {"facility_id": str(facility_id), "history": hist, "memory": mem},
++                     ["Q_LIFT_HISTORY", "Q_LIFT_RECORD"], graph, started, entities=[str(facility_id)])
++
++
++def lift_dossier(facility_id: str, scope: str = "demo"):
++    """A one-page brief on a lift: which platform-directions depend on it alone, their certified routes and minimum
++    cuts, its record and current proposals (markdown)."""
++    started = time.perf_counter()
++    graph = _scope_graph(scope)
++    g = db.client().select_graph(graph)
++    fid = str(facility_id)
++    rows = g.ro_query("MATCH (p:Node:Platform)-[d:DEPENDS_ON|DEPENDS_NOW]->(l:Lift) WHERE l.facility_id = $fid "
++                      "RETURN DISTINCT p.stop_id, p.name, p.platform_name, d.dir, type(d), p.k_board, p.k_exit, "
++                      "p.mincuts_board, p.mincuts_exit ORDER BY p.stop_id, d.dir", {"fid": fid}).result_set
++    info = g.ro_query(Q_LIFT_INFO, {"fid": fid}).result_set
++    if not info and not rows:
++        return _envelope("lift_dossier", False, f"cannot assess: lift {fid} is not in the step-free model",
++                         {"facility_id": fid}, ["Q_LIFT_INFO"], graph, started, entities=[fid])
++    rec = recall_lift_history(fid, scope)["data"]
++    lines = [f"# Lift {fid}", ""]
++    if rows:
++        lines += ["| Platform | Direction | Relationship | Lift routes now | Minimum cuts |", "|---|---|---|---|---|"]
++        for stop, name, pname, d, rel, kb, ke, mb, me in rows:
++            cuts = mb if d == "board" else me
++            lines.append(f"| {name} {pname or ''} ({stop}) | {d} | "
++                         f"{'only lift (baseline)' if rel == 'DEPENDS_ON' else 'last lift now'} | "
++                         f"{kb if d == 'board' else ke} | {cuts or '-'} |")
++    else:
++        lines.append("No platform-direction depends on this lift alone.")
++    a = (rec["history"] or {}).get("archive")
++    if a:
++        lines += ["", f"Archive since {a['from']}: {a['closures']} closures, {a['closed_hours']} hours closed"
++                  + (f", available {round(a['availability_12m'] * 100, 1)}% of the last 12 archive months"
++                     if a.get("availability_12m") is not None else "") + "."]
++    for d in rec["memory"]["disagreements"]:
++        lines.append(f"MBTA's advice has differed from the model ({d['source']}): follow MBTA's advice.")
++    for p in rec["memory"]["proposals"][:3]:
++        lines.append(f"Proposal: {p['kind']} ({p['status']}, {p['label']}).")
++    lines += ["", "_Open-data model, unofficial; check mbta.com/alerts/access._"]
++    summary = (f"lift {fid}: only lift for {sum(1 for r in rows if r[4] == 'DEPENDS_ON')} platform-direction(s) at "
++               f"baseline, last lift now for {sum(1 for r in rows if r[4] == 'DEPENDS_NOW')}")
++    return _envelope("lift_dossier", True, summary, {"facility_id": fid, "markdown": "\n".join(lines)},
++                     ["Q_LIFT_INFO", "Q_LIFT_HISTORY", "Q_LIFT_RECORD"], graph, started,
++                     entities=[fid] + [r[0] for r in rows])
++
++
+ REGISTRY = {f.__name__: f for f in (resolve_place, current_closures, platform_redundancy, what_if_close,
+                                     step_free_route, repair_priority, lift_history, draft_action, network_impact,
+-                                    repair_order)}
++                                    repair_order, recall_lift_history, lift_dossier)}

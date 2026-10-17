@@ -12,7 +12,7 @@ from typing import Annotated
 
 from pydantic import Field
 
-from . import alerts, db, incidents, network, redundancy, routing, sequence, state
+from . import alerts, db, incidents, memory, network, redundancy, routing, sequence, state
 from .queries import (Q_CLOSED_AT_COMPLEX, Q_COMPLEX_PLATFORMS, Q_STATION_PLATFORMS, Q_COMPLEX_STREETS, Q_LIFT_HISTORY, Q_LIFT_INCIDENT_COUNT, Q_LIFT_INFO,
                       Q_LOST_NOW, Q_NEWLY_LAST, Q_PRIORITY, Q_STATION, Q_STATION_SEARCH, Q_CRITICAL_PAIRS,
                       Q_LIFT_BLAST, Q_LIFT_RECORD)
@@ -47,6 +47,7 @@ def prepare_scope(scope):
     fids = modelled_closed_facilities(alerts.closures_for(scope))
     res = state.ensure_scope(scope, fids)
     res["incidents"] = incidents.sync(scope)
+    res["disagreements"] = memory.sync_disagreements(state.graph_name(scope))
     return res
 
 
@@ -511,6 +512,103 @@ def repair_order(scope: str = "demo"):
                      highlight={"nodes": [f"lift:{f}" for f in closed], "edges": []}, entities=closed)
 
 
+def recall_lift_history(facility_id: str, scope: str = "demo"):
+    """What LastLift remembers about a lift: closures on record, its archive record, the agents' past assessments and
+    proposals, disagreements with MBTA, and how many earlier answers cited it (and are now stale). Never a forecast."""
+    started = time.perf_counter()
+    graph = _scope_graph(scope)
+    hist = lift_history(facility_id, scope)["data"]
+    mem = memory.recall(graph, str(facility_id))
+    parts = [f"lift {facility_id}: {len(hist['incidents'])} closure alert(s) seen live"]
+    if hist.get("archive"):
+        a = hist["archive"]
+        parts.append(f"{a['closures']} closures in the archive since {a['from']}")
+    if mem["assessments"]:
+        last = mem["assessments"][0]
+        parts.append(f"last assessed {last['at']} as {last['playbook']} ({last['verdict']})")
+    if mem["proposals"]:
+        parts.append(f"{len(mem['proposals'])} action proposal(s), latest {mem['proposals'][0]['status']}")
+    if mem["disagreements"]:
+        d = mem["disagreements"][0]
+        parts.append(f"MBTA's advice differed from the model before ({d['source']}: MBTA {d['mbta']}, model "
+                     f"{d['model']}); follow MBTA's advice")
+    if mem["answers_citing"]:
+        parts.append(f"{mem['answers_citing']} earlier answer(s) cited it, {mem['answers_stale']} now stale")
+    return _envelope("recall_lift_history", True, "; ".join(parts) + " (observed history, not a forecast)",
+                     {"facility_id": str(facility_id), "history": hist, "memory": mem},
+                     ["Q_LIFT_HISTORY", "Q_LIFT_RECORD"], graph, started, entities=[str(facility_id)])
+
+
+def lift_dossier(facility_id: str, scope: str = "demo"):
+    """A one-page brief on a lift: which platform-directions depend on it alone, their certified routes and minimum
+    cuts, its record and current proposals (markdown)."""
+    started = time.perf_counter()
+    graph = _scope_graph(scope)
+    g = db.client().select_graph(graph)
+    fid = str(facility_id)
+    rows = g.ro_query("MATCH (p:Node:Platform)-[d:DEPENDS_ON|DEPENDS_NOW]->(l:Lift) WHERE l.facility_id = $fid "
+                      "RETURN DISTINCT p.stop_id, p.name, p.platform_name, d.dir, type(d), p.k_board, p.k_exit, "
+                      "p.mincuts_board, p.mincuts_exit ORDER BY p.stop_id, d.dir", {"fid": fid}).result_set
+    info = g.ro_query(Q_LIFT_INFO, {"fid": fid}).result_set
+    if not info and not rows:
+        return _envelope("lift_dossier", False, f"cannot assess: lift {fid} is not in the step-free model",
+                         {"facility_id": fid}, ["Q_LIFT_INFO"], graph, started, entities=[fid])
+    rec = recall_lift_history(fid, scope)["data"]
+    lines = [f"# Lift {fid}", ""]
+    if rows:
+        lines += ["| Platform | Direction | Relationship | Lift routes now | Minimum cuts |", "|---|---|---|---|---|"]
+        for stop, name, pname, d, rel, kb, ke, mb, me in rows:
+            cuts = mb if d == "board" else me
+            lines.append(f"| {name} {pname or ''} ({stop}) | {d} | "
+                         f"{'only lift (baseline)' if rel == 'DEPENDS_ON' else 'last lift now'} | "
+                         f"{kb if d == 'board' else ke} | {cuts or '-'} |")
+    else:
+        lines.append("No platform-direction depends on this lift alone.")
+    a = (rec["history"] or {}).get("archive")
+    if a:
+        lines += ["", f"Archive since {a['from']}: {a['closures']} closures, {a['closed_hours']} hours closed"
+                  + (f", available {round(a['availability_12m'] * 100, 1)}% of the last 12 archive months"
+                     if a.get("availability_12m") is not None else "") + "."]
+    for d in rec["memory"]["disagreements"]:
+        lines.append(f"MBTA's advice has differed from the model ({d['source']}): follow MBTA's advice.")
+    for p in rec["memory"]["proposals"][:3]:
+        lines.append(f"Proposal: {p['kind']} ({p['status']}, {p['label']}).")
+    lines += ["", "_Open-data model, unofficial; check mbta.com/alerts/access._"]
+    summary = (f"lift {fid}: only lift for {sum(1 for r in rows if r[4] == 'DEPENDS_ON')} platform-direction(s) at "
+               f"baseline, last lift now for {sum(1 for r in rows if r[4] == 'DEPENDS_NOW')}")
+    return _envelope("lift_dossier", True, summary, {"facility_id": fid, "markdown": "\n".join(lines)},
+                     ["Q_LIFT_INFO", "Q_LIFT_HISTORY", "Q_LIFT_RECORD"], graph, started,
+                     entities=[fid] + [r[0] for r in rows])
+
+
+def stress_test(budget: Annotated[int, Field(ge=1, le=10, description="How many lifts fail at once (1-10)")] = 5):
+    """The worst day for a given number of lift failures: the set that leaves the most platform-directions without a
+    step-free route (exact; scripts/worst_day.py), re-checked now in FalkorDB on a throwaway copy of the base graph.
+    A resilience stress test: the answer is which lifts to protect first."""
+    import json as _json
+    started = time.perf_counter()
+    from .config import REPO_ROOT
+    path = REPO_ROOT / "data" / "worst_day.json"
+    if not path.is_file():
+        return _envelope("stress_test", False, "the worst-day table has not been computed", {}, [], "", started)
+    b = max(1, min(10, int(budget)))
+    row = next(r for r in _json.loads(path.read_text(encoding="utf-8"))["rows"] if r["B"] == b)
+    lifts = [x["facility_id"] for x in row["lifts"]]
+    res = state.what_if("base", lifts)
+    lost_now = db.client().select_graph(res["copy"]).ro_query(Q_LOST_NOW).result_set
+    observed = sum((r[4] == 0) + (r[5] == 0) for r in lost_now)
+    stations = sorted({x["station"] for x in row["lifts"] if x["station"]})
+    summary = (f"worst day with {b} lift failure(s): {row['platform_directions']} platform-directions lose step-free "
+               f"access in the open-data model (lifts {', '.join(lifts)}; {', '.join(stations)}); re-checked in "
+               f"FalkorDB on a copy: {observed} ({'matches' if observed == row['platform_directions'] else 'differs'})")
+    return _envelope("stress_test", True, summary,
+                     {"budget": b, "expected": row["platform_directions"], "observed": observed,
+                      "match": observed == row["platform_directions"], "lifts": row["lifts"],
+                      "departures": row["departures"], "copy": res["copy"]},
+                     ["Q_CLOSE_LIFTS", "Q_MAXFLOW", "Q_LOST_NOW"], res["copy"], started,
+                     highlight={"nodes": [f"lift:{f}" for f in lifts], "edges": []}, entities=lifts)
+
+
 REGISTRY = {f.__name__: f for f in (resolve_place, current_closures, platform_redundancy, what_if_close,
                                     step_free_route, repair_priority, lift_history, draft_action, network_impact,
-                                    repair_order)}
+                                    repair_order, recall_lift_history, lift_dossier, stress_test)}

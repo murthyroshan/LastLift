@@ -36,7 +36,12 @@
                              "from_model": {"type": "string"}, "to_model": {"type": "string"}}}},
     {"if": {"properties": {"type": {"const": "grounding"}}},
      "then": {"required": ["ok", "problems"], "properties": {"ok": {"type": "boolean"},
-                                                            "problems": {"type": "array", "items": {"type": "string"}}}}},
+                                                            "problems": {"type": "array", "items": {"type": "string"}},
+                                                            "claims": {"type": "array", "items": {
+                                                              "type": "object", "required": ["text", "cites", "ok"],
+                                                              "properties": {"text": {"type": "string"},
+                                                                             "cites": {"type": "array"},
+                                                                             "ok": {"type": "boolean"}}}}}}},
     {"if": {"properties": {"type": {"const": "answer"}}},
      "then": {"required": ["text", "source", "grounded", "tools"],
               "properties": {"text": {"type": "string"}, "source": {"enum": ["llm", "template"]},
