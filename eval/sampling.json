@@ -1,0 +1,9 @@
+{
+  "note": "Fixed seeds for every random sample in the evaluation, committed before any sample is drawn.",
+  "static_sweep_agreement_sample": {"seed": 20261017, "fraction": 0.2, "stratify_by": "prefill_verdict"},
+  "intra_rater_kappa_relabel": {"seed": 20261018, "rows": 30, "min_hours_after_first_label": 12},
+  "agent_eval_fallback_subset": {"seed": 1017, "questions": 12},
+  "agent_eval_human_audit": {"seed": 1018, "answers": 20},
+  "llm_baseline_platform_sample": {"seed": 1019, "rows": 30, "max_pathway_rows_per_station": 150},
+  "historical_gold_sample": {"seed": 1020, "rows": 20}
+}

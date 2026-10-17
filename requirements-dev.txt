@@ -2,3 +2,4 @@
 networkx==3.7
 pytest==8.4.2
 jsonschema==4.26.0
+pyyaml==6.0.3
