@@ -144,7 +144,11 @@ def main(argv=None):
     with out.open("w", encoding="utf-8", newline="\n") as fh:
         for r in rows:
             fh.write(json.dumps(r, sort_keys=True, ensure_ascii=False, separators=(",", ":")) + "\n")
-    (ROOT / "claims.json").write_text(json.dumps(claims, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    path = ROOT / "claims.json"
+    if path.is_file():  # keep the evaluation's keys (scripts/eval.py owns live_* and static_*)
+        old = json.loads(path.read_text(encoding="utf-8"))
+        claims.update({k: v for k, v in old.items() if k.startswith(("live_", "static_"))})
+    path.write_text(json.dumps(claims, indent=1, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
     from lastlift.seed import apply_precomputed
     apply_precomputed(args.graph, snapshot)
     print(json.dumps({k: claims[k] for k in ("maxflow_calls", "falkordb_first_pass_exact", "falkordb_repaired",

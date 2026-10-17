@@ -78,12 +78,26 @@ def harvest():
         for r in ordered:
             fh.write(json.dumps(r, sort_keys=True, ensure_ascii=False, separators=(",", ":")) + "\n")
     polls = (ARCHIVE / "polls.jsonl").read_text(encoding="utf-8").splitlines() if (ARCHIVE / "polls.jsonl").is_file() else []
-    first = json.loads(polls[0])["at"] if polls else None
-    last = json.loads(polls[-1])["at"] if polls else None
+    polls = [p for p in (json.loads(x) for x in polls if x.strip())]
+    first = polls[0]["at"] if polls else None
+    last = polls[-1]["at"] if polls else None
+    # When each accessibility alert was seen active (first/last poll, count): lets incident memory say
+    # when a closure ended. An alert absent from the last poll has ended (or was withdrawn) since.
+    activity = {}
+    for p in polls:
+        for aid in p.get("active_accessibility_alert_ids", []):
+            a = activity.setdefault(aid, {"first_active": p["at"], "last_active": p["at"], "polls_active": 0})
+            a["last_active"], a["polls_active"] = p["at"], a["polls_active"] + 1
+    for a in activity.values():  # first poll that no longer listed it: the closure ended before then
+        a["first_absent"] = next((p["at"] for p in polls if p["at"] > a["last_active"]), None)
+    (ALERTS_OUT / "alert_activity.json").write_text(
+        json.dumps({"first_poll": first, "last_poll": last, "polls": len(polls), "alerts": activity},
+                   indent=1, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
     summary = {"source": "MBTA V3 /alerts, polled every 10 minutes by the local collector",
                "polls": len(polls), "first_poll": first, "last_poll": last,
                "accessibility_alerts": len({r["alert"]["id"] for r in ordered}), "versions": len(ordered)}
-    (ALERTS_OUT / "HARVEST.json").write_text(json.dumps(summary, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    (ALERTS_OUT / "HARVEST.json").write_text(json.dumps(summary, indent=1, sort_keys=True) + "\n", encoding="utf-8",
+                                             newline="\n")
     print(json.dumps(summary, indent=1))
     return 0
 

@@ -61,4 +61,4 @@ The build fails if any override stops matching the feed.
 
 ## Wording
 Results describe the open-data model. LastLift says "loses step-free access in the open-data model",
-never "stranded", "safe" or a bare "accessible", and says "cannot assess" where pathway data is missing.
+never "stranded", "safe" or a bare "accessible", and says "cannot assess" where pathway data is missing. <!-- copy-lint: quoted -->

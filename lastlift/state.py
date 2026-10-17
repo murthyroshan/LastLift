@@ -9,6 +9,7 @@ Closures are relationship-type swaps (SF <-> SF_CLOSED) on lift edges, applied a
 desired state. After a sync, only complexes whose closed set changed are recomputed.
 """
 import hashlib
+import os
 import threading
 from collections import OrderedDict
 
@@ -90,7 +91,9 @@ def what_if(scope: str, extra_fids) -> dict:
     parent = graph_name(scope)
     base_closed = closed(parent)
     want = sorted(set(base_closed) | set(extra_fids))
-    key = hashlib.sha1(f"{parent}|{','.join(want)}".encode()).hexdigest()[:12]
+    # The process id is part of the name: two processes (the API and a script, say) never share a copy,
+    # so one process's LRU eviction can never delete a copy the other is still reading.
+    key = hashlib.sha1(f"{os.getpid()}|{parent}|{','.join(want)}".encode()).hexdigest()[:12]
     name = graph_name(f"wi_{key}")
     with _lock:
         if name in _what_ifs:

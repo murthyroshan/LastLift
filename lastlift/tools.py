@@ -9,9 +9,9 @@ Wording follows docs/model_rules.md: "loses step-free access in the open-data mo
 import re
 import time
 
-from . import alerts, db, redundancy, routing, state
-from .queries import (Q_COMPLEX_PLATFORMS, Q_COMPLEX_STREETS, Q_LIFT_INFO, Q_LOST_NOW, Q_NEWLY_LAST, Q_PRIORITY,
-                      Q_STATION, Q_STATION_SEARCH)
+from . import alerts, db, incidents, redundancy, routing, state
+from .queries import (Q_COMPLEX_PLATFORMS, Q_COMPLEX_STREETS, Q_LIFT_HISTORY, Q_LIFT_INCIDENT_COUNT, Q_LIFT_INFO,
+                      Q_LOST_NOW, Q_NEWLY_LAST, Q_PRIORITY, Q_STATION, Q_STATION_SEARCH)
 
 SCOPES = ("demo", "live", "base")
 _FT_SPECIAL = re.compile(r"[-|%*@()\"'~{}\[\]:;!^$+<>=/\\]")
@@ -34,9 +34,12 @@ def _scope_graph(scope):
 
 
 def prepare_scope(scope):
-    """Create/sync a scope graph to its alert set (demo = frozen snapshot, live = latest harvest)."""
+    """Create/sync a scope graph to its alert set (demo = frozen snapshot, live = latest harvest),
+    and write its incident memory."""
     fids = modelled_closed_facilities(alerts.closures_for(scope))
-    return state.ensure_scope(scope, fids)
+    res = state.ensure_scope(scope, fids)
+    res["incidents"] = incidents.sync(scope)
+    return res
 
 
 def modelled_closed_facilities(closures):
@@ -226,36 +229,54 @@ def repair_priority(scope: str = "demo", limit: int = 10):
     lost_stations = {r[3] for r in g.ro_query(Q_LOST_NOW).result_set}
     closed = set(state.closed(graph))
     rows = []
-    for fid, name, sid, is_closed, deps, newly, departures in g.ro_query(Q_PRIORITY).result_set:
+    for fid, name, sid, is_closed, deps, newly, departures, n_inc in g.ro_query(Q_PRIORITY).result_set:
         tier = 2 if newly else 3
         rows.append({"facility_id": fid, "name": name, "station_id": sid, "closed": bool(is_closed),
-                     "platform_directions": deps, "newly_last": newly, "departures_day": departures, "tier": tier})
+                     "platform_directions": deps, "newly_last": newly, "departures_day": departures,
+                     "incidents": n_inc, "tier": tier})
     for fid in closed:
         if not any(r["facility_id"] == fid for r in rows):
             info = g.ro_query(Q_LIFT_INFO, {"fid": fid}).result_set
             if info and info[0][3] in lost_stations:
+                n_inc = g.ro_query(Q_LIFT_INCIDENT_COUNT, {"fid": fid}).result_set[0][0]
                 rows.append({"facility_id": fid, "name": info[0][1], "station_id": info[0][3], "closed": True,
-                             "platform_directions": 0, "newly_last": 0, "departures_day": 0, "tier": 1})
-    rows.sort(key=lambda r: (r["tier"], -r["newly_last"], -r["departures_day"], r["facility_id"]))
+                             "platform_directions": 0, "newly_last": 0, "departures_day": 0, "incidents": n_inc,
+                             "tier": 1})
+    rank(rows)
     labels = {1: "repair now (closed, platforms lose access)", 2: "protect (newly the last lift)",
               3: "structural single point of failure"}
     for r in rows:
         r["tier_label"] = labels[r["tier"]]
     top = rows[:limit]
     summary = "; ".join(f"{r['facility_id']} ({r['tier_label']})" for r in top[:3]) or "no lift dependencies"
-    return _envelope("repair_priority", True, summary, {"ranked": top}, ["Q_PRIORITY", "Q_LOST_NOW", "Q_LIFT_INFO"],
+    return _envelope("repair_priority", True, summary, {"ranked": top},
+                     ["Q_PRIORITY", "Q_LOST_NOW", "Q_LIFT_INFO", "Q_LIFT_INCIDENT_COUNT"],
                      graph, started, entities=[r["facility_id"] for r in top] + [r["station_id"] for r in top])
 
 
-def lift_history(facility_id: str):
-    """Every alert version the collector has seen for this lift (the agent's incident memory)."""
+def rank(rows):
+    """Lexicographic, reasons shown: tier, then newly-last count, then scheduled departures, then how
+    many closures of this lift are on record (incident memory), then facility id."""
+    rows.sort(key=lambda r: (r["tier"], -r["newly_last"], -r["departures_day"], -r.get("incidents", 0),
+                             r["facility_id"]))
+    return rows
+
+
+def lift_history(facility_id: str, scope: str = "demo"):
+    """Closures of this lift on record (incident memory in the graph, from MBTA alerts the collector saw)."""
     started = time.perf_counter()
-    events = [a for a in alerts.lift_alerts() if facility_id in a["facility_ids"]]
-    summary = (f"lift {facility_id}: {len(events)} alert(s) on record since collection began"
-               if events else f"lift {facility_id}: no alerts on record")
-    return _envelope("lift_history", True, summary, {"facility_id": facility_id, "alerts": events},
-                     ["data/alerts/accessibility_alert_versions.jsonl"], "collector", started,
-                     entities=[facility_id] + [s for e in events for s in e["stations"]])
+    graph = _scope_graph(scope)
+    g = db.client().select_graph(graph)
+    keys = ("alert_id", "effect", "header", "started", "first_seen", "last_seen", "ongoing", "ended_by", "versions")
+    events = [dict(zip(keys, r)) for r in g.ro_query(Q_LIFT_HISTORY, {"fid": str(facility_id)}).result_set]
+    since = alerts.activity().get("first_poll")
+    ongoing = sum(1 for e in events if e["ongoing"])
+    began = f" since collection began {since[:10]}" if since else ""
+    summary = (f"lift {facility_id}: {len(events)} closure alert(s) on record ({ongoing} ongoing){began}"
+               if events else f"lift {facility_id}: no closures on record{began}")
+    return _envelope("lift_history", True, summary,
+                     {"facility_id": facility_id, "incidents": events, "collection_began": since},
+                     ["Q_LIFT_HISTORY"], graph, started, entities=[facility_id])
 
 
 def draft_action(facility_id: str, scope: str = "demo"):
@@ -263,7 +284,7 @@ def draft_action(facility_id: str, scope: str = "demo"):
     started = time.perf_counter()
     pr = repair_priority(scope, limit=200)["data"]["ranked"]
     row = next((r for r in pr if r["facility_id"] == facility_id), None)
-    hist = lift_history(facility_id)["data"]["alerts"]
+    hist = lift_history(facility_id, scope)["data"]["incidents"]
     if row is None:
         return _envelope("draft_action", False, f"lift {facility_id} has no platform depending on it alone",
                          {}, ["Q_PRIORITY"], state.graph_name(scope), started, entities=[facility_id])
@@ -273,7 +294,7 @@ def draft_action(facility_id: str, scope: str = "demo"):
         f"**Priority tier:** {row['tier']} ({row['tier_label']})",
         f"**Platform-directions with no other step-free route:** {row['platform_directions']}",
         f"**Scheduled departures affected (day):** {row['departures_day']}",
-        f"**Alerts on record:** {len(hist)}",
+        f"**Closures on record (incident memory):** {len(hist)}",
         "",
         "_Draft generated from the open-data model (unofficial decision support). Not filed automatically._",
     ])

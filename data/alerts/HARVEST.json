@@ -1,8 +1,8 @@
 {
- "accessibility_alerts": 35,
+ "accessibility_alerts": 36,
  "first_poll": "2026-10-15T15:42:45.030388+00:00",
- "last_poll": "2026-10-15T16:33:17.087504+00:00",
- "polls": 11,
+ "last_poll": "2026-10-16T02:14:19.159943+00:00",
+ "polls": 24,
  "source": "MBTA V3 /alerts, polled every 10 minutes by the local collector",
- "versions": 35
+ "versions": 37
 }

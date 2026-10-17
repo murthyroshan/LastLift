@@ -1,0 +1,223 @@
+{
+ "alerts": {
+  "1001815": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1001816": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1001817": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1001818": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1001819": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1001820": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1001821": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1007380": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1009001": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1009729": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1009804": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1023448": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1024904": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1028722": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1029163": {
+   "first_absent": "2026-10-15T16:23:05.210743+00:00",
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-15T16:13:03.534912+00:00",
+   "polls_active": 9
+  },
+  "1030394": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1031518": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1031519": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1031908": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1033322": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1035010": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1036024": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1036421": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1036639": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1037250": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1038079": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1038209": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1038229": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1038485": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1038565": {
+   "first_absent": "2026-10-16T01:32:00.712135+00:00",
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-15T17:43:08.677578+00:00",
+   "polls_active": 18
+  },
+  "1038679": {
+   "first_absent": "2026-10-15T16:03:07.056128+00:00",
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-15T15:53:03.887527+00:00",
+   "polls_active": 7
+  },
+  "1038753": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1038926": {
+   "first_absent": null,
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 24
+  },
+  "1038957": {
+   "first_absent": "2026-10-15T16:13:03.534912+00:00",
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-15T16:03:07.056128+00:00",
+   "polls_active": 8
+  },
+  "1038975": {
+   "first_absent": "2026-10-15T17:33:06.476836+00:00",
+   "first_active": "2026-10-15T15:42:45.030388+00:00",
+   "last_active": "2026-10-15T17:23:10.743685+00:00",
+   "polls_active": 16
+  },
+  "1039191": {
+   "first_absent": null,
+   "first_active": "2026-10-16T01:32:00.712135+00:00",
+   "last_active": "2026-10-16T02:14:19.159943+00:00",
+   "polls_active": 6
+  }
+ },
+ "first_poll": "2026-10-15T15:42:45.030388+00:00",
+ "last_poll": "2026-10-16T02:14:19.159943+00:00",
+ "polls": 24
+}

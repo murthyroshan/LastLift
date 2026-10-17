@@ -28,6 +28,9 @@ Q_REOPEN_LIFTS = (
 )
 Q_CLOSED_FACILITIES = "MATCH (i:Lift)-[:SF_CLOSED]->() RETURN collect(DISTINCT i.facility_id)"
 Q_LIFT_COMPLEXES = "MATCH (l:Node:Lift) WHERE l.facility_id IN $fids RETURN collect(DISTINCT l.cx)"
+Q_LIFT_INCIDENT_COUNT = (
+    "MATCH (l:Lift {facility_id:$fid}) OPTIONAL MATCH (l)-[:CLOSED_IN]->(i:Incident) RETURN count(DISTINCT i)"
+)
 Q_LIFT_INFO = (
     "MATCH (l:Lift {facility_id:$fid}) RETURN l.facility_id, l.name, l.short_name, l.station_id, l.cx, "
     "l.modelled, coalesce(l.closed, false) LIMIT 1"
@@ -55,10 +58,15 @@ Q_NEWLY_LAST = (
     "RETURN l.facility_id, l.name, l.station_id, collect(DISTINCT p.stop_id + ' ' + n.dir)"
 )
 Q_PRIORITY = (
+    # "newly" = platform-directions for which this lift became the last lift because of current closures.
+    # (A pattern predicate with {dir:d.dir} inside CASE never matched on 4.22, so use OPTIONAL MATCH.)
     "MATCH (p:Node:Platform)-[d:DEPENDS_NOW]->(l:Lift) "
+    "OPTIONAL MATCH (p)-[o:DEPENDS_ON]->(l) WHERE o.dir = d.dir "
+    "WITH l, p, d, count(o) AS before "
     "WITH l, count(DISTINCT p.stop_id + d.dir) AS deps, sum(p.deps_day) AS departures, "
-    "sum(CASE WHEN (p)-[:DEPENDS_ON {dir:d.dir}]->(l) THEN 0 ELSE 1 END) AS newly "
-    "RETURN l.facility_id, l.name, l.station_id, coalesce(l.closed, false), deps, newly, departures"
+    "toInteger(sum(CASE WHEN before = 0 THEN 1 ELSE 0 END)) AS newly "
+    "OPTIONAL MATCH (l)-[:CLOSED_IN]->(i:Incident) WITH l, deps, departures, newly, count(DISTINCT i) AS incidents "
+    "RETURN l.facility_id, l.name, l.station_id, coalesce(l.closed, false), deps, newly, departures, incidents"
 )
 
 # --- names --------------------------------------------------------------------------------
@@ -105,3 +113,15 @@ Q_STATION_UNMODELLED_LIFTS = (
     "MATCH (l:Lift) WHERE l.station_id = $sid AND NOT l:Node RETURN l.facility_id, l.name ORDER BY l.facility_id"
 )
 Q_META = "MATCH (m:Meta) RETURN m.snapshot_id, m.seed_sha256 LIMIT 1"
+Q_MODELLED_LIFTS = "MATCH (l:Node:Lift) WHERE l.facility_id IN $fids RETURN collect(DISTINCT l.facility_id)"
+
+# --- incident memory (incidents.py) -----------------------------------------------------------
+Q_CLEAR_INCIDENTS = "MATCH (i:Incident) DETACH DELETE i"
+Q_WRITE_INCIDENTS = (
+    "UNWIND $rows AS r CREATE (i:Incident) SET i = r.p WITH i, r "
+    "UNWIND r.fids AS fid MATCH (l:Lift {facility_id:fid}) MERGE (l)-[:CLOSED_IN]->(i)"
+)
+Q_LIFT_HISTORY = (
+    "MATCH (l:Lift {facility_id:$fid})-[:CLOSED_IN]->(i:Incident) RETURN DISTINCT i.alert_id, i.effect, i.header, "
+    "i.started, i.first_seen, i.last_seen, i.ongoing, i.ended_by, i.versions ORDER BY i.first_seen"
+)

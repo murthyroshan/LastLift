@@ -36,3 +36,6 @@ Thumbs.db
 .idea/
 .vscode/
 *.tsbuildinfo
+
+# MBTA alternate-service text is licensed for internal use only: used to validate, never committed
+validation/_private/

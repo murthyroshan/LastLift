@@ -1,11 +1,15 @@
 # Labelling guide (live gold set)
 
-**Provenance of the current labels:** the 14 rows were labelled by an AI coding assistant working from
-MBTA's alert text only, before any LastLift model output for them was produced, and are pending review
-by the author (`labelled_by` column). Any row the author changes is noted in `labeller_notes`.
+**Provenance.** There are two label sets for the 14 live alerts, both made from MBTA's alert text only
+and both committed before the evaluation (`scripts/eval.py`) was first run, as the git history shows:
 
-You label each row of `gold_live.csv` **from MBTA's alert text only** (`mbta_text`), before seeing any
-LastLift output. The labels are committed first, so the git history proves they came before the model.
+- `gold_live_author.csv`: labelled blind by the author. **This is the evaluation key.**
+- `gold_live.csv`: labelled by an AI coding assistant. Kept only to report labeller agreement (Cohen's kappa);
+  never used to score the model.
+
+Each labeller labels every row **from MBTA's alert text only** (`mbta_text`), without looking at LastLift's
+output. Labels are committed before the evaluation runs, and are never edited afterwards (corrections go
+in an errata file with reasons).
 
 Fill these columns; leave every other column untouched.
 
@@ -20,3 +24,21 @@ Fill these columns; leave every other column untouched.
 
 Tips: "ride to X and come back" or "use X station instead" means `LOSS`. "Use elevator N" in the same
 station means `NO_LOSS` for that direction. When unsure, choose `CANNOT_ASSESS` and explain in the notes.
+
+## Static sweep (`static_prefill.csv`, `gold_static.csv`)
+
+MBTA publishes, for most elevators, a short text saying what riders should do while that elevator is out
+(`alternate-service-text`). That text is licensed for internal use only: it is used here to validate,
+never displayed and never committed.
+
+1. `python scripts/static_sweep.py` writes your sheet to `validation/_private/static_review.csv`
+   (gitignored). Each row has MBTA's text and a regex pre-fill. **The sheet never shows the model's verdict.**
+2. For every row with `review_required = Y`, read the text and fill `author_board_class`,
+   `author_exit_class`, `author_named_elevators` and `author_verdict` with the same vocabulary as above,
+   correcting the pre-fill wherever it is wrong. Add `author_notes` for anything ambiguous.
+3. `python scripts/static_sweep.py --make-gold` writes `gold_static.csv`: your labels for the flagged rows,
+   the pre-fill for the rest (marked "regex prefill, not reviewed"), and a sha256 of each text, never the
+   text itself. Commit it before running `python scripts/eval.py`.
+
+Only your reviewed rows count towards the static agreement figure. Unreviewed rows were left unreviewed
+because their pre-fill matched the model, so they are not evidence of agreement.

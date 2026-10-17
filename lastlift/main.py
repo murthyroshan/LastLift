@@ -10,8 +10,10 @@ from typing import Literal
 from fastapi import Body, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from redis.exceptions import ConnectionError as RedisConnectionError
+from redis.exceptions import TimeoutError as RedisTimeoutError
 
-from . import __version__, db, state, station_view, tools
+from . import __version__, db, incidents, state, station_view, tools, wording
 from .config import settings
 
 STARTED = time.time()
@@ -22,8 +24,11 @@ log = logging.getLogger("lastlift")
 async def lifespan(_app):
     try:
         state.sweep_stale_what_ifs()        # what-if copies never outlive the process that made them
+        for scope in ("base", "demo", "live"):
+            if state.exists(state.graph_name(scope)):
+                incidents.sync(scope)       # incident memory rebuilt from the committed harvest
     except Exception as exc:                # graph server not up yet: /healthz reports it
-        log.warning("what-if sweep skipped: %s", exc)
+        log.warning("boot sync skipped: %s", exc)
     yield
 
 
@@ -35,6 +40,18 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],
 )
+
+
+@app.exception_handler(RedisConnectionError)
+@app.exception_handler(RedisTimeoutError)
+async def graph_unavailable(_request, exc):
+    """Fail loudly: without the graph there is no answer, never a guessed or empty one."""
+    log.error("graph server unavailable: %s", type(exc).__name__)
+    return JSONResponse(status_code=503, content={
+        "ok": False, "error": "graph_unavailable",
+        "summary": "The graph server is unreachable, so LastLift gives no answer. "
+                   "Check mbta.com/alerts/access for current elevator status.",
+        "data": None})
 
 
 def _rss_mb() -> float | None:
@@ -111,3 +128,9 @@ def station_graph(station_id: str, dir: Literal["board", "exit"] = "board",
     if scope != "base":
         tools._scope_graph(scope)           # make sure the scope graph exists and is synced
     return _call(station_view.view, {"station_id": station_id, "direction": dir, "scope": scope, "scenario": scenario})
+
+
+@app.get("/v1/disclaimers")
+def disclaimers():
+    """The exact disclaimer texts every surface uses (footer, validation, partial, cannot-assess, ...)."""
+    return wording.DISCLAIMERS

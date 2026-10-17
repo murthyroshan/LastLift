@@ -1,0 +1,216 @@
+facility_id,long_name,stop,text_sha256,model_verdict,model_board_class,model_exit_class,model_alt_lifts,model_entrances_cut
+50,Framingham Elevator 50 (Track 1 (outbound platform) to pedestrian bridge),place-WML-0214,a579bcd7d4b85611,CANNOT_ASSESS,,,,
+51,Framingham Elevator 51 (Waverly Street to pedestrian bridge),place-WML-0214,a579bcd7d4b85611,CANNOT_ASSESS,,,,
+52,Route 128 Elevator 52 (Lobby to South Station platform),place-NEC-2173,bf7d9a60cb223833,CANNOT_ASSESS,,,,
+53,Route 128 Elevator 53 (Lobby to outbound platform),place-NEC-2173,5371bf3eda533aef,CANNOT_ASSESS,,,,
+701,Wonderland Elevator 701 (Main lobby to garage),place-wondl,9936272f3536eb7f,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+702,Wonderland Elevator 702 (Main lobby to garage),place-wondl,8cbbabba8c238f69,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+703,Wonderland Elevator 703 (Main lobby to garage),place-wondl,f1479c70138cb98f,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+704,South Acton Elevator 704 (Track 1 (outbound platform) to pedestrian bridge),place-FR-0253,a3106858af713baf,CANNOT_ASSESS,,,,
+705,South Acton Elevator 705 (Track 2 (Boston platform) to pedestrian bridge),place-FR-0253,d11921eb7c88b1ae,CANNOT_ASSESS,,,,
+708,Wonderland Elevator 708 (Main lobby to pedestrian bridge),place-wondl,55c1010583a584ec,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+709,Wonderland Elevator 709 (North Shore Road Busway to pedestrian plaza),place-wondl,68628f9fdda24aa5,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+710,Wonderland Elevator 710 (Wonderland platform to pedestrian plaza),place-wondl,c57b738d71ee1223,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+711,Wonderland Elevator 711 (Ocean Avenue to pedestrian plaza),place-wondl,34d83a2095bb32c3,ENTRANCE_ONLY,UNAFFECTED,UNAFFECTED,,door-wondl-oceannele
+712,Orient Heights Elevator 712 (Bowdoin platform to paid pedestrian bridge),place-orhte,10b49e2993ec8cc4,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+713,Orient Heights Elevator 713 (Bennington Street Busway to unpaid pedestrian bridge),place-orhte,034b431a9efdb227,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+714,Orient Heights Elevator 714 (Wonderland platform to paid pedestrian bridge),place-orhte,6a89d0376ce3c842,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+715,Orient Heights Elevator 715 (Saratoga Street Busway to unpaid pedestrian bridge),place-orhte,c0b1af5c2f5c4076,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+716,Assembly Elevator 716 (Foley Street to unpaid lobby),place-astao,041acd83c4db87a9,ENTRANCE_ONLY,IN_STATION,IN_STATION,718;719,door-astao-foley
+717,Assembly Elevator 717 (Platform to Foley Street paid lobby),place-astao,041acd83c4db87a9,ENTRANCE_ONLY,IN_STATION,IN_STATION,718;719,door-astao-foley
+718,Assembly Elevator 718 (Revolution Drive to unpaid lobby),place-astao,25b6adc3ce327e38,ENTRANCE_ONLY,IN_STATION,IN_STATION,716;717,door-astao-revol
+719,Assembly Elevator 719 (Platform to Revolution Drive paid lobby),place-astao,25b6adc3ce327e38,ENTRANCE_ONLY,IN_STATION,IN_STATION,716;717,door-astao-revol
+720,Government Center Elevator 720 (Green Line platform to street),place-gover,18887c5aec8ac60e,NO_LOSS,IN_STATION,IN_STATION,721;722;723,
+721,Government Center Elevator 721 (Green Line platform to street),place-gover,c066f56bce69514f,NO_LOSS,IN_STATION,IN_STATION,720;722;723,
+722,Government Center Elevator 722 (Blue Line platform to Green Line platform),place-gover,d065fa036938eef4,NO_LOSS,IN_STATION,IN_STATION,721;723,
+723,Government Center Elevator 723 (Blue Line platform to Green Line platform),place-gover,5f13bd47c8765ff1,NO_LOSS,IN_STATION,IN_STATION,721;722,
+724,Forest Hills Elevator 724 (Orange Line platform to Southwest Corridor Park lobby),place-forhl,a2b800d6c6d25867,ENTRANCE_ONLY,IN_STATION,IN_STATION,842,door-forhl-south
+728,Ruggles Elevator 728 (Lobby to lower busway center platform),place-rugg,d269b59c88dd8846,NO_LOSS,IN_STATION,UNAFFECTED,848;849,
+729,"Braintree Elevator 729 (Busway to Commuter Rail platform, parking garage)",place-brntn,772b599523d4c515,CANNOT_ASSESS,,,,
+730,"Braintree Elevator 730 (Busway to Commuter Rail platform, parking garage)",place-brntn,f5f849fffe168379,CANNOT_ASSESS,,,,
+731,North Station Elevator 731 (Passageway to Causeway Street),place-north,1a04002f8f83b0cb,ENTRANCE_ONLY,IN_STATION,IN_STATION,732;909;912,door-north-tdgarden
+732,"North Station Elevator 732 (Passageway to Commuter Rail, TD Garden)",place-north,84469426f3ac68cf,NO_LOSS,IN_STATION,IN_STATION,731;909;912,
+733,Wollaston Elevator 733 (Parking lot lobby to pedestrian bridge),place-wlsta,e3cf0a43c7362159,NO_LOSS,IN_STATION,IN_STATION,734,
+734,Wollaston Elevator 734 (Newport Ave lobby to platform),place-wlsta,877a57b79f7fc9dd,NO_LOSS,IN_STATION,IN_STATION,733;735,
+735,Wollaston Elevator 735 (Platform to pedestrian bridge),place-wlsta,e3cf0a43c7362159,NO_LOSS,IN_STATION,IN_STATION,734,
+736,Quincy Adams Elevator 736 (Lobby to platform),place-qamnl,f98298b35a113ab2,NO_LOSS,IN_STATION,IN_STATION,805,
+739,North Quincy Elevator 739 (Pick-up/drop-off area and northern lobby to parking garage),place-nqncy,e39647af618477c3,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+740,North Quincy Elevator 740 (Pick-up/drop-off area and northern lobby to parking garage),place-nqncy,1fec0938f618460c,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+743,Oak Grove Elevator 743 (Orange Line platform to paid lobby),place-ogmnl,c36b3dede1dac399,NO_LOSS,IN_STATION,IN_STATION,744;746,
+744,Oak Grove Elevator 744 (Washington Street to lobby),place-ogmnl,69afd8c3ab490aad,ENTRANCE_ONLY,IN_STATION,IN_STATION,743;745;746,door-ogmnl-washel
+745,"Oak Grove Elevator 745 (Busway, parking lot to lobby)",place-ogmnl,77a6707cfb061150,NO_LOSS,IN_STATION,IN_STATION,743;744;746,
+746,Oak Grove Elevator 746 (Orange Line platform to paid lobby),place-ogmnl,ef296b5a7d58e072,NO_LOSS,IN_STATION,IN_STATION,743;744,
+747,"Winchester Center Elevator 747 (Track 2 (Boston platform) to Waterfield St, parking)",place-NHRML-0078,5bc036720d80395a,CANNOT_ASSESS,,,,
+748,"Winchester Center Elevator 748 (Track 1 (outbound platform) to Waterfield St, parking)",place-NHRML-0078,7f2e95c834253463,CANNOT_ASSESS,,,,
+749,Winchester Center Elevator 749 (Track 1 (outbound platform) to Main St),place-NHRML-0078,c225de65161dd1ee,CANNOT_ASSESS,,,,
+750,Natick Center Elevator 750 (Track 1 to street),place-WML-0177,6c59e5d9c089055e,CANNOT_ASSESS,,,,
+751,Natick Center Elevator 751 (Track 2 to street),place-WML-0177,8219535370401977,CANNOT_ASSESS,,,,
+753,South Station Elevator 753 (Bus Terminal to Commuter Rail concourse),place-sstat,201fff81defe3241,NO_LOSS,IN_STATION,UNAFFECTED,754;nofac-node-sstat-busgroundelev-bottom;nofac-node-sstat-busrotundasouthelev-bottom,
+754,South Station Elevator 754 (Bus Terminal to Commuter Rail concourse),place-sstat,80a1279c31b08a27,NO_LOSS,IN_STATION,IN_STATION,753;nofac-node-sstat-busgroundelev-bottom;nofac-node-sstat-busrotundanorthelev-bottom;nofac-node-sstat-busrotundasouthelev-bottom,
+756,Kendall/MIT Elevator 756 (Ashmont/Braintree platform to Main Street),place-knncl,72debe044dbbf8e8,NO_LOSS,IN_STATION,IN_STATION,757,
+757,Kendall/MIT Elevator 757 (Ashmont/Braintree platform to Main Street),place-knncl,d8d9e5711e17c7ef,NO_LOSS,IN_STATION,IN_STATION,756,
+762,Lechmere Elevator 762 (Platform to North First Street lobby),place-lech,0458f4d4ffd51402,NO_LOSS,IN_STATION,IN_STATION,763;764,
+763,Lechmere Elevator 763 (Platform to North First Street lobby),place-lech,a268ae76c93b1fc5,NO_LOSS,IN_STATION,IN_STATION,762;764,
+764,Lechmere Elevator 764 (Platform to O'Brien Highway lobby),place-lech,e63205debb73e8cc,NO_LOSS,IN_STATION,IN_STATION,762;763,
+765,Gilman Square Elevator 765 (Platform to Medford Street lobby),place-gilmn,f50acfe55e8e5970,ENTRANCE_ONLY,IN_STATION,IN_STATION,766,door-gilmn-medford
+766,Gilman Square Elevator 766 (Platform to School Street lobby),place-gilmn,f8ad48b8206b9f8f,ENTRANCE_ONLY,IN_STATION,IN_STATION,765,door-gilmn-school
+767,Magoun Square Elevator 767 (Platform to lobby),place-mgngl,d2aa27377de7faa2,NO_LOSS,IN_STATION,IN_STATION,768,
+768,Magoun Square Elevator 768 (Platform to lobby),place-mgngl,8a8768ec64016387,NO_LOSS,IN_STATION,IN_STATION,767,
+769,Ball Square Elevator 769 (Platform to Broadway lobby),place-balsq,78de75dd36c5c882,ENTRANCE_ONLY,UNAFFECTED,UNAFFECTED,,door-balsq-broadway
+770,Medford/Tufts Elevator 770 (Platform to lobby),place-mdftf,b61bf27689d9a0c9,NO_LOSS,IN_STATION,IN_STATION,772,
+771,Union Square Elevator 771 (Platform to Prospect Street),place-unsqu,05bfe9e21fc45693,ENTRANCE_ONLY,UNAFFECTED,UNAFFECTED,,door-unsqu-elevator
+772,Medford/Tufts Elevator 772 (Platform to lobby),place-mdftf,8677389c66acbf47,NO_LOSS,IN_STATION,IN_STATION,770,
+777,Kendall/MIT Elevator 777 (Alewife platform to Main Street),place-knncl,9f422bc56d8eb37b,ENTRANCE_ONLY,IN_STATION,IN_STATION,866,door-knncl-nbmain
+778,East Taunton Elevator 778 (Parking to pedestrian bridge),place-NBM-0374,34c48138c31c0074,ENTRANCE_ONLY,UNAFFECTED,UNAFFECTED,,door-NBM-0374-elevator
+779,East Taunton Elevator 779 (Platform to pedestrian bridge),place-NBM-0374,34c48138c31c0074,ENTRANCE_ONLY,UNAFFECTED,UNAFFECTED,,door-NBM-0374-elevator
+802,"State Elevator 802 (Oak Grove platform to Forest Hills, Wonderland platforms)",place-state,ae2695ab8201deed,NO_LOSS,IN_STATION,IN_STATION,803;967;974;975,
+803,"State Elevator 803 (Forest Hills platform to Washington Street, Milk Street)",place-state,1a4ca3ec62860802,ENTRANCE_ONLY,IN_STATION,IN_STATION,802;967;974;975,door-state-meeting
+804,"Park Street Elevator 804 (Government Center & North lobby to Tremont Street, Winter Street)",place-pktrm,acaddb279b3f3359,ENTRANCE_ONLY,IN_STATION,IN_STATION,808;812;823;892;978;979,door-pktrm-elevatoreb
+805,Quincy Adams Elevator 805 (Lobby to platform),place-qamnl,4851e432030dab03,NO_LOSS,IN_STATION,IN_STATION,736,
+806,Quincy Adams Elevator 806 (Lobby to parking garage),place-qamnl,b0edf2cf22704b1d,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+807,Quincy Adams Elevator 807 (Lobby to parking garage),place-qamnl,e3dcec7dd1112d43,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+808,"Park Street Elevator 808 (Red Line center platform to Government Center & North platform, Winter Street Concourse)",place-pktrm,3dc0460bdfabc463,NO_LOSS,IN_STATION,IN_STATION,804;812;823;892;978;979,
+810,Quincy Center Elevator 810 (Red Line platform to lobby),place-qnctr,892f020e8b2e2c62,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+811,Braintree Elevator 811 (Red Line platform to lobby),place-brntn,eb7f9b52249c9b2e,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+812,Park Street Elevator 812 (Green Line underpass to Government Center & North platform),place-pktrm,a3afa2eb174ba454,NO_LOSS,IN_STATION,IN_STATION,804;808;978;979,
+813,Alewife Elevator 813 (Platform to main lobby),place-alfcl,9c720cd164a5901f,NO_LOSS,IN_STATION,IN_STATION,961,
+814,"Alewife Elevator 814 (Main lobby to street, parking garage)",place-alfcl,5c4ff4638abf977c,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+815,"Alewife Elevator 815 (Main lobby to street, parking garage)",place-alfcl,c26857e3a4991efb,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+816,Davis Elevator 816 (Platform to lobby),place-davis,ed14662ce318020a,LOSS,NO_ROUTE,NO_ROUTE,,
+817,Davis Elevator 817 (Lobby to College Avenue),place-davis,ab6b739d50678c09,LOSS,NO_ROUTE,NO_ROUTE,,
+821,Harvard Elevator 821 (Lobby to Harvard Square),place-harsq,854e7f8c7a32befd,ENTRANCE_ONLY,IN_STATION,IN_STATION,973,door-harsq-square
+823,Park Street Elevator 823 (Green Line underpass to Copley & West platform),place-pktrm,595ece94a1d29509,NO_LOSS,IN_STATION,IN_STATION,804;808;978;979,
+830,JFK/UMass Elevator 830 (Braintree branch platform to lobby),place-jfk,0c950296724f824b,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+831,JFK/UMass Elevator 831 (Ashmont branch platform to lobby),place-jfk,89bfc315113975a2,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+840,Sullivan Square Elevator 840 (Center platform to lobby),place-sull,c3f32a493a6ba4b7,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,881,
+841,Forest Hills Elevator 841 (Commuter Rail platform to lobby),place-forhl,00cf249e1b894f99,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+842,Forest Hills Elevator 842 (Orange Line platform to main upper lobby),place-forhl,00393d985f46c8d7,NO_LOSS,IN_STATION,IN_STATION,724,
+843,Forest Hills Elevator 843 (Lower busway to upper lobby),place-forhl,40e086c9ba4081d4,NO_LOSS,IN_STATION,UNAFFECTED,841,
+844,Green Street Elevator 844 (Platform to paid lobby),place-grnst,7d0d445d74199155,LOSS,NO_ROUTE,NO_ROUTE,,door-grnst-main
+845,Stony Brook Elevator 845 (Platform to paid lobby),place-sbmnl,13c58357e6c92e89,LOSS,NO_ROUTE,NO_ROUTE,,door-sbmnl-main
+846,Jackson Square Elevator 846 (Platform to paid lobby),place-jaksn,f71258066653e482,LOSS,NO_ROUTE,NO_ROUTE,,
+847,Roxbury Crossing Elevator 847 (Platform to paid lobby),place-rcmnl,2d3205ee36912204,LOSS,NO_ROUTE,NO_ROUTE,,door-rcmnl-tremont
+848,Ruggles Elevator 848 (Lobby to lower busway side platform),place-rugg,53f2665bce8ddc39,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+849,Ruggles Elevator 849 (Commuter Rail tracks 1 and 3 to lobby),place-rugg,fa7a4fdc247947a6,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+850,Ruggles Elevator 850 (Orange Line platform to upper lobby),place-rugg,ee679e17d843b1dc,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+851,Ruggles Elevator 851 (Forsyth Street to upper lobby),place-rugg,1c6d4e5e47871917,ENTRANCE_ONLY,UNAFFECTED,UNAFFECTED,,door-rugg-forsyth
+852,Massachusetts Avenue Elevator 852 (Platform to paid lobby),place-masta,3a8ca4a888de0534,LOSS,NO_ROUTE,NO_ROUTE,,door-masta-main;door-masta-side
+853,Back Bay Elevator 853 (Orange Line platform to lobby),place-bbsta,cd30ea0f60531d88,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+854,Back Bay Elevator 854 (Commuter Rail track 2 to lobby),place-bbsta,fcdbff1cf9f55760,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+855,Back Bay Elevator 855 (Commuter Rail tracks 1 and 3 to lobby),place-bbsta,fcdbff1cf9f55760,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+856,Back Bay Elevator 856 (Commuter Rail tracks 5 and 7 to lobby),place-bbsta,fcdbff1cf9f55760,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+857,Tufts Medical Center Elevator 857 (Lobby to Washington Street),place-tumnl,df7f355e6505474f,LOSS,NO_ROUTE,NO_ROUTE,,door-tumnl-washington
+858,Tufts Medical Center Elevator 858 (Oak Grove platform to Washington Street lobby),place-tumnl,95aef5bb3c2e110c,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+859,Tufts Medical Center Elevator 859 (Forest Hills platform to Washington Street lobby),place-tumnl,df7f355e6505474f,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+860,Central Elevator 860 (Alewife platform to Massachusetts Avenue),place-cntsq,68355291972cc3ac,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,door-cntsq-obmass
+861,Central Elevator 861 (Ashmont/Braintree platform to Massachusetts Avenue),place-cntsq,ac56413538d6db65,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,door-cntsq-ibmass
+864,Wellington Elevator 864 (Oak Grove platform to lobby),place-welln,b24239e6b39465d6,NO_LOSS,IN_STATION,IN_STATION,865,
+865,Wellington Elevator 865 (Forest Hills platform to lobby),place-welln,6b8460ef9f1f9a93,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,864,
+866,Kendall/MIT Elevator 866 (Alewife platform to Main Street),place-knncl,1c42cd1c4f2bbe8b,ENTRANCE_ONLY,IN_STATION,IN_STATION,777,door-knncl-nbhotel
+867,Broadway Elevator 867 (Platform to lobby),place-brdwy,a0dd1f843cafc5b2,LOSS,NO_ROUTE,NO_ROUTE,,door-brdwy-main
+868,Broadway Elevator 868 (Lobby to street),place-brdwy,a0dd1f843cafc5b2,LOSS,NO_ROUTE,NO_ROUTE,,door-brdwy-main
+869,Downtown Crossing Elevator 869 (Alewife platform to Summer Street Concourse),place-dwnxg,d7f1bb3ddf1fbb09,NO_LOSS,IN_STATION,IN_STATION,891;999,
+870,Downtown Crossing Elevator 870 (Ashmont/Braintree platform to Summer Street Concourse),place-dwnxg,696e526b5204a9ab,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+872,Andrew Elevator 872 (Lobby to street),place-andrw,f19d5b9d355a9662,LOSS,NO_ROUTE,NO_ROUTE,,
+876,"Chinatown Elevator 876 (Oak Grove platform to Washington St, Essex St)",place-chncl,4ce4048de1226762,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,door-chncl-ogelevator
+879,Andrew Elevator 879 (Ashmont/Braintree platform to lobby),place-andrw,48c9baf314477a18,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+880,Andrew Elevator 880 (Alewife platform to lobby),place-andrw,37a3fc52584de274,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+881,Sullivan Square Elevator 881 (Oak Grove platform to lobby),place-sull,e5397ec66a28822e,NO_LOSS,IN_STATION,IN_STATION,840,
+884,Revere Beach Elevator 884 (Bowdoin platform to lobby),place-rbmnl,e0ef559ce7328381,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+885,Revere Beach Elevator 885 (Wonderland platform to lobby),place-rbmnl,7f4dce368106b2ca,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+886,Beachmont Elevator 886 (Bowdoin platform to lobby),place-bmmnl,1464def6ff61383c,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+887,Beachmont Elevator 887 (Wonderland platform to lobby),place-bmmnl,4f0cba695a39dd9a,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+889,Wood Island Elevator 889 (Bowdoin platform to pedestrian bridge),place-wimnl,3da6e213a2999c8d,LOSS,RIDE_AND_RETURN,UNAFFECTED,,
+890,Wood Island Elevator 890 (Wonderland platform to pedestrian bridge),place-wimnl,502a90d8410e7fa3,LOSS,RIDE_AND_RETURN,UNAFFECTED,,
+891,Downtown Crossing Elevator 891 (Oak Grove platform to Franklin Street),place-dwnxg,261e45004ba67e40,ENTRANCE_ONLY,IN_STATION,IN_STATION,869;998;999,door-dwnxg-franklinelev
+892,"Downtown Crossing Elevator 892 (Forest Hills platform to Washington Street, Winter Street)",place-dwnxg,a99f349d2fc84be0,ENTRANCE_ONLY,IN_STATION,IN_STATION,804;808;812;823;978;979,door-dwnxg-winter
+896,Quincy Center Elevator 896 (Commuter Rail platform to lobby),place-qnctr,465bf0376f505222,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+897,North Quincy Elevator 897 (Hancock Street parking to northern lobby),place-nqncy,ee0b2db8e93b7b58,ENTRANCE_ONLY,IN_STATION,UNAFFECTED,898;899;900,door-nqncy-hancockelevator
+898,North Quincy Elevator 898 (Newport Avenue to northern lobby),place-nqncy,0fba715d0530e012,ENTRANCE_ONLY,UNAFFECTED,IN_STATION,897;899;900,door-nqncy-newportelevator
+899,North Quincy Elevator 899 (Platform to northern lobby),place-nqncy,67a7014327d87ca5,ENTRANCE_ONLY,IN_STATION,IN_STATION,900,door-nqncy-garageelevators;door-nqncy-hancockelevator;door-nqncy-newportelevator
+900,"North Quincy Elevator 900 (Platform to main lobby, busway)",place-nqncy,b28fdb82eecfdbee,NO_LOSS,IN_STATION,IN_STATION,897;898;899,
+901,South Station Elevator 901 (Ashmont/Braintree platform to Silver Line drop-off platform and lobby),place-sstat,7af2f011d08c1b6d,NO_LOSS,IN_STATION,IN_STATION,918;919;927;949,
+903,Haymarket Elevator 903 (Oak Grove platform to Congress Street lobby),place-haecl,9eb28003b2dd1329,NO_LOSS,IN_STATION,IN_STATION,904;905;906;907;908,
+904,Haymarket Elevator 904 (Forest Hills platform to Congress Street lobby),place-haecl,069e86972f0e2bb8,NO_LOSS,IN_STATION,IN_STATION,903;905;906;907;908,
+905,Haymarket Elevator 905 (Underpass to Forest Hills platform),place-haecl,71eda48f16ed3a95,NO_LOSS,IN_STATION,IN_STATION,903;904;906;907;908,
+906,"Haymarket Elevator 906 (Underpass to Green Line platforms, busway)",place-haecl,2275d2dec417b872,NO_LOSS,IN_STATION,IN_STATION,903;904;905;907;908,
+907,Haymarket Elevator 907 (Underpass to Oak Grove platform),place-haecl,3d9650eba5a943a4,NO_LOSS,IN_STATION,IN_STATION,903;904;905;906;908,
+908,"Haymarket Elevator 908 (Green Line lobby to busway, Sudbury Street, New Chardon Street)",place-haecl,d3519eaec4cfe8ea,ENTRANCE_ONLY,IN_STATION,IN_STATION,903;904;905;906;907,door-haecl-busway
+909,"North Station Elevator 909 (Orange Line, Green Line lobby to Valenti Way)",place-north,0b77b9e40443ece8,ENTRANCE_ONLY,IN_STATION,IN_STATION,731;732;910;911;912,door-north-valenti
+910,"North Station Elevator 910 (Lobby to Forest Hills, Copley & West platform)",place-north,08c9ee9d9d066634,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+911,North Station Elevator 911 (Oak Grove platform to paid lobby),place-north,d95619e189a406b3,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+912,"North Station Elevator 912 (Orange Line, Green Line lobby to Causeway Street)",place-north,0492c8484f26841c,ENTRANCE_ONLY,IN_STATION,IN_STATION,731;732;909;911,door-north-causewaye
+913,Aquarium Elevator 913 (Wonderland platform to State Street lobby),place-aqucl,5a27fcf284e19b65,NO_LOSS,IN_STATION,IN_STATION,924;925,
+914,Aquarium Elevator 914 (Bowdoin platform to State Street lobby),place-aqucl,6e314680b5e79a29,NO_LOSS,IN_STATION,IN_STATION,923;925,
+915,Aquarium Elevator 915 (State Street lobby to street),place-aqucl,250ee52d254897cf,ENTRANCE_ONLY,IN_STATION,IN_STATION,923;924;925,door-aqucl-mcksouth
+917,Prudential Elevator 917 (Lobby to Huntington Avenue),place-prmnl,f67657bc5238b5a1,LOSS,NO_ROUTE,NO_ROUTE,,door-prmnl-prudential
+918,South Station Elevator 918 (Ashmont/Braintree platform to Airport/Design Center/Chelsea platform and lobby),place-sstat,55b3a8acc2d22608,NO_LOSS,IN_STATION,IN_STATION,901;919;927;949,
+919,South Station Elevator 919 (Alewife platform to Airport/Design Center/Chelsea platform),place-sstat,01015bbe54128793,NO_LOSS,IN_STATION,IN_STATION,901;918;927;949,
+920,Prudential Elevator 920 (Heath Street platform to lobby),place-prmnl,37d862619243f648,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+921,Prudential Elevator 921 (Lechmere platform to lobby),place-prmnl,61956fa7cefd91de,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+922,"Chinatown Elevator 922 (Forest Hills platform to Boylston St, Washington St)",place-chncl,c5985c9ff47d9116,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,door-chncl-fhelevator
+923,Aquarium Elevator 923 (Bowdoin platform to Atlantic Avenue lobby),place-aqucl,769ddbb0e25efd12,NO_LOSS,IN_STATION,IN_STATION,914;915,
+924,Aquarium Elevator 924 (Wonderland platform to Atlantic Avenue lobby),place-aqucl,2f7bd99747543b34,NO_LOSS,IN_STATION,IN_STATION,913;915,
+925,Aquarium Elevator 925 (Atlantic Avenue lobby to Long Wharf),place-aqucl,aa2beb321e1b203b,ENTRANCE_ONLY,IN_STATION,IN_STATION,913;914;915,door-aqucl-atlanticelev
+926,"South Station Elevator 926 (Subway Lobby to Atlantic Avenue, Summer Street)",place-sstat,6112604abb210f26,ENTRANCE_ONLY,IN_STATION,IN_STATION,6476;901;918;919;927;949,door-sstat-outmainelev
+927,South Station Elevator 927 (Alewife platform to Silver Line Drop-off platform),place-sstat,62df8103948d55f9,NO_LOSS,IN_STATION,IN_STATION,901;918;919;949,
+929,Lynn Elevator 929 (Street to parking garage),place-ER-0115,768e4d2fa1cacab5,CANNOT_ASSESS,,,,
+930,Lynn Elevator 930 (Street to parking garage),place-ER-0115,8cb022b2366c0b7a,CANNOT_ASSESS,,,,
+931,Airport Elevator 931 (Wonderland platform to paid pedestrian bridge),place-aport,002af4b428a4eeec,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+932,Airport Elevator 932 (Bowdoin platform to paid pedestrian bridge),place-aport,0590a23759e742ed,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+933,Community College Elevator 933 (Paid lobby to platform),place-ccmnl,432d2672f81aa35c,LOSS,NO_ROUTE,NO_ROUTE,,door-ccmnl-main
+934,World Trade Center Elevator 934 (Lobby to World Trade Center Avenue),place-wtcst,18aedee506ebedd5,ENTRANCE_ONLY,UNAFFECTED,UNAFFECTED,,door-wtcst-wtc
+935,World Trade Center Elevator 935 (South Station platform to lobby),place-wtcst,b0343ff583578146,LOSS,NO_ROUTE,NO_ROUTE,,
+936,World Trade Center Elevator 936 (Airport/Design Center/Chelsea platform to lobby),place-wtcst,d741efd69714d3e6,LOSS,NO_ROUTE,NO_ROUTE,,
+937,Courthouse Elevator 937 (South Station platform to lobby),place-crtst,a7b63cb373e5ccf7,LOSS,NO_ROUTE,NO_ROUTE,,
+938,Courthouse Elevator 938 (Airport/Design Center/Chelsea platform to lobby),place-crtst,447caa337f9f811e,LOSS,NO_ROUTE,NO_ROUTE,,
+939,"Courthouse Elevator 939 (Lobby to Seaport Boulevard, Thomson Place)",place-crtst,297b6f327b5a536c,ENTRANCE_ONLY,IN_STATION,UNAFFECTED,937;938;940,door-crtst-south
+940,"Courthouse Elevator 940 (Lobby to Seaport Boulevard, Fan Pier Boulevard)",place-crtst,ae1da30887b5a45e,ENTRANCE_ONLY,UNAFFECTED,IN_STATION,937;938;939,door-crtst-north
+944,Malden Center Elevator 944 (Lobby to Commuter Rail platform),place-mlmnl,1d5f8fe35ec6a98b,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+945,Malden Center Elevator 945 (Lobby to Orange Line platform),place-mlmnl,b7550fc2a3406272,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+946,Savin Hill Elevator 946 (Platform to paid lobby),place-shmnl,6217a4ad14c135df,LOSS,NO_ROUTE,NO_ROUTE,,door-shmnl-savin;door-shmnl-sydney
+947,Savin Hill Elevator 947 (Sydney Street to unpaid lobby),place-shmnl,3fb3d48327e2921c,ENTRANCE_ONLY,IN_STATION,UNAFFECTED,946,door-shmnl-sydney
+948,Kenmore Elevator 948 (Lobby to Commonwealth Avenue),place-kencl,7f02a3fe2e8f06d4,NO_LOSS,IN_STATION,UNAFFECTED,971;972,
+949,South Station Elevator 949 (Lobby to Dewey Square),place-sstat,b530b6ea294468f5,ENTRANCE_ONLY,IN_STATION,IN_STATION,6476;901;918;919;926;927,door-sstat-deweyelev
+951,Charles/MGH Elevator 951 (Ashmont/Braintree platform to lobby),place-chmnl,4ad09ec2c6f1d1a8,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+952,Charles/MGH Elevator 952 (Alewife platform to lobby),place-chmnl,cb756dc6c80d223e,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+953,Shawmut Elevator 953 (Alewife platform to lobby),place-smmnl,f9891a904271551f,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+954,Shawmut Elevator 954 (Ashmont platform to lobby),place-smmnl,6ff9b1c1d6f54a17,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+955,Airport Elevator 955 (Bremen Street lobby to unpaid pedestrian bridge),place-aport,35f22ab572d16c15,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+956,Airport Elevator 956 (Busway lobby to unpaid pedestrian bridge),place-aport,b1c5543730008c6d,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+957,Fields Corner Elevator 957 (Paid lobby to Alewife platform),place-fldcr,5941a34fd8efae0e,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+958,Fields Corner Elevator 958 (Paid lobby to Ashmont platform),place-fldcr,92881f8cd8c41566,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+961,"Alewife Elevator 961 (Platform to Russell Field, Rindge Avenue lobby)",place-alfcl,6e4ca1336dc2aaab,ENTRANCE_ONLY,IN_STATION,IN_STATION,813,door-alfcl-russell
+962,Arlington Elevator 962 (Copley & West platform to lobby),place-armnl,1c9653f6ec556c39,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+963,Arlington Elevator 963 (Park Street & North platform to lobby),place-armnl,a7c44dd6b637de2a,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+964,Arlington Elevator 964 (Lobby to Boylston Street),place-armnl,469cbf2b36741029,LOSS,NO_ROUTE,NO_ROUTE,,door-armnl-elevator
+965,"Maverick Elevator 965 (Platform to Maverick Square, busway)",place-mvbcl,7874291ca90152a4,NO_LOSS,IN_STATION,IN_STATION,966,
+966,Maverick Elevator 966 (Platform to Lewis Courtyard),place-mvbcl,81d754f50ac8a857,NO_LOSS,IN_STATION,IN_STATION,965,
+967,"State Elevator 967 (Oak Grove platform to Forest Hills, Wonderland platforms)",place-state,ede6cd5f57081579,NO_LOSS,IN_STATION,IN_STATION,802;803;974;975,
+968,Ashmont Elevator 968 (Alewife platform to Peabody Square lobby),place-asmnl,bb7f534f452c19f1,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+969,Ashmont Elevator 969 (Alewife platform to Mattapan Line lobby),place-asmnl,5d5f130588980943,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+970,"Ashmont Elevator 970 (Ashmont platform to Mattapan Line lobby, busway)",place-asmnl,c7604b5e40854f04,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+971,Kenmore Elevator 971 (Westbound platform to lobby),place-kencl,c4d7f99273945516,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+972,"Kenmore Elevator 972 (Park Street & North platform to lobby, busway)",place-kencl,d0e120120f9ed404,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,948;971,
+973,Harvard Elevator 973 (Upper busway to Brattle Square),place-harsq,59659c85588e8f3b,ENTRANCE_ONLY,IN_STATION,IN_STATION,821,door-harsq-brattle
+974,"State Elevator 974 (Bowdoin platform to Congress Street, 60 State Street)",place-state,25557eb301c7a92d,ENTRANCE_ONLY,IN_STATION,IN_STATION,802;803;967;975,door-state-congress
+975,"State Elevator 975 (Wonderland platform to Congress Street, 53 State Street)",place-state,0784165f686d1ccf,ENTRANCE_ONLY,IN_STATION,IN_STATION,802;803;967;974,door-state-exchange
+976,Copley Elevator 976 (Park Street & North platform to Boylston Street),place-coecl,2e087664a2cedaa9,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,door-coecl-bpl
+977,"Copley Elevator 977 (Kenmore & West, Heath Street platform to Boylston Street)",place-coecl,2f7481651a614553,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,door-coecl-church
+978,Park Street Elevator 978 (Copley & West platform to Boston Common),place-pktrm,2eb80af42aa61e07,ENTRANCE_ONLY,IN_STATION,IN_STATION,804;808;812;823;892;979,door-pktrm-elevatorwb
+979,Park Street Elevator 979 (Red Line center platform to Copley & West platform),place-pktrm,3524536e3a64991c,NO_LOSS,IN_STATION,IN_STATION,804;808;812;823;892;978,
+980,Science Park/West End Elevator 980 (Copley & West platform to lobby),place-spmnl,687718dc23d9025b,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,door-spmnl-obrienel
+981,Science Park/West End Elevator 981 (Lechmere & North platform to lobby),place-spmnl,3e1d6d27e0a04427,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,door-spmnl-nashuael
+982,Porter Elevator 982 (Lobby to Somerville Avenue & Mass Avenue),place-portr,c7e2e2eff185d12c,ENTRANCE_ONLY,IN_STATION,IN_STATION,983;985;986;987,door-portr-elevator982
+983,Porter Elevator 983 (Red Line platforms to lobby),place-portr,6c0efbb41f0eae3c,NO_LOSS,IN_STATION,IN_STATION,982;985;987,
+985,Porter Elevator 985 (Lobby to Somerville Avenue),place-portr,d29d25b6072480b6,ENTRANCE_ONLY,IN_STATION,IN_STATION,982;983;986;987,door-portr-elevator985
+986,Porter Elevator 986 (Commuter Rail platform to lobby),place-portr,d9737bbe1680d5c8,LOSS,RIDE_AND_RETURN,RIDE_AND_RETURN,,
+987,Porter Elevator 987 (Red Line platforms to lobby),place-portr,096b18d219a1b661,NO_LOSS,IN_STATION,IN_STATION,982;983;985,
+994,Beverly Elevator 994 (Parking garage to platform walkway),place-ER-0183,9ceb9e1da2782daa,CANNOT_ASSESS,,,,
+995,Beverly Elevator 995 (Parking garage to platform walkway),place-ER-0183,eeaf7d176b1ad102,CANNOT_ASSESS,,,,
+996,Salem Elevator 996 (Bridge St to parking garage to busway and platforms),place-ER-0168,75b1d7c1aec08aa3,CANNOT_ASSESS,,,,
+998,Downtown Crossing Elevator 998 (Oak Grove platform to Alewife platform),place-dwnxg,438b3efbfe382647,NO_LOSS,UNAFFECTED,IN_STATION,869;891;999,
+999,Downtown Crossing Elevator 999 (Oak Grove platform to Alewife platform),place-dwnxg,62203435302fab57,NO_LOSS,IN_STATION,IN_STATION,869;891;998,
+6476,"South Station Elevator 6476 (Red Line, Silver Line SL1/SL2/SL3 lobby to Commuter Rail lobby)",place-sstat,2f1aff87f5e9fd8f,NO_LOSS,UNAFFECTED,UNAFFECTED,,
+elev_b748_c4e7_405,"Pawtucket/Central Falls Elevator (Track 1 (outbound platform) to Pine St, Barton St)",place-NEC-1891,b168943e9e9eab73,CANNOT_ASSESS,,,,
+elev_b748_c4e7_406,"Pawtucket/Central Falls Elevator (Track 1 (outbound platform) to Pine St, Barton St)",place-NEC-1891,b168943e9e9eab73,CANNOT_ASSESS,,,,

@@ -1,0 +1,47 @@
+name: Report an accessibility problem with LastLift
+description: Tell us where LastLift's step-free information is wrong, unclear or hard to use. Every field is optional.
+title: "Accessibility problem: "
+labels: ["accessibility-report"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you. You can fill in as much or as little as you like. LastLift is an unofficial prototype built from public data. For current elevator status, check mbta.com/alerts/access or call the elevator status line, 617-222-2828.
+
+        This form is public. Please do not include personal details you do not want to share. Prefer not to post publicly? Email mrslvt.dev@gmail.com instead. We will not quote anything you write without asking you first.
+  - type: input
+    id: station
+    attributes:
+      label: Which station or lift?
+      description: A station name, an elevator number, or both.
+    validations:
+      required: false
+  - type: textarea
+    id: what
+    attributes:
+      label: What went wrong?
+      description: For example, a route that doesn't work in real life, a lift we got wrong, or a page that is hard to use with your device.
+    validations:
+      required: false
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect instead?
+    validations:
+      required: false
+  - type: input
+    id: tech
+    attributes:
+      label: Device or assistive technology (if it matters)
+      description: For example, a screen reader, voice control or zoom.
+    validations:
+      required: false
+  - type: dropdown
+    id: contact
+    attributes:
+      label: May we contact you about this report?
+      options:
+        - "No"
+        - "Yes, reply here on this issue"
+    validations:
+      required: false
