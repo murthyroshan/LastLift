@@ -847,5 +847,6 @@ export const S = {
     ai: "Built with the help of an AI coding assistant. Design decisions, the validation labels and the final review are the author's own.",
     feedback: "Report a problem with LastLift",
     source: "Source code",
+    video: "Demo video",
   },
 } as const;

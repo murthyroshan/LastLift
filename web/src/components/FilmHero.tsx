@@ -152,6 +152,7 @@ export function FilmHero({ film, claims, onTry }: { film: Manifest; claims: Reco
     let tx = 0, ty = 0, mx = 0, my = 0;
     const onPointer = (e: PointerEvent) => { tx = (e.clientX / window.innerWidth) * 2 - 1; ty = (e.clientY / window.innerHeight) * 2 - 1; };
     const tick = () => {                                     // ease toward the scroll position, so scrubbing glides
+      if (!box.current) return;                              // unmounted between frames (fast route change)
       const q = progress(), target = q * (film.n - 1);
       cur += (target - cur) * 0.2;
       if (Math.abs(target - cur) < 0.05) cur = target;

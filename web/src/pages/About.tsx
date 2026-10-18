@@ -71,7 +71,7 @@ export function About() {
         <p>{S.about.assumptions}</p>
         {d.validation && <p>{d.validation}</p>}
         <p className="muted">{S.about.ai}</p>
-        <p><a href={REPO}>{S.about.source}</a> · <a href={`${REPO}/issues/new?template=accessibility-problem.yml`}>{S.about.feedback}</a></p>
+        <p><a href="https://youtu.be/XLDNu4cGaN8">{S.about.video}</a> · <a href={REPO}>{S.about.source}</a> · <a href={`${REPO}/issues/new?template=accessibility-problem.yml`}>{S.about.feedback}</a></p>
       </section>
     </article>
   );

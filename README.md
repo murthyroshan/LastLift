@@ -14,8 +14,9 @@
 [![FalkorDB](https://img.shields.io/badge/FalkorDB-4.22-f5a524)](https://www.falkordb.com)
 [![track](https://img.shields.io/badge/Graph%20Hacks-Track%201%3A%20Agents%20That%20Act-f5a524)](#track-entered)
 [![licence](https://img.shields.io/badge/licence-MIT-lightgrey)](LICENSE)
+[![demo video](https://img.shields.io/badge/demo%20video-2%3A32-ff0033?logo=youtube&logoColor=white)](https://youtu.be/XLDNu4cGaN8)
 
-**[Live site](https://lastlift.vercel.app)** · **[Judge's tour](https://lastlift.vercel.app/#/tour)** · **[Play the walkthrough](https://lastlift.vercel.app/concepts/alewife.html)** · **[Issues the agents filed](https://github.com/murthyroshan/lastlift-ops/issues)** · **[Blog post](https://dev.to/roshan_7c49d2a48522e3f8ff/the-last-lift-finding-the-elevator-a-wheelchair-user-cant-lose-before-it-fails-2c9n)** · Demo video: _link added when recorded_
+**[▶ Demo video (2:32)](https://youtu.be/XLDNu4cGaN8)** · **[Live site](https://lastlift.vercel.app)** · **[Judge's tour](https://lastlift.vercel.app/#/tour)** · **[Play the walkthrough](https://lastlift.vercel.app/concepts/alewife.html)** · **[Issues the agents filed](https://github.com/murthyroshan/lastlift-ops/issues)** · **[Blog post](https://dev.to/roshan_7c49d2a48522e3f8ff/the-last-lift-finding-the-elevator-a-wheelchair-user-cant-lose-before-it-fails-2c9n)**
 
 <br>
 
@@ -171,8 +172,8 @@ Thirteen read-only tools with output schemas, plus resources (station graphs as 
 | Public source-code repository | this repository |
 | README with setup instructions and the graph data model | [Run it yourself](#run-it-yourself), [The graph data model](#the-graph-data-model) |
 | The Cypher queries or graph algorithms the product depends on | [The Cypher and the algorithms](#the-cypher-and-the-algorithms) (generated from `lastlift/queries.py`) |
-| A demo video | _added when recorded_ |
-| A live deployment, or complete local setup | https://lastlift.vercel.app, https://lastlift-api.onrender.com and [Run it yourself](#run-it-yourself) |
+| A demo video | [youtu.be/XLDNu4cGaN8](https://youtu.be/XLDNu4cGaN8) (2:32, narrated by the author, English subtitles) |
+| A live deployment, or complete local setup | [lastlift.vercel.app](https://lastlift.vercel.app), the API at [lastlift-api.onrender.com/v1/docs](https://lastlift-api.onrender.com/v1/docs), and [Run it yourself](#run-it-yourself) |
 | The track | Track 1, Agents That Act on Connected Data ([how it fits](#track-entered)) |
 
 ### Track entered
@@ -314,7 +315,7 @@ Code: MIT. Data: MBTA GTFS (feed "<!--claim:feed_version-->Fall 2026, 2026-10-14
 
 ## AI assistance
 
-This project was built with the help of an AI coding assistant. Design decisions and the final review are the author's own. The validation keys (`validation/gold_live_author.csv` and `validation/gold_history_author.csv`) were labelled by the author, blind, from MBTA's alert text only; a second label set made by the AI assistant (`validation/gold_live.csv`) is kept only to report labeller agreement.
+This project was built with the help of an AI coding assistant. Design decisions and the final review are the author's own. In the demo video, the narration is the author's own voice and every number and screen comes from the project's data and renders; a few short background shots were generated with Kling. The validation keys (`validation/gold_live_author.csv` and `validation/gold_history_author.csv`) were labelled by the author, blind, from MBTA's alert text only; a second label set made by the AI assistant (`validation/gold_live.csv`) is kept only to report labeller agreement.
 
 ## Credits
 
