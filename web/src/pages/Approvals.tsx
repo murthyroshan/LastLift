@@ -9,6 +9,7 @@ export function Approvals({ scope, live }: { scope: Scope; live: boolean }) {
   const [ops, setOps] = useState<Record<string, any> | null>(null);
   const [inbox, setInbox] = useState<any[] | null>(null);
   const [msg, setMsg] = useState("");
+  const [filed, setFiled] = useState("");
   const [names, setNames] = useState<Record<string, string>>({});
   useEffect(() => {
     getOps().then(setOps).catch(() => {});
@@ -19,6 +20,7 @@ export function Approvals({ scope, live }: { scope: Scope; live: boolean }) {
   async function decide(pid: string, decision: "approve" | "reject") {
     const r = await decideProposal(scope, pid, decision).catch(() => null);
     setMsg(r ? S.ops.decided(pid, r.status) : S.ops.failed);
+    setFiled(r?.url ?? "");
     getProposals(scope).then(setInbox).catch(() => {});
   }
 
@@ -80,7 +82,7 @@ export function Approvals({ scope, live }: { scope: Scope; live: boolean }) {
             ))}
           </ul>
         )}
-        {msg && <p role="status">{msg}</p>}
+        {msg && <p role="status">{msg}{filed && <> <a href={filed} target="_blank" rel="noreferrer">{S.ops.filed}</a></>}</p>}
         <p className="muted">{S.ops.policy}</p>
       </section>
 

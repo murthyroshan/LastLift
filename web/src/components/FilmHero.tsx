@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { lessMotion, scrollToY, scrollVelocity } from "../lib/motion";
+import { href } from "../router";
 import { S } from "../strings.en";
 
 const BASE = import.meta.env.BASE_URL;
@@ -226,7 +227,7 @@ export function FilmHero({ film, claims, onTry }: { film: Manifest; claims: Reco
             <p className="fh-p">{S.film.b3p}</p>
             <div className="fh-ctas">
               <button className="lh-btn lh-btn-ink" onClick={onTry}>{S.film.try}<span aria-hidden="true">↓</span></button>
-              <a className="lh-btn fh-btn-glass" href={`${BASE}concepts/world.html`}>{S.hero.walk}</a>
+              <a className="lh-btn fh-btn-glass" href={href("/console")}>{S.hero.console}</a>
             </div>
           </div>
         </div>

@@ -195,7 +195,10 @@ export function askLive(question: string, onEvent: (e: any) => void, scope: Scop
   const kinds = ["start", "tool_call", "tool_result", "error", "grounding", "answer", "done"];
   for (const k of kinds) {
     src.addEventListener(k, (m) => {
-      const ev = JSON.parse((m as MessageEvent).data);
+      const data = (m as MessageEvent).data;
+      if (typeof data !== "string") return;          // a connection error (no payload): onerror below reports it
+      let ev: any;
+      try { ev = JSON.parse(data); } catch { return; }
       onEvent(ev);
       if (ev.type === "done") src.close();
     });

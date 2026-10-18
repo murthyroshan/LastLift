@@ -65,6 +65,11 @@ export default function App() {
   const scope: Scope = wantLive && wake === "live" ? "live" : "demo";
   const status = useLiveStatus(scope === "live");
   const [drawer, setDrawer] = useState(false);
+  useEffect(() => {                                   // "Ask your own question" on the landing opens the chat dock
+    const open = () => setDrawer(true);
+    window.addEventListener("lastlift:ask", open);
+    return () => window.removeEventListener("lastlift:ask", open);
+  }, []);
   const [eyes, setEyes] = useState(isEyesFree());
   const closeEyes = useCallback(() => setEyes(false), []);
   useEffect(() => {
@@ -156,7 +161,6 @@ export default function App() {
               <button className="search-trigger" onClick={() => setPalette(true)} aria-haspopup="dialog" aria-label={S.shell.searchLabel}>
                 <I.search /> <span>{S.shell.search}</span> <kbd>Ctrl K</kbd>
               </button>
-              <button className="link" aria-expanded={drawer} onClick={() => setDrawer(true)}><I.agent /><span>{S.nav.ask}</span></button>
               <button className="link display-trigger" aria-expanded={displayOpen} onClick={() => setDisplayOpen(!displayOpen)}>
                 <I.about /><span>{S.display.button}</span></button>
             </div>
@@ -188,7 +192,7 @@ export default function App() {
               : page === "atlas" ? <AtlasPage />
               : page === "history" ? <TimeMachine />
               : page === "sandbox" ? <Sandbox key={scope} route={route} live={wake === "live"} scope={scope} />
-              : page === "lab" ? <Lab route={route} />
+              : page === "lab" && import.meta.env.DEV ? <Lab route={route} />       // development views only, never shipped
               : <Landing key={scope} scope={scope} />}
           </main>
           <footer className="site"><p>{footer}</p></footer>

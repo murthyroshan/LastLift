@@ -7,6 +7,20 @@ import { I } from "./icons";
 
 type Action = { id: string; label: string; run: () => void };
 
+/** Word-prefix matching, not cmdk's fuzzy default (which let "alew" match "pAge Live viEW", and "qqqq" match a station).
+ *  Whole-label prefix ranks first, then a word that starts with the query, then a plain substring. */
+export function paletteScore(value: string, search: string): number {
+  const q = search.toLowerCase().trim();
+  if (!q) return 1;
+  const label = value.toLowerCase().replace(/^(page|action|station|lift) /, "");
+  const words = label.split(/[\s/()·,-]+/).filter(Boolean);
+  if (label.startsWith(q)) return 1;
+  if (words.some((w) => w.startsWith(q))) return 0.8;
+  if (q.split(/\s+/).every((part) => words.some((w) => w.startsWith(part)))) return 0.6;
+  if (q.length >= 3 && label.includes(q)) return 0.4;
+  return 0;
+}
+
 /** ⌘K / Ctrl+K: jump to any station, lift, page or action. cmdk gives the combobox and listbox semantics. */
 export function CommandPalette({ open, setOpen, actions }: { open: boolean; setOpen: (v: boolean) => void; actions: Action[] }) {
   const [stations, setStations] = useState<{ id: string; name: string; single: number; lost: number }[]>([]);
@@ -33,7 +47,7 @@ export function CommandPalette({ open, setOpen, actions }: { open: boolean; setO
     ["/sandbox", S.tabs.whatif, "lift"], ["/about", S.tabs.how, "about"], ["/atlas", S.tabs.cities, "network"]];
 
   return (
-    <Command.Dialog open={open} onOpenChange={setOpen} label={S.palette.label} className="cmdk" overlayClassName="cmdk-overlay">
+    <Command.Dialog open={open} onOpenChange={setOpen} label={S.palette.label} className="cmdk" overlayClassName="cmdk-overlay" filter={paletteScore}>
       <div className="cmdk-input-row">
         <I.search />
         <Command.Input placeholder={S.palette.placeholder} />

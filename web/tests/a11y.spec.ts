@@ -44,7 +44,7 @@ test("repairs, tickets and the evaluation table work from the mirror", async ({ 
 test("the agent drawer plays a recorded run with its Cypher", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/#/");
-  await page.getByRole("button", { name: "Ask the agent" }).click();
+  await page.getByRole("button", { name: "Chat with the agent" }).click();
   await page.getByRole("button", { name: /Revere Beach/ }).click();
   await expect(page.getByText("via MCP").first()).toBeVisible();
   await page.getByRole("button", { name: "Show the Cypher" }).first().click();
@@ -100,7 +100,7 @@ test("Live scope reads the API and shows the feed status", async ({ page }) => {
     asked.push(`${name}:${JSON.parse(r.request().postData() ?? "{}").scope}`);
     return r.fulfill(ok(name === "current_closures" ? mirrored.closures : mirrored.priority));
   });
-  await page.goto("/#/");
+  await page.goto("/#/repairs");                      // the plan reads the scope's closures (the home page no longer does)
   const toggle = page.getByRole("button", { name: "Live" });
   await expect(toggle).toBeEnabled();
   await toggle.click();
@@ -153,7 +153,7 @@ test("station history: replayed closures, lift table and month strip with its ta
 test("a recorded run verifies its own hash chain in the browser", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/#/");
-  await page.getByRole("button", { name: "Ask the agent" }).click();
+  await page.getByRole("button", { name: "Chat with the agent" }).click();
   await page.getByRole("button", { name: /Which lifts should be repaired/ }).click();
   await page.getByRole("button", { name: "Verify this replay" }).click();
   await expect(page.getByRole("complementary", { name: "Ask the agent" }).getByText(/Verified in your browser: all \d+ events match/)).toBeVisible();

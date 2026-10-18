@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { href } from "../router";
 import { S } from "../strings.en";
 import type { Scope } from "../api";
-import { LiftPanel } from "./LiftPanel";
+import { GameTeaser } from "./GameTeaser";
+import { AgentShowcase } from "./AgentShowcase";
 
 const BASE = import.meta.env.BASE_URL;
 const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -71,7 +72,7 @@ export function LandingHero({ claims, stations, film = false, scope = "demo" }: 
 
   return (
     <>
-      <section id="lh-product" className={`lh ${open ? "lh-open" : ""} ${film ? "lh-after-film" : ""}`} aria-label={S.panel.title}>
+      <section id="lh-product" className={`lh ${open ? "lh-open" : ""} ${film ? "lh-after-film" : ""}`} aria-label={S.teaser.title}>
         {!film && <div className="lh-doors" aria-hidden="true">
           <div className="lh-door lh-door-l" />
           <div className="lh-door lh-door-r" />
@@ -81,7 +82,7 @@ export function LandingHero({ claims, stations, film = false, scope = "demo" }: 
           </button>
         </div>}
 
-        <div className="lh-product"><LiftPanel scope={scope} /></div>
+        <div className="lh-product"><AgentShowcase /><GameTeaser /></div>
         <span className="lh-ghost" aria-hidden="true">{claims?.platforms_single_lift ?? ""}</span>
       </section>
 
@@ -96,7 +97,7 @@ export function LandingHero({ claims, stations, film = false, scope = "demo" }: 
           <p className="lh-line">{S.home.countText}</p>
           <div className="lh-ctas">
             <a className="lh-btn lh-btn-ink" href={`${BASE}concepts/sequence.html`}>{S.hero.story}<span aria-hidden="true">→</span></a>
-            <a className="lh-btn" href={`${BASE}concepts/world.html`}>{S.hero.walk}</a>
+            <a className="lh-btn" href={`${BASE}concepts/alewife.html`}>{S.hero.walk}</a>
             <a className="lh-btn lh-btn-ghost" href={href("/console")}>{S.hero.console}</a>
           </div>
         </div>

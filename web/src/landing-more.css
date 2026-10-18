@@ -146,3 +146,61 @@ body.has-film .shell-top header.site:not([data-solid]) .search-trigger { backgro
     box-shadow: 0 20px 50px -24px rgb(22 24 29 / 0.35), inset 0 0 0 1px rgb(255 255 255 / 0.5); }
   .fh-right .fh-p:last-child, .fh-right .fh-cue { margin-bottom: 0; }
 }
+
+/* the game teaser that replaced the lift panel: a still from the station as lift 813 fails, the numbers, Play */
+.landing .gt { max-width: 1240px; margin: 0 auto; }
+.landing .gt-title { margin-bottom: 2.2rem; }
+.gt-card { position: relative; border-radius: 28px; overflow: hidden; isolation: isolate; background: #1a1513;
+  box-shadow: 0 40px 90px -40px rgb(22 24 29 / 0.55), inset 0 0 0 1px rgb(255 255 255 / 0.06); }
+.gt-img { display: block; width: 100%; height: auto; aspect-ratio: 1342 / 565; object-fit: cover; transform-origin: 46% 40%; }
+html.anim-on .gt-img { animation: gt-drift 18s ease-in-out infinite alternate; }
+@keyframes gt-drift { from { transform: scale(1.02); } to { transform: scale(1.09) translateX(-1.2%); } }
+.gt-card::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(90deg, rgb(12 10 10 / 0.88) 0%, rgb(12 10 10 / 0.62) 34%, rgb(12 10 10 / 0) 62%); }
+.gt-body { position: absolute; z-index: 2; inset: 0 auto 0 0; width: min(46%, 520px); padding: clamp(1.4rem, 3.4vw, 3rem);
+  display: flex; flex-direction: column; justify-content: center; gap: 0.85rem; color: #f5f3ee; }
+.gt-kicker { margin: 0; font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.22em; text-transform: uppercase; color: #ffb4ad; }
+.gt-head { margin: 0; font-family: var(--display); font-weight: 900; text-transform: uppercase; line-height: 0.9; font-size: clamp(2rem, 4vw, 3.6rem); }
+.gt-lead { margin: 0; font-size: 1rem; line-height: 1.5; color: #e4e0d9; max-width: 34ch; }
+.gt-facts { list-style: none; margin: 0.2rem 0 0.3rem; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.gt-facts li { padding: 0.45rem 0.75rem; border-radius: 999px; font-size: 0.85rem; color: #f5f3ee;
+  background: rgb(255 255 255 / 0.1); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16); backdrop-filter: blur(8px); }
+.gt-facts b { font-family: var(--display); font-weight: 900; font-size: 1.05rem; color: #ff6b61; margin-right: 0.2rem; }
+.gt-ctas { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.3rem; }
+.gt-card .gt-play { background: #f5f3ee; color: #16181d; }
+.gt-card .gt-watch { background: transparent; color: #f5f3ee; box-shadow: inset 0 0 0 1.5px rgb(245 243 238 / 0.7); }
+@media (max-width: 860px) {
+  .gt-card::after { background: linear-gradient(180deg, rgb(12 10 10 / 0) 30%, rgb(12 10 10 / 0.92) 58%); }
+  .gt-img { aspect-ratio: 4 / 5; object-position: 40% 50%; }
+  .gt-body { inset: auto 0 0 0; width: auto; justify-content: flex-end; }
+}
+@media (prefers-reduced-motion: reduce) { html.anim-on .gt-img { animation: none; } }
+
+/* the agent at work: a recorded run played back on the landing (question, tool calls over MCP, checked answer) */
+.landing .as { max-width: 1240px; margin: 0 auto 6rem; }
+.landing .as-title { margin-bottom: 1rem; max-width: none; }
+.as-lead { max-width: 60ch; margin: 0 auto 2.2rem; text-align: center; color: color-mix(in srgb, var(--fg) 78%, var(--bg)); font-size: 1.05rem; line-height: 1.55; }
+.as-card { border-radius: 28px; padding: clamp(1.2rem, 3vw, 2.4rem); background: var(--panel); display: grid; gap: 1rem;
+  box-shadow: 0 30px 70px -36px rgb(22 24 29 / 0.4), inset 0 0 0 1px var(--line); }
+.as-q { margin: 0; font-size: clamp(1.1rem, 2vw, 1.45rem); font-weight: 600; line-height: 1.35; }
+.as-who { display: block; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: color-mix(in srgb, var(--fg) 75%, var(--panel)); margin-bottom: 0.35rem; font-weight: 500; }
+.as-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; counter-reset: step; }
+.as-steps li { position: relative; display: grid; grid-template-columns: auto 1fr auto; gap: 0.2rem 0.9rem; align-items: baseline; padding: 0.85rem 1rem 0.85rem 2.9rem;
+  border-radius: 16px; background: color-mix(in srgb, var(--fg) 4%, transparent); opacity: 0; visibility: hidden; transform: translateY(6px);
+  transition: opacity 500ms ease, transform 500ms cubic-bezier(.34, 1.56, .64, 1), visibility 0s 500ms; counter-increment: step; }
+.as-steps li::before { content: counter(step); position: absolute; left: 0.9rem; top: 0.85rem; width: 1.4rem; height: 1.4rem; border-radius: 50%;
+  display: grid; place-items: center; font: 600 0.72rem/1 var(--mono); background: var(--fg); color: var(--bg); }
+.as-steps li.on { opacity: 1; visibility: visible; transform: none; transition: opacity 500ms ease, transform 500ms cubic-bezier(.34, 1.56, .64, 1); }
+.as-tool { font-family: var(--mono); font-weight: 600; font-size: 0.9rem; }
+.as-args { font-family: var(--mono); font-size: 0.8rem; color: color-mix(in srgb, var(--fg) 72%, var(--panel)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.as-meta { font-family: var(--mono); font-size: 0.74rem; color: color-mix(in srgb, #2fb5a0 45%, var(--fg)); white-space: nowrap; }
+.as-sum { grid-column: 1 / -1; font-size: 0.95rem; line-height: 1.45; }
+.as-answer { min-height: 5.5rem; border-radius: 18px; padding: 1rem 1.2rem; background: color-mix(in srgb, #2fb5a0 10%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #2fb5a0 35%, transparent); opacity: 0.25; transition: opacity 500ms; }
+.as-answer.on { opacity: 1; }
+.as-check { margin: 0 0 0.4rem; font-weight: 700; color: color-mix(in srgb, #2fb5a0 45%, var(--fg)); font-size: 0.9rem; }
+.as-text { margin: 0 0 0.5rem; font-size: 1.05rem; line-height: 1.5; }
+.as-foot { margin: 0; font-size: 0.82rem; color: color-mix(in srgb, var(--fg) 78%, var(--panel)); }
+.as-ctas { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+@media (max-width: 700px) { .as-steps li { grid-template-columns: 1fr; } .as-args { white-space: normal; } }
+@media (prefers-reduced-motion: reduce) { .as-steps li, .as-answer { transition: none; } }
