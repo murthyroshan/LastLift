@@ -1,0 +1,834 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>LastLift · Find the way out</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root { --ink: #16181d; --paper: #f5f3ee; --muted: #5d6169; --amber: #f5a524; --red: #e5484d; --mint: #2fb5a0; --glass: rgba(18, 20, 24, 0.55); }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0c0e; color: #f5f3ee; font-family: "IBM Plex Sans", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  #stage { position: fixed; inset: 0; }
+  #stage canvas { display: block; width: 100%; height: 100%; outline: none; }
+  /* a cinematic finish over the world: soft vignette and fine grain */
+  #grade { position: fixed; inset: 0; pointer-events: none; z-index: 2; background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(0, 0, 0, 0.42) 100%); }
+  #grain { position: fixed; inset: -50%; pointer-events: none; z-index: 2; opacity: 0.06; mix-blend-mode: overlay; animation: grain 0.8s steps(5) infinite;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+  @keyframes grain { 0% { transform: translate(0, 0); } 25% { transform: translate(-4%, 3%); } 50% { transform: translate(3%, -5%); } 75% { transform: translate(-2%, -2%); } 100% { transform: translate(0, 0); } }
+  #flash { position: fixed; inset: 0; pointer-events: none; z-index: 3; box-shadow: inset 0 0 0 0 rgba(229, 72, 77, 0); transition: box-shadow 600ms; }
+  #flash.on { box-shadow: inset 0 0 220px 40px rgba(229, 72, 77, 0.55); }
+  #fade { position: fixed; inset: 0; z-index: 9; background: #000; opacity: 0; pointer-events: none; transition: opacity 900ms; }
+  #fade.on { opacity: 1; }
+
+  .hud { position: fixed; z-index: 5; pointer-events: none; transition: opacity 400ms; }
+  body.cine .hud, body.cine #prompt.on, body.cine #toast.on { opacity: 0; }
+  .brand { top: 20px; left: 22px; font: 900 22px/1 "Big Shoulders Display", sans-serif; text-transform: uppercase; letter-spacing: 0.02em; display: flex; align-items: center; gap: 10px; }
+  .brand i { width: 16px; height: 16px; border-radius: 4px; background: var(--amber); }
+  .objective { top: 18px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 12px; padding: 10px 18px 10px 12px; border-radius: 999px;
+    background: var(--glass); backdrop-filter: blur(14px); font-weight: 600; font-size: 14px; white-space: nowrap; }
+  .objective b { width: 24px; height: 24px; border-radius: 50%; background: var(--paper); color: var(--ink); display: grid; place-items: center; font-size: 12px; }
+  .objective .t { font: 600 13px/1 "IBM Plex Mono", monospace; color: #c9cbd0; padding-left: 12px; border-left: 1px solid rgba(255, 255, 255, 0.2); }
+  #prompt { left: 50%; bottom: 120px; transform: translate(-50%, 10px); opacity: 0; transition: opacity 200ms, transform 300ms cubic-bezier(.34, 1.56, .64, 1);
+    padding: 12px 18px; border-radius: 14px; background: var(--glass); backdrop-filter: blur(14px); font-weight: 600; font-size: 15px; }
+  #prompt.on { opacity: 1; transform: translate(-50%, 0); }
+  #prompt kbd, .keys kbd { font: 700 12px/1 "IBM Plex Mono", monospace; background: var(--paper); color: var(--ink); border-radius: 6px; padding: 4px 7px; margin-right: 6px; }
+  #toast { top: 74px; left: 50%; transform: translate(-50%, -8px); opacity: 0; transition: opacity 250ms, transform 300ms; padding: 11px 18px; border-radius: 12px;
+    background: var(--ink); font-weight: 600; font-size: 14px; }
+  #toast.on { opacity: 1; transform: translate(-50%, 0); } #toast.bad { background: var(--red); } #toast.good { background: var(--mint); }
+  #cross { left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px; border-radius: 50%; background: rgba(255, 255, 255, 0.85); box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.25); }
+  #debug { left: 22px; bottom: 20px; font: 500 12px/1.4 "IBM Plex Mono", monospace; color: #9fe; background: rgba(0, 0, 0, 0.55); padding: 8px 10px; border-radius: 8px; display: none; white-space: pre; }
+  body.edit #debug { display: block; }
+  body.clean .hud, body.clean #toast, body.clean #prompt { display: none !important; }
+  .keys { right: 22px; bottom: 20px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; font-size: 12.5px; color: #d9dbe0; opacity: 0.85; }
+  .keys span { background: var(--glass); backdrop-filter: blur(10px); border-radius: 9px; padding: 6px 9px; }
+
+  .screen { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; padding: 24px; opacity: 0; pointer-events: none; transition: opacity 700ms; }
+  .screen.on { opacity: 1; pointer-events: auto; }
+  .screen::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.55)); }
+  .panel { position: relative; width: min(600px, 100%); padding: 32px 34px 28px; border-radius: 28px; color: var(--ink); background: rgba(245, 243, 238, 0.9);
+    backdrop-filter: blur(24px) saturate(1.2); box-shadow: 0 40px 120px rgba(0, 0, 0, 0.5); transform: translateY(18px); transition: transform 800ms cubic-bezier(.34, 1.56, .64, 1); }
+  .screen.on .panel { transform: none; }
+  #outro .panel { width: min(540px, 100%); }
+  #outro .big { font-size: clamp(40px, 5.4vw, 62px); white-space: nowrap; }
+  @media (max-height: 720px) { .panel { padding: 24px 28px 22px; } .big { font-size: clamp(44px, 7vw, 68px); margin-bottom: 12px; } .stats b { font-size: 34px; } .panel p { font-size: 14.5px; margin-bottom: 8px; } }
+  .kicker { font: 600 12px/1 "IBM Plex Mono", monospace; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+  .big { font: 900 clamp(56px, 9vw, 96px)/0.84 "Big Shoulders Display", sans-serif; text-transform: uppercase; margin: 0 0 18px; }
+  .big em { font-style: normal; color: transparent; -webkit-text-stroke: 2px var(--ink); }
+  .panel p { margin: 0 0 12px; font-size: 16px; line-height: 1.5; color: #2b2e35; }
+  .verdict { font-weight: 600; color: var(--ink) !important; } .verdict.bad { color: #b42318 !important; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 2px solid var(--ink); margin: 4px 0 18px; }
+  .stats div { padding: 12px 10px 0 0; } .stats div + div { padding-left: 12px; border-left: 1px solid #cfc8bb; }
+  .stats b { display: block; font: 900 44px/0.9 "Big Shoulders Display", sans-serif; } .stats span { font-size: 12.5px; color: var(--muted); }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+  .btn { font: 700 16px/1 "IBM Plex Sans", sans-serif; border: 0; border-radius: 999px; padding: 15px 24px; cursor: pointer; background: var(--ink); color: var(--paper);
+    text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: transform 300ms cubic-bezier(.34, 1.56, .64, 1); }
+  .btn:hover { transform: translateY(-2px); } .btn:disabled { opacity: 0.6; cursor: progress; transform: none; }
+  .btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+  .btn kbd { font: 700 11px "IBM Plex Mono", monospace; opacity: 0.6; }
+  #loadbar { height: 3px; background: rgba(22, 24, 29, 0.15); border-radius: 3px; overflow: hidden; margin: 6px 0 18px; }
+  #loadbar span { display: block; height: 100%; width: 0; background: var(--ink); transition: width 300ms; }
+  .data-line { font-size: 14px !important; color: var(--ink) !important; border-left: 3px solid var(--red); padding-left: 10px; }
+  .data-line:empty { display: none; }
+  .credit { font-size: 12px !important; color: var(--muted) !important; margin: 14px 0 0 !important; }
+  .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  #touch { display: none; left: 0; right: 0; bottom: 18px; padding: 0 16px; justify-content: space-between; align-items: flex-end; pointer-events: none; }
+  #touch .pad { display: grid; grid-template-columns: repeat(3, 58px); grid-template-rows: repeat(2, 58px); gap: 8px; }
+  #touch button { pointer-events: auto; touch-action: none; border: 0; border-radius: 16px; background: var(--glass); backdrop-filter: blur(12px); color: var(--paper);
+    font: 700 20px/1 "IBM Plex Sans", sans-serif; -webkit-user-select: none; user-select: none; }
+  #touch button:active, #touch button.on { background: rgba(245, 243, 238, 0.85); color: var(--ink); }
+  #touch .use { width: 84px; height: 84px; border-radius: 50%; font-size: 16px; }
+  @media (pointer: coarse) { #touch { display: flex; } .keys { display: none; } #prompt { bottom: 170px; } }
+  @media (max-width: 640px) { .keys, .brand { display: none; } .objective { top: 12px; font-size: 12.5px; } }
+  @media (prefers-reduced-motion: reduce) { #grain { animation: none; } * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div id="stage" aria-hidden="true"></div>
+<div id="grade" aria-hidden="true"></div>
+<div id="grain" aria-hidden="true"></div>
+<div id="flash" aria-hidden="true"></div>
+<div id="fade" aria-hidden="true"></div>
+
+<div class="hud brand" aria-hidden="true"><i></i>LastLift</div>
+<div class="hud objective"><b id="objNum">1</b><span id="objective">Find a step-free way to the street</span><span class="t" id="timer" aria-hidden="true">0:00</span></div>
+<div class="hud" id="prompt" role="status"></div>
+<div class="hud" id="toast" role="status"></div>
+<div class="hud" id="cross" aria-hidden="true"></div>
+<div class="hud keys" aria-hidden="true"><span><kbd>W S</kbd>roll</span><span><kbd>A D</kbd>turn</span><span><kbd>Mouse</kbd>look</span><span><kbd>E</kbd>use</span><span><kbd>Esc</kbd>free the mouse</span></div>
+<div class="hud" id="debug" aria-hidden="true"></div>
+<div class="hud" id="touch">
+  <div class="pad"><span></span><button data-k="w" aria-label="Roll forward">▲</button><span></span>
+    <button data-k="a" aria-label="Turn left">◀</button><button data-k="s" aria-label="Roll back">▼</button><button data-k="d" aria-label="Turn right">▶</button></div>
+  <button class="use" id="touchUse">Use</button>
+</div>
+
+<section class="screen on" id="intro" role="dialog" aria-modal="true" aria-labelledby="introTitle">
+  <div class="panel">
+    <p class="kicker">LastLift · a platform like Alewife</p>
+    <h1 class="big" id="introTitle">Find the <em>way out</em></h1>
+    <p>You use a wheelchair. You have just got off the train, on a platform deep under the street. Stairs and escalators are no use to you: only a lift gets you out.</p>
+    <p class="data-line" id="introData"></p>
+    <div id="loadbar" aria-hidden="true"><span></span></div>
+    <div class="actions"><button class="btn" id="startBtn" disabled>Loading the station…</button><button class="btn ghost" id="skipBtn" hidden>Watch lift 813 fail</button></div>
+    <p class="credit"><a href="/">Back to LastLift</a></p>
+    <p class="credit">Materials and lighting: photo-scanned CC0 assets from Poly Haven.</p>
+  </div>
+</section>
+
+<section class="screen" id="outro" role="dialog" aria-modal="true" aria-labelledby="outroTitle">
+  <div class="panel">
+    <p class="kicker" id="outroKicker"></p>
+    <h2 class="big" id="outroTitle"></h2>
+    <div class="stats"><div><b id="stTime">0:00</b><span>time</span></div><div><b id="stDist">0 m</b><span>rolled</span></div><div><b id="stTries">0</b><span>dead ends</span></div></div>
+    <p class="verdict" id="outroText"></p>
+    <p id="outroData"></p>
+    <div class="actions"><button class="btn" id="outroNext"></button><a class="btn ghost" href="/#/station/place-alfcl">Alewife in LastLift</a></div>
+  </div>
+</section>
+<p class="vh" id="live" aria-live="polite"></p>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { HDRLoader } from "three/addons/loaders/HDRLoader.js";
+import { RectAreaLightUniformsLib } from "three/addons/lights/RectAreaLightUniformsLib.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { GTAOPass } from "three/addons/postprocessing/GTAOPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+import { SMAAPass } from "three/addons/postprocessing/SMAAPass.js";
+
+const Q = new URLSearchParams(location.search);
+const EDIT = Q.has("edit"); if (EDIT) document.body.classList.add(Q.has("clean") ? "clean" : "edit");   // ?edit&clean: no HUD, for stills
+const LITE = Q.has("lite");
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const $ = (id) => document.getElementById(id);
+const A = "/world/";
+const FAIL = "813";
+
+/* ================================================================ renderer, scene, post */
+let renderer;
+try { renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" }); }
+catch {
+  $("startBtn").textContent = "This browser cannot show 3D (WebGL is off)";
+  $("introTitle").insertAdjacentHTML("afterend", "<p>Try another browser, or turn on hardware acceleration. The station data is all on the main site.</p>");
+  throw new Error("WebGL unavailable");
+}
+renderer.setPixelRatio(Math.min(devicePixelRatio, LITE ? 1 : 1.25)); renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.shadowMap.autoUpdate = false;
+$("stage").appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x08090b); scene.fog = new THREE.FogExp2(0x0b0c0e, 0.0075);
+const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.05, 220);
+RectAreaLightUniformsLib.init();
+
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const gtao = new GTAOPass(scene, camera, innerWidth, innerHeight);
+gtao.updateGtaoMaterial({ radius: 0.6, distanceExponent: 1.4, thickness: 1.2, scale: 1.1, samples: 8 });
+gtao.blendIntensity = 0.85; gtao.enabled = !LITE;
+composer.addPass(gtao);
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth / 2, innerHeight / 2), 0.5, 0.55, 0.9);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+const smaa = new SMAAPass(innerWidth, innerHeight); composer.addPass(smaa);
+function resize() {
+  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight);
+}
+addEventListener("resize", resize);
+
+/* ================================================================ assets: CC0 scans from Poly Haven */
+const manager = new THREE.LoadingManager();
+const bar = $("loadbar").firstElementChild;
+manager.onProgress = (_u, done, total) => { bar.style.width = `${Math.round((100 * done) / total)}%`; };
+const tl = new THREE.TextureLoader(manager);
+const maxAniso = renderer.capabilities.getMaxAnisotropy();
+const images = {};
+function img(name, srgb) {
+  if (!images[name]) { const t = tl.load(A + "tex/" + name + ".webp"); t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace; images[name] = t; }
+  return images[name];
+}
+function rep(t, rx, ry) { const c = t.clone(); c.wrapS = c.wrapT = THREE.RepeatWrapping; c.repeat.set(rx, ry); c.anisotropy = Math.min(8, maxAniso); c.needsUpdate = true; return c; }
+// a scanned material: colour, OpenGL normal, and ARM (ambient occlusion, roughness, metalness)
+function scanned(name, rx, ry, extra = {}) {
+  const arm = name === "gravel_concrete" ? null : rep(img(name + "_arm"), rx, ry);
+  return new THREE.MeshStandardMaterial({
+    map: rep(img(name + "_diff", true), rx, ry), normalMap: rep(img(name + "_nor"), rx, ry),
+    ...(arm ? { roughnessMap: arm, metalnessMap: arm, aoMap: arm } : {}), roughness: 1, metalness: arm ? 1 : 0, ...extra,
+  });
+}
+// pull the colour out of a scan (sat 0 = grey) before it is tinted, so grey granite and safety yellow come out true
+function desat(m, sat) {
+  m.onBeforeCompile = (sh) => { sh.fragmentShader = sh.fragmentShader.replace("#include <map_fragment>", `
+    vec4 sampledDiffuseColor = texture2D( map, vMapUv );
+    float lum = dot( sampledDiffuseColor.rgb, vec3( 0.2126, 0.7152, 0.0722 ) );
+    sampledDiffuseColor.rgb = mix( vec3( lum ), sampledDiffuseColor.rgb, ${sat.toFixed(2)} );
+    diffuseColor *= sampledDiffuseColor;`); };
+  m.customProgramCacheKey = () => "desat" + sat; return m;
+}
+const env = new HDRLoader(manager).loadAsync(A + "metro_vijzelgracht_1k.hdr").then((hdr) => {
+  const pm = new THREE.PMREMGenerator(renderer); const rt = pm.fromEquirectangular(hdr); hdr.dispose(); pm.dispose();
+  scene.environment = rt.texture; scene.environmentIntensity = 0.45;
+});
+const gltf = new GLTFLoader(manager);
+const models = Promise.all(["painted_wooden_bench", "modern_ceiling_lamp_01"].map((m) => gltf.loadAsync(`${A}models/${m}/${m}_1k.gltf`)));
+
+/* ================================================================ the station: an island platform deep underground
+   x runs along the platform (-40..40), z across it; the platform top is y = 0, the track beds y = -1.2 */
+const L = 84, HALF = 42, PW = 5, TR = 10.5, BED = -1.2, SPRING = 3.6, VAULT = 0.42;
+const vaultY = (z) => SPRING + VAULT * Math.sqrt(Math.max(0, TR * TR - z * z));
+const world = new THREE.Group(); scene.add(world);
+const solids = [];                                   // the collision shapes (never drawn): floors and walls
+const colMat = new THREE.MeshBasicMaterial({ color: 0x00ffaa, wireframe: true });
+function solid(w, h, d, x, y, z) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), colMat); m.position.set(x, y, z); m.updateMatrixWorld(true);
+  m.visible = EDIT && Q.has("wire"); if (m.visible) scene.add(m); solids.push(m); return m;
+}
+function mesh(geo, mat, x = 0, y = 0, z = 0, parent = world) {
+  const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; parent.add(m); return m;
+}
+const plane = (w, h) => new THREE.PlaneGeometry(w, h);
+const box = (w, h, d) => new THREE.BoxGeometry(w, h, d);
+
+const M = {
+  floor: desat(scanned("granite_tile_02", 80 / 1.2, 10 / 1.2, { color: 0xd4d6d8, roughness: 0.6, envMapIntensity: 2 }), 0.08),
+  slab: scanned("brushed_concrete", 30, 0.6),
+  tactile: desat(scanned("anti_skid_tiles", 80 / 0.6, 1, { color: 0xffd21a }), 0),
+  wall: scanned("long_white_tiles", L / 1.6, 4.8 / 1.6, { envMapIntensity: 1.3 }),
+  vault: desat(scanned("concrete_wall_003", 6, 18, { color: 0xc2c3c4 }), 0.15),
+  end: desat(scanned("concrete_wall_003", 6, 3, { color: 0xa9aaab }), 0.15),
+  bed: scanned("gravel_concrete", L / 2.5, 2.2, { color: 0x77726a }),
+  steel: new THREE.MeshStandardMaterial({ color: 0xc4c8cd, metalness: 1, roughness: 0.28, envMapIntensity: 2.4 }),
+  darkSteel: new THREE.MeshStandardMaterial({ color: 0x2a2d32, metalness: 0.9, roughness: 0.45 }),
+  plate: new THREE.MeshStandardMaterial({ color: 0xb4b8bd, metalness: 1, roughness: 0.42, envMapIntensity: 1.6 }),
+  stair: desat(scanned("granite_tile_02", 4 / 1.2, 0.4 / 1.2, { color: 0xd2d3d4 }), 0.08),
+  rail: new THREE.MeshStandardMaterial({ color: 0x8b8e93, metalness: 1, roughness: 0.25 }),
+  sleeper: new THREE.MeshStandardMaterial({ color: 0x4a4744, roughness: 0.9 }),
+  black: new THREE.MeshStandardMaterial({ color: 0x0c0d0f, roughness: 0.6 }),
+  glass: new THREE.MeshPhysicalMaterial({ color: 0xdfeff2, metalness: 0, roughness: 0.04, transparent: true, opacity: 0.16, envMapIntensity: 2.2, depthWrite: false, side: THREE.DoubleSide }),
+  strip: new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0xfff1dc, emissiveIntensity: 4.2 }),
+  redLine: new THREE.MeshStandardMaterial({ color: 0xc8261b, roughness: 0.45 }),
+};
+
+// platform: a granite top on a concrete slab, a yellow tactile strip and a white edge line along each side
+mesh(plane(80, 2 * PW), M.floor, 0, 0, 0).rotation.x = -Math.PI / 2;
+mesh(box(80, -BED, 2 * PW), M.slab, 0, BED / 2 - 0.002, 0);
+for (const s of [-1, 1]) {
+  const t = mesh(plane(80, 0.6), M.tactile, 0, 0.003, s * (PW - 0.36)); t.rotation.x = -Math.PI / 2;
+  const w = mesh(plane(80, 0.06), new THREE.MeshStandardMaterial({ color: 0xf2efe8, roughness: 0.5 }), 0, 0.004, s * (PW - 0.03)); w.rotation.x = -Math.PI / 2;
+}
+solid(80, 1, 2 * PW, 0, -0.5, 0);                                     // platform floor
+// track beds with sleepers, rails and a covered third rail
+for (const s of [-1, 1]) {
+  const zc = s * (PW + TR) / 2;
+  mesh(plane(L + 60, TR - PW), M.bed, 0, BED, zc).rotation.x = -Math.PI / 2;
+  const n = Math.floor((L + 60) / 0.65), sl = new THREE.InstancedMesh(box(2.6, 0.14, 0.24), M.sleeper, n);
+  const o = new THREE.Object3D();
+  for (let i = 0; i < n; i++) { o.position.set(-HALF - 30 + i * 0.65, BED + 0.07, zc); o.rotation.y = Math.PI / 2; o.updateMatrix(); sl.setMatrixAt(i, o.matrix); }
+  sl.receiveShadow = true; world.add(sl);
+  for (const r of [-0.72, 0.72]) mesh(box(L + 60, 0.16, 0.07), M.rail, 0, BED + 0.22, zc + r);
+  mesh(box(L + 60, 0.08, 0.32), new THREE.MeshStandardMaterial({ color: 0xc9a227, roughness: 0.6 }), 0, BED + 0.34, zc + s * 1.45);
+}
+// side walls: long white tiles to the springing line, with a red line band
+for (const s of [-1, 1]) {
+  const w = mesh(plane(L, SPRING - BED), M.wall, 0, (SPRING + BED) / 2, s * TR); w.rotation.y = s > 0 ? Math.PI : 0;
+  mesh(box(L, 0.14, 0.04), M.redLine, 0, 1.05, s * (TR - 0.03));
+  solid(L, 10, 1, 0, 3, s * (TR + 0.5));
+}
+// the vault: an elliptical concrete barrel over the whole hall
+{
+  const g = new THREE.CylinderGeometry(TR, TR, L, 72, 1, true, 0, Math.PI);
+  g.rotateZ(Math.PI / 2); g.scale(1, VAULT, 1); g.translate(0, SPRING, 0);
+  const nrm = g.attributes.normal;                   // the barrel's normals point outwards; we are inside it
+  for (let i = 0; i < nrm.count; i++) nrm.setXYZ(i, -nrm.getX(i), -nrm.getY(i), -nrm.getZ(i));
+  const v = mesh(g, M.vault.clone()); v.material.side = THREE.BackSide; v.castShadow = false;
+}
+// long linear lights in the vault, and a cove light washing each wall
+const strips = [];
+for (const s of [-1, 1]) {
+  const z = s * 3.9, y = vaultY(z) - 0.12;
+  strips.push(mesh(box(76, 0.06, 0.22), M.strip, 0, y, z));
+  for (const x of [-19, 19]) {
+    const ra = new THREE.RectAreaLight(0xfff0da, 7, 38, 0.5); ra.position.set(x, y - 0.05, z); ra.lookAt(x, 0, z); world.add(ra);
+  }
+  const cy = SPRING - 0.15;
+  strips.push(mesh(box(L, 0.05, 0.12), M.strip, 0, cy, s * (TR - 0.25)));
+  const cove = new THREE.RectAreaLight(0xfff4e6, 5, L, 0.4); cove.position.set(0, cy - 0.05, s * (TR - 0.3)); cove.lookAt(0, -4, s * TR); world.add(cove);
+}
+// a key light over the lift so it throws real shadows across the floor
+const key = new THREE.SpotLight(0xfff1de, 260, 22, 0.75, 0.6, 1.6); key.position.set(2, 7.4, 0); key.target.position.set(6, 0, 0);
+key.castShadow = true; key.shadow.mapSize.set(1024, 1024); key.shadow.bias = -0.0004; key.shadow.normalBias = 0.03; world.add(key, key.target);
+// columns down both sides of the platform
+for (let x = -35; x <= 35; x += 10) for (const s of [-1, 1]) {
+  const z = s * 3.2, h = vaultY(z);
+  mesh(new THREE.CylinderGeometry(0.3, 0.3, h, 32), M.steel, x, h / 2, z);
+  mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.12, 32), M.darkSteel, x, 0.06, z);
+  const c = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 4, 12), colMat); c.position.set(x, 2, z); c.updateMatrixWorld(true); solids.push(c);
+}
+// end walls with the two tunnel mouths, and dark tunnels running off into the fog
+for (const s of [-1, 1]) {
+  const x = s * HALF, face = s > 0 ? -Math.PI / 2 : Math.PI / 2;
+  for (const [z0, z1, y0] of [[-TR, -2.2, SPRING], [2.2, TR, SPRING], [-2.2, 2.2, RISE_TOP()]]) {   // above the springing line, round the exit
+    const m = mesh(plane(z1 - z0, 9.5 - y0), M.end, x, (9.5 + y0) / 2, (z0 + z1) / 2); m.rotation.y = face;
+  }
+  mesh(box(0.5, SPRING - BED, 2 * PW), M.end, x + s * 0.25, (SPRING + BED) / 2, 0);     // between the tunnels
+  for (const t of [-1, 1]) {
+    const zc = t * (PW + TR) / 2, tg = new THREE.BoxGeometry(60, SPRING - BED + 0.6, TR - PW + 0.4);
+    const tm = mesh(tg, new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.95, side: THREE.BackSide }), x + s * 30, (SPRING + BED) / 2 + 0.3, zc);
+    tm.receiveShadow = false; tm.castShadow = false;
+    mesh(box(0.6, 0.6, TR - PW + 0.4), M.end, x, SPRING + 0.3, zc);                       // the lintel
+  }
+  solid(1, 10, 2 * TR, x + s * 0.5, 3, 0);
+}
+function RISE_TOP() { return 5.4 + 2.5; }
+
+/* ---- the stairs (east end) and the escalators (west end): both lead up to the street, neither is any use to you */
+const RISE = 5.4, RUN = 12, A0 = Math.atan2(RISE, RUN), SLOPE = Math.hypot(RISE, RUN);
+const daylight = new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0xfff6e8, emissiveIntensity: 3.2 });
+function exitHall(s) {
+  // the landing at the top of the flight, with a bright concourse beyond the opening
+  const x = s * HALF, face = s > 0 ? -Math.PI / 2 : Math.PI / 2;
+  mesh(box(HALF - 27 - RUN + 0.02, RISE, 4.4), M.end, s * (27 + RUN + (HALF - 27 - RUN) / 2), RISE / 2, 0);
+  const hall = mesh(new THREE.BoxGeometry(10, 2.5, 4.4), new THREE.MeshStandardMaterial({ color: 0xcfc9bf, roughness: 0.8, side: THREE.BackSide }), x + s * 5, RISE + 1.25, 0);
+  hall.receiveShadow = false; hall.castShadow = false;
+  const far = mesh(plane(4.4, 2.5), daylight, x + s * 9.9, RISE + 1.25, 0); far.rotation.y = face;
+  const flight = new THREE.PointLight(0xfff0dc, 45, 20, 1.4); flight.position.set(s * 31, 6.6, 0); world.add(flight);
+  const glow = new THREE.PointLight(0xfff3e0, 30, 14, 1.5); glow.position.set(x - s * 1.5, RISE + 1.8, 0); world.add(glow);
+  solid(RUN + 3, 3, 4.6, s * (27 + (RUN + 3) / 2), 1.5, 0);                             // a wall for you, not for walkers
+}
+{ // stairs: thirty granite steps between two concrete parapets with steel handrails
+  const g = new THREE.Group(); world.add(g);
+  const steps = 30, tread = RUN / steps, riser = RISE / steps;
+  for (let i = 0; i < steps; i++) mesh(box(tread, riser * (i + 1), 4), M.stair, 27 + tread * (i + 0.5), (riser * (i + 1)) / 2, 0, g);
+  for (const z of [-2.15, 2.15]) {
+    const p = mesh(box(SLOPE, 1.1, 0.3), M.slab, 27 + RUN / 2, RISE / 2 + 0.35, z, g); p.rotation.z = A0;
+    const r = mesh(new THREE.CylinderGeometry(0.035, 0.035, SLOPE, 12), M.steel, 27 + RUN / 2, RISE / 2 + 1.05, z * 0.9, g); r.rotation.z = A0 - Math.PI / 2;
+  }
+  exitHall(1);
+}
+const escSteps = [];
+{ // escalators: a pair, steel steps that really move, glass balustrades and black handrails
+  const g = new THREE.Group(); world.add(g);
+  for (const z of [-0.95, 0.95]) {
+    const tex = rep(img("metal_plate_diff", true), 1, SLOPE / 0.4); escSteps.push(tex);
+    const stepMat = new THREE.MeshStandardMaterial({ map: tex, color: 0x9a9da2, metalness: 0.9, roughness: 0.4 });
+    const band = mesh(box(SLOPE, 0.1, 1.0), stepMat, -27 - RUN / 2, RISE / 2, z, g); band.rotation.z = -A0;
+    tex.rotation = Math.PI / 2; tex.center.set(0.5, 0.5);
+    const truss = mesh(box(SLOPE, 1.0, 1.5), M.darkSteel, -27 - RUN / 2, RISE / 2 - 0.58, z, g); truss.rotation.z = -A0;
+    for (const e of [-0.62, 0.62]) {
+      const gl = mesh(box(SLOPE, 0.95, 0.02), M.glass, -27 - RUN / 2, RISE / 2 + 0.55, z + e, g); gl.rotation.z = -A0; gl.castShadow = false;
+      const hr = mesh(box(SLOPE + 0.6, 0.07, 0.1), M.black, -27 - RUN / 2, RISE / 2 + 1.05, z + e, g); hr.rotation.z = -A0;
+    }
+    mesh(box(1.4, 0.03, 1.0), M.steel, -26.3, 0.015, z, g);                             // comb plate at the foot
+  }
+  exitHall(-1);
+}
+
+/* ---- the lifts: glass shafts with steel frames, cabs that ride up, doors that slide.
+   813 is the one this platform hangs on; 961 (to Russell Field) is out of service in LastLift's data. */
+const tapeMat = (() => {
+  const tc = document.createElement("canvas"); tc.width = 256; tc.height = 32; const tx = tc.getContext("2d");
+  for (let i = -2; i < 20; i++) { tx.fillStyle = i % 2 ? "#e8262b" : "#f4f1ea"; tx.beginPath(); tx.moveTo(i * 16, 32); tx.lineTo(i * 16 + 16, 32); tx.lineTo(i * 16 + 32, 0); tx.lineTo(i * 16 + 16, 0); tx.fill(); }
+  const t = new THREE.CanvasTexture(tc); t.colorSpace = THREE.SRGBColorSpace;
+  return new THREE.MeshStandardMaterial({ map: t, color: 0x9a9a9a, roughness: 0.85, envMapIntensity: 0.3 });
+})();
+function makeLift(id, x, dest) {
+  const w = 2.6, top = vaultY(0) - 0.05, h = w / 2;
+  const L = { id, x, w, dest, cab: new THREE.Group(), doors: [], open: 0, out: false };
+  for (const [dx, dz] of [[-h, -h], [-h, h], [h, -h], [h, h]]) mesh(box(0.12, top, 0.12), M.darkSteel, x + dx, top / 2, dz);
+  for (let y = 2.6; y < top; y += 2.6) for (const s of [-1, 1]) {
+    mesh(box(w, 0.08, 0.1), M.darkSteel, x, y, s * h); mesh(box(0.1, 0.08, w), M.darkSteel, x + s * h, y, 0);
+  }
+  for (const [px, pz, ry] of [[x, -h, 0], [x, h, 0], [x + h, 0, Math.PI / 2]]) { const p = mesh(plane(w, top), M.glass, px, top / 2, pz); p.rotation.y = ry; p.castShadow = false; }
+  // the front (facing the start of the platform): glass either side of a slim steel portal
+  const fr = mesh(plane(w, top - 2.4), M.glass, x - h, 2.4 + (top - 2.4) / 2, 0); fr.rotation.y = -Math.PI / 2; fr.castShadow = false;
+  for (const s of [-1, 1]) {
+    const g = mesh(plane(h - 0.68, 2.4), M.glass, x - h, 1.2, s * (0.68 + (h - 0.68) / 2)); g.rotation.y = -Math.PI / 2; g.castShadow = false;
+    mesh(box(0.16, 2.4, 0.1), M.steel, x - h, 1.2, s * 0.66);
+  }
+  mesh(box(0.16, 0.14, 1.42), M.steel, x - h, 2.36, 0);
+  // the cab: steel walls, a warm ceiling panel, a handrail
+  const cab = L.cab; cab.position.set(x, 0, 0); world.add(cab);
+  mesh(box(0.06, 2.3, 2.3), M.plate, h - 0.2, 1.15, 0, cab);
+  for (const s of [-1, 1]) mesh(box(2.2, 2.3, 0.06), M.plate, 0.05, 1.15, s * 1.15, cab);
+  mesh(box(2.3, 0.06, 2.3), M.darkSteel, 0.05, 0.03, 0, cab); mesh(box(2.3, 0.08, 2.3), M.darkSteel, 0.05, 2.34, 0, cab);
+  L.lamp = mesh(box(1.6, 0.02, 1.6), new THREE.MeshStandardMaterial({ color: 0, emissive: 0xffe2b8, emissiveIntensity: 1.1 }), 0.05, 2.29, 0, cab);
+  L.light = new THREE.PointLight(0xffe2b8, 2.2, 4, 1.4); L.light.position.set(0.05, 2.0, 0); cab.add(L.light);
+  mesh(box(0.05, 0.05, 2.0), M.steel, h - 0.32, 0.95, 0, cab);
+  // two glass-and-steel door leaves that slide apart
+  for (const s of [-1, 1]) {
+    const d = new THREE.Group(); d.position.set(x - h + 0.1, 0, s * 0.3); world.add(d);
+    mesh(box(0.05, 2.25, 0.6), M.steel, 0, 1.13, 0, d);
+    mesh(box(0.06, 1.3, 0.34), new THREE.MeshPhysicalMaterial({ color: 0x222831, roughness: 0.05, metalness: 0.3, envMapIntensity: 2 }), 0, 1.4, 0, d);
+    d.userData.s = s; L.doors.push(d);
+  }
+  // the call panel
+  mesh(box(0.08, 1.2, 0.22), M.steel, x - h - 0.05, 0.6, 1.55);
+  L.button = mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.02, 24), new THREE.MeshStandardMaterial({ color: 0, emissive: 0x7fd7ff, emissiveIntensity: 3 }), x - h - 0.1, 1.05, 1.55);
+  L.button.rotation.z = Math.PI / 2;
+  solid(w + 0.2, 3, w + 0.2, x, 1.5, 0);
+  // a red beacon on the portal, lit when the lift is out of service
+  L.beacon = mesh(new THREE.SphereGeometry(0.11, 20, 12), new THREE.MeshStandardMaterial({ color: 0x400000, emissive: 0xff2a2a, emissiveIntensity: 0 }), x - h - 0.1, 2.36, -0.95);
+  L.alarm = new THREE.PointLight(0xff2a2a, 0, 9, 1.6); L.alarm.position.set(x - h - 0.4, 2.7, 0); world.add(L.alarm);
+  // hazard tape across the doors
+  L.tape = new THREE.Group(); world.add(L.tape); L.tape.visible = false;
+  for (const [y, r] of [[0.95, 0.22], [1.35, -0.18]]) { const t = mesh(box(0.01, 0.12, 2.5), tapeMat, x - h - 0.35, y, 0, L.tape); t.rotation.x = r; }
+  L.at = new THREE.Vector3(x - h - 0.9, 0, 0); L.inCab = new THREE.Vector3(x + 0.1, 0, 0);
+  return L;
+}
+const lift = makeLift(FAIL, 6, "Main lobby · Street");
+const lift961 = makeLift("961", -6, "Russell Field");
+const LIFTS = [lift, lift961];
+// out of service: taped off, beacon on, cab dark, the screen goes red
+function breakLift(L, jam = 0) {
+  L.out = true; L.tape.visible = true; L.open = jam; L.button.material.emissive.setHex(0xff2a2a);
+  L.lamp.material.emissiveIntensity = 0.05; L.light.intensity = 0; if (L.screen) L.sign.material = L.screen(true);
+}
+
+/* ---- signs: drawn once the site fonts are ready */
+async function signs() {
+  await Promise.all(["700 80px 'IBM Plex Sans'", "900 80px 'Big Shoulders Display'"].map((f) => document.fonts.load(f).catch(() => {})));
+  const panel = (draw, w, h, px = 220) => {
+    const c = document.createElement("canvas"); c.width = Math.round(w * px); c.height = Math.round(h * px); const g = c.getContext("2d"); draw(g, c.width, c.height);
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = Math.min(8, maxAniso);
+    return new THREE.MeshStandardMaterial({ map: t, roughness: 0.35, emissive: 0xffffff, emissiveMap: t, emissiveIntensity: 0.16 });
+  };
+  // the station name on the walls
+  const name = panel((g, w, h) => {
+    g.fillStyle = "#1c2430"; g.fillRect(0, 0, w, h); g.fillStyle = "#da291c"; g.fillRect(0, 0, h * 0.18, h);
+    g.fillStyle = "#ffffff"; g.font = `700 ${h * 0.55}px 'IBM Plex Sans'`; g.textBaseline = "middle"; g.fillText("Alewife", h * 0.5, h * 0.54);
+  }, 3.4, 0.8);
+  for (let x = -32; x <= 32; x += 16) for (const s of [-1, 1]) { const p = mesh(plane(3.4, 0.8), name, x, 2.35, s * (TR - 0.02)); p.rotation.y = s > 0 ? Math.PI : 0; p.castShadow = false; }
+  // hanging wayfinding signs over the platform
+  const way = (txt) => panel((g, w, h) => {
+    g.fillStyle = "#0e1013"; g.fillRect(0, 0, w, h); g.fillStyle = "#ffffff"; g.font = `700 ${h * 0.46}px 'IBM Plex Sans'`; g.textBaseline = "middle"; g.fillText(txt, h * 0.35, h * 0.54);
+  }, 3.6, 0.5);
+  const hang = (x, front, back) => {
+    const g = new THREE.Group(); g.position.set(x, 3.7, 0); world.add(g);
+    mesh(box(0.04, 0.5, 3.64), M.darkSteel, 0, 0, 0, g);
+    const f = mesh(plane(3.6, 0.5), way(front), -0.025, 0, 0, g); f.rotation.y = -Math.PI / 2;
+    const b = mesh(plane(3.6, 0.5), way(back), 0.025, 0, 0, g); b.rotation.y = Math.PI / 2;
+    for (const z of [-1.5, 1.5]) mesh(new THREE.CylinderGeometry(0.012, 0.012, vaultY(z) - 3.95, 6), M.darkSteel, 0, (vaultY(z) - 3.95) / 2 + 0.25, z, g);
+  };
+  hang(-14, "♿ Lifts 961, 813  ↑", "Escalators · Street  ↑");
+  hang(17, "Stairs · Street  ↑", "♿ Lift 813 · Street  ↑");
+  // each lift's number and its status screen
+  for (const L of LIFTS) {
+    L.screen = (bad) => panel((g, w, h) => {
+      g.fillStyle = bad ? "#2a0606" : "#0e1013"; g.fillRect(0, 0, w, h);
+      g.fillStyle = bad ? "#ff4d4d" : "#ffffff"; g.font = `900 ${h * 0.7}px 'Big Shoulders Display'`; g.textBaseline = "middle"; g.fillText(L.id, h * 0.3, h * 0.55);
+      g.font = `700 ${h * 0.24}px 'IBM Plex Sans'`; g.fillText(bad ? "OUT OF SERVICE" : L.dest, w * 0.4, h * 0.55);
+    }, 1.9, 0.5);
+    L.sign = mesh(plane(1.9, 0.5), L.screen(L.out), L.x - L.w / 2 - 0.09, 2.78, 0); L.sign.rotation.y = -Math.PI / 2;
+  }
+}
+
+/* ---- the train you just got off (Red Line), which pulls out as the game starts */
+function makeTrain(z) {
+  const train = new THREE.Group(); train.position.set(-6, 0, z); world.add(train);
+  const body = new THREE.MeshStandardMaterial({ color: 0xc9cdd2, metalness: 0.92, roughness: 0.3, envMapIntensity: 1.4 });
+  const win = new THREE.MeshStandardMaterial({ color: 0x07080a, roughness: 0.05, metalness: 0.4, emissive: 0x3c4450, emissiveIntensity: 0.45 });
+  const door = new THREE.MeshStandardMaterial({ color: 0x9da1a7, metalness: 0.9, roughness: 0.35 });
+  for (let c = 0; c < 3; c++) {
+    const cx = (c - 1) * 19.6;
+    mesh(box(19, 3.2, 3.0), body, cx, 0.75, 0, train);
+    mesh(box(19.02, 0.2, 3.02), M.redLine, cx, 0.4, 0, train);
+    mesh(box(18.4, 0.85, 3.04), win, cx, 1.55, 0, train);
+    for (const dx of [-6, 0, 6]) mesh(box(1.4, 2.1, 3.05), door, cx + dx, 0.95, 0, train);
+    mesh(box(19, 0.6, 2.6), M.black, cx, -0.95, 0, train);
+  }
+  const head = new THREE.MeshStandardMaterial({ color: 0, emissive: 0xfff4dc, emissiveIntensity: 6 });
+  for (const z of [-0.9, 0.9]) mesh(new THREE.CircleGeometry(0.12, 20), head, 29.11, 0.2, z, train).rotation.y = Math.PI / 2;
+  return train;
+}
+const train = makeTrain((PW + TR) / 2);
+const davis = makeTrain(-(PW + TR) / 2); davis.visible = false;            // the train back to Davis, one stop inbound
+
+/* ================================================================ the player: seated, with momentum, floor-following, walls */
+const AT = EDIT && Q.get("at")?.split(",").map(Number);           // ?edit&at=x,z,yaw starts you anywhere (for checking the build)
+const EYE = 1.18, START = new THREE.Vector3(AT ? AT[0] : -21, 0, AT ? AT[1] : 0), START_YAW = AT ? AT[2] : -Math.PI / 2;
+const me = { pos: START.clone(), vel: new THREE.Vector3(), yaw: START_YAW, pitch: -0.04, tyaw: START_YAW, tpitch: -0.04, turn: 0 };
+const aim = (yaw, pitch) => { me.yaw = me.tyaw = yaw; me.pitch = me.tpitch = pitch; };
+const ray = new THREE.Raycaster(), DOWN = new THREE.Vector3(0, -1, 0);
+function floorAt(p) { ray.set(new THREE.Vector3(p.x, p.y + 1.2, p.z), DOWN); ray.far = 4; const h = ray.intersectObjects(solids, false)[0]; return h ? h.point.y : null; }
+function blocked(from, dir, dist) {
+  for (const hgt of [0.3, 0.9]) {
+    for (const side of [-0.32, 0, 0.32]) {                          // the chair is about 65 cm wide
+      const o = new THREE.Vector3(from.x - dir.z * side, from.y + hgt, from.z + dir.x * side);
+      ray.set(o, dir); ray.far = dist + 0.42; if (ray.intersectObjects(solids, false)[0]) return true;
+    }
+  }
+  return false;
+}
+// pointer lock can be refused (no gesture, an embedded frame, a focus change); looking round still works by dragging
+const lockMouse = () => { try { renderer.domElement.requestPointerLock?.()?.catch?.(() => {}); } catch { /* drag to look instead */ } };
+const keys = new Set();
+addEventListener("keydown", (e) => {
+  const k = e.key.toLowerCase(); keys.add(k);
+  if (k === "e" || k === " ") use();
+  if (k === "enter" && phase === "intro" && ready) start();
+});
+addEventListener("keyup", (e) => keys.delete(e.key.toLowerCase()));
+addEventListener("blur", () => keys.clear());
+renderer.domElement.addEventListener("click", () => { if (phase === "play" && !document.pointerLockElement) lockMouse(); });
+// mouse look feeds a target; the camera eases towards it every frame, so looking round is smooth at any frame rate
+let dragging = false;
+renderer.domElement.addEventListener("mousedown", () => (dragging = true));
+addEventListener("mouseup", () => (dragging = false));
+addEventListener("mousemove", (e) => {
+  if (phase !== "play" || (document.pointerLockElement !== renderer.domElement && !dragging)) return;
+  if (Math.abs(e.movementX) > 250 || Math.abs(e.movementY) > 250) return;     // the jump some browsers report on lock
+  me.tyaw -= e.movementX * 0.0021; me.tpitch = Math.max(-0.9, Math.min(0.7, me.tpitch - e.movementY * 0.0018));
+});
+
+// touch: the pad holds keys down while pressed; one finger on the view looks round
+for (const b of document.querySelectorAll("#touch [data-k]")) {
+  const k = b.dataset.k, on = (e) => { e.preventDefault(); keys.add(k); b.classList.add("on"); }, off = () => { keys.delete(k); b.classList.remove("on"); };
+  b.addEventListener("pointerdown", on); for (const ev of ["pointerup", "pointercancel", "pointerleave"]) b.addEventListener(ev, off);
+}
+$("touchUse").addEventListener("click", () => use());
+let lastTouch = null;
+renderer.domElement.addEventListener("touchstart", (e) => { lastTouch = e.touches[0]; }, { passive: true });
+renderer.domElement.addEventListener("touchmove", (e) => {
+  const t = e.touches[0]; if (!lastTouch || phase !== "play") return;
+  me.tyaw -= (t.clientX - lastTouch.clientX) * 0.005; me.tpitch = Math.max(-0.9, Math.min(0.7, me.tpitch - (t.clientY - lastTouch.clientY) * 0.004)); lastTouch = t;
+}, { passive: true });
+
+/* ================================================================ sound: a station hum, chimes, an alarm, the train */
+let actx = null, hum = null;
+const ac = () => (actx ??= new AudioContext());
+function noise(sec) { const c = ac(), b = c.createBuffer(1, c.sampleRate * sec, c.sampleRate), d = b.getChannelData(0); let l = 0; for (let i = 0; i < d.length; i++) { l = (l + 0.02 * (Math.random() * 2 - 1)) / 1.02; d[i] = l * 3.5; } return b; }
+function tone(f, at, dur, gain = 0.1, type = "sine") {
+  const c = ac(), o = c.createOscillator(), g = c.createGain(); o.type = type; o.frequency.value = f;
+  g.gain.setValueAtTime(0, c.currentTime + at); g.gain.linearRampToValueAtTime(gain, c.currentTime + at + 0.02); g.gain.exponentialRampToValueAtTime(0.0008, c.currentTime + at + dur);
+  o.connect(g).connect(c.destination); o.start(c.currentTime + at); o.stop(c.currentTime + at + dur + 0.05);
+}
+const chime = () => { tone(1318.5, 0, 0.9, 0.06); tone(1046.5, 0.32, 1.2, 0.06); };
+const alarm = () => [0, 0.22, 0.44, 0.66, 0.88, 1.1].forEach((d) => tone(740, d, 0.16, 0.05, "square"));
+function bang() {
+  const c = ac(), o = c.createOscillator(), g = c.createGain(), t = c.currentTime; o.type = "sine";
+  o.frequency.setValueAtTime(90, t); o.frequency.exponentialRampToValueAtTime(32, t + 0.7);
+  g.gain.setValueAtTime(0.5, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.9); o.connect(g).connect(c.destination); o.start(t); o.stop(t + 1);
+  const s = c.createBufferSource(), f = c.createBiquadFilter(), n = c.createGain(); s.buffer = noise(0.6); f.type = "lowpass"; f.frequency.value = 900;
+  n.gain.setValueAtTime(0.5, t); n.gain.exponentialRampToValueAtTime(0.001, t + 0.5); s.connect(f).connect(n).connect(c.destination); s.start(t);
+}
+function startHum() {
+  if (hum) return; const c = ac(), s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+  s.buffer = noise(4); s.loop = true; f.type = "lowpass"; f.frequency.value = 220; g.gain.value = 0.05; s.connect(f).connect(g).connect(c.destination); s.start(); hum = g;
+}
+function rumble(sec) {
+  const c = ac(), s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain(), t = c.currentTime;
+  s.buffer = noise(sec); f.type = "lowpass"; f.frequency.setValueAtTime(380, t); f.frequency.linearRampToValueAtTime(120, t + sec);
+  g.gain.setValueAtTime(0.0, t); g.gain.linearRampToValueAtTime(0.4, t + 1.2); g.gain.linearRampToValueAtTime(0.0001, t + sec);
+  s.connect(f).connect(g).connect(c.destination); s.start();
+}
+
+/* ================================================================ the game */
+const POINTS = [
+  ...LIFTS.map((L) => ({ id: L.id, kind: "lift", at: L.at, L })),
+  { id: "stairs", kind: "stairs", at: new THREE.Vector3(25.6, 0, 0) },
+  { id: "esc", kind: "escalator", at: new THREE.Vector3(-25.6, 0, 0) },
+  { id: "train", kind: "train", at: new THREE.Vector3(-6, 0, -4.2), off: true },
+];
+const boardPoint = POINTS.find((q) => q.id === "train");
+let arriveT = -1;
+function arrive() {
+  if (arriveT >= 0) return; arriveT = 0; davis.visible = true; davis.position.x = -150; rumble(10);
+  toast("A train is coming in on the other track", "", 3200);
+}
+let phase = "intro", ready = false, mission = 1, deadEnds = 0, dist = 0, t0 = 0, shake = 0, trainT = -1, ride = null, scene2 = null;
+const tried = new Set();
+const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+const claimsP = fetch("/claims.json").then((r) => r.json()).catch(() => null);
+// LastLift's own data for Alewife: which platforms hang on 813, which lifts are already out
+const stationP = fetch("/m/station/place-alfcl.json").then((r) => r.json()).catch(() => null);
+const contP = fetch("/m/contingency.json").then((r) => r.json()).catch(() => null);
+const facts = Promise.all([stationP, contP]).then(([st, ct]) => {
+  const nodes = st?.graph?.exit?.nodes ?? [];
+  const l813 = nodes.find((n) => n.facility_id === FAIL), closed = st?.redundancy?.data?.closed_here ?? ["961"];
+  const now = ct?.now?.data, pair = now?.critical_pairs?.find((x) => x.station_id === "place-alfcl");
+  const link = now?.last_link?.find((x) => x.facility_id === FAIL);
+  return { hang: l813?.last_lift?.length ?? 0, closed, dirs: pair?.platform_directions ?? 0, journeys: link?.journeys ?? 0 };
+});
+function toast(msg, kind = "", ms = 3000) {
+  const t = $("toast"); t.textContent = msg; t.className = `hud on ${kind}`; $("live").textContent = msg;
+  clearTimeout(toast.h); toast.h = setTimeout(() => (t.className = "hud"), ms);
+}
+const objective = (n, text) => { $("objNum").textContent = String(n); $("objective").textContent = text; };
+
+async function start() {
+  $("intro").classList.remove("on"); $("outro").classList.remove("on"); $("fade").classList.remove("on");
+  me.vel.set(0, 0, 0); dist = 0; deadEnds = 0; tried.clear(); ride = null; startHum();
+  for (const L of LIFTS) { L.cab.position.y = 0; L.open = 0; }
+  if (mission === 1) {
+    document.body.classList.remove("cine"); phase = "play"; t0 = performance.now();
+    me.pos.copy(START); aim(START_YAW, -0.04); objective(1, "Find a step-free way to the street");
+    lockMouse();
+    trainT = 0; tone(659, 0, 0.5, 0.05); tone(523, 0.35, 0.7, 0.05); setTimeout(() => rumble(9), 1200);
+  } else {
+    // the failure, as a scene: you watch lift 813 break down in front of you
+    document.body.classList.add("cine"); phase = "fail"; train.visible = false; trainT = -1;
+    me.pos.set(AT ? START.x : 1.2, 0, AT ? START.z : 0.4); aim(-Math.PI / 2 + 0.06, 0.04);
+    lift.out = false; lift.tape.visible = false; lift.lamp.material.emissiveIntensity = 1.1; lift.light.intensity = 2.2;
+    lift.button.material.emissive.setHex(0x7fd7ff); if (lift.screen) lift.sign.material = lift.screen(false);
+    scene2 = { t: 0, beats: new Set() };
+  }
+}
+// ?autoplay drives mission 2 on its own: try 813, roll round to 961, try the escalators, then board the train to Davis
+const AUTO = Q.has("autoplay");
+const PLAN = [
+  { use: FAIL, at: [2.9, 0] },
+  { to: [1.2, 2.25] }, { to: [-4.2, 2.25] }, { to: [-8.9, 2.0] }, { use: "961", at: [-9.0, 0] },
+  { to: [-16, 0] }, { use: "esc", at: [-25.4, 0] },
+  { to: [-14, -1.2] }, { wait: "train" }, { use: "train", at: [-6.2, -4.0] },
+];
+const auto = { i: 0, hold: 0, last: new THREE.Vector3(), stuck: 0 };
+function autopilot(dt) {
+  const st = PLAN[auto.i]; if (!st) return false;
+  if (st.wait === "train") { if (!boardPoint.off) auto.i++; want.set(0, 0, 0); return true; }
+  if (auto.hold > 0) {
+    const tg = POINTS.find((q) => q.id === st.use), L = tg?.L;      // look at the lift (or the flight) you just tried
+    if (L) me.tyaw = me.yaw + wrap(-Math.PI / 2 - me.yaw) * Math.min(1, dt * 5);
+    else if (st.use === "esc") me.tyaw = me.yaw + wrap(Math.PI / 2 - me.yaw) * Math.min(1, dt * 5);
+    auto.hold -= dt; want.set(0, 0, 0); if (auto.hold <= 0) auto.i++; return true;
+  }
+  const [x, z] = st.to ?? st.at, dx = x - me.pos.x, dz = z - me.pos.z, d = Math.hypot(dx, dz);
+  if (d < 0.3) { if (st.use) { use(); auto.hold = 2.4; } else auto.i++; want.set(0, 0, 0); return true; }
+  const head = Math.atan2(-dx, -dz);                                   // the yaw that faces the target
+  me.tyaw = me.yaw + wrap(head - me.yaw) * Math.min(1, dt * 4); me.tpitch = -0.04;
+  const off = Math.abs(wrap(head - me.yaw));
+  fwd.set(-Math.sin(me.yaw), 0, -Math.cos(me.yaw));
+  want.copy(fwd).multiplyScalar((off < 0.5 ? 2.1 : 0.5) * Math.min(1, d / 1.2 + 0.25));
+  // never wedge on a corner: if no progress for a second, hop to the waypoint
+  auto.stuck = me.pos.distanceTo(auto.last) < 0.02 ? auto.stuck + dt : 0; auto.last.copy(me.pos);
+  if (auto.stuck > 1) { me.pos.set(x, me.pos.y, z); auto.stuck = 0; }
+  return true;
+}
+function failScene(dt) {
+  const t = (scene2.t += dt), once = (k, at) => t >= at && !scene2.beats.has(k) && scene2.beats.add(k);
+  if (reduced && t < 2.2) scene2.t = 2.2;
+  // the doors open for you, start to close, the cab light flickers, then a bang and the lift dies
+  lift.open = t < 0.9 ? ease(clamp01(t / 0.9)) : t < 2.2 ? 1 - 0.75 * ease(clamp01((t - 1.4) / 0.8)) : lift.open;
+  if (t > 1.5 && t < 2.2) { const f = Math.random() > 0.5 ? 1 : 0.05; lift.lamp.material.emissiveIntensity = 1.1 * f; lift.light.intensity = 2.2 * f; }
+  if (once("bang", 2.2)) {
+    bang(); breakLift(lift, lift.open); shake = reduced ? 0 : 1.2;
+    $("flash").classList.add("on"); setTimeout(() => $("flash").classList.remove("on"), 1500); setTimeout(alarm, 250);
+  }
+  if (once("say", 3.0)) { document.body.classList.remove("cine"); objective(2, `Lift ${FAIL} just failed. Find another way out`);
+    toast(`Attention: elevator ${FAIL}, platform to main lobby, is out of service.`, "bad", 4200); }
+  if (once("go", 4.6)) { phase = "play"; t0 = performance.now(); if (EDIT) { for (const id of Q.get("tried")?.split(",") ?? []) tried.add(id); if (Q.has("arrive")) arrive(); } toast("Click the view to look around", "", 2600); }
+}
+const near = () => { let best = null, bd = 2.2; for (const p of POINTS) { if (p.off) continue; const d = p.at.distanceTo(me.pos); if (d < bd) { bd = d; best = p; } } return best; };
+function use() {
+  if (phase !== "play") return;
+  const p = near(); if (!p) return;
+  const first = !tried.has(p.id); tried.add(p.id);
+  if (p.kind === "train") {                       // the long way out: back the way you came
+    phase = "ride"; ride = null; chime(); document.exitPointerLock?.(); document.body.classList.add("cine");
+    $("fade").classList.add("on"); setTimeout(() => finish("davis"), reduced ? 300 : 1500); return;
+  }
+  if (p.kind !== "lift" || p.L.out) {
+    if (first) deadEnds++;
+    if (p.kind === "lift") { alarm(); toast(`Lift ${p.id} is out of service`, "bad"); }
+    else toast(p.kind === "stairs" ? "Stairs. Not an option for you." : "Escalators. Not an option for you.", "bad");
+    // with both lifts out there is no way up; once you have found that out, the only way off arrives
+    if (mission === 2 && LIFTS.every((L) => tried.has(L.id))) setTimeout(arrive, 1600);
+    return;
+  }
+  // the ride: the doors open, you roll in and turn round, the doors close, the cab rises
+  phase = "ride"; chime(); document.exitPointerLock?.(); document.body.classList.add("cine");
+  ride = { t: 0, L: p.L, from: me.pos.clone(), yaw0: me.yaw, pitch0: me.pitch };
+  if (reduced) { $("fade").classList.add("on"); setTimeout(() => finish("out"), 400); }
+}
+async function finish(kind) {
+  if (phase === "outro") return; phase = "outro"; document.exitPointerLock?.(); document.body.classList.add("cine");
+  const secs = (performance.now() - t0) / 1000, cl = await claimsP, f = await facts;
+  $("stTime").textContent = fmt(secs); $("stDist").textContent = `${Math.round(dist)} m`; $("stTries").textContent = String(deadEnds);
+  const v = $("outroText"), d = $("outroData"), next = $("outroNext"); v.classList.toggle("bad", kind === "davis");
+  if (kind === "out" && mission === 1) {
+    $("outroKicker").textContent = "Mission 1 complete"; $("outroTitle").innerHTML = `Out in <em>${fmt(secs)}</em>`;
+    v.textContent = deadEnds ? `You made it by lift ${FAIL}, after ${deadEnds} dead end${deadEnds > 1 ? "s" : ""}.` : `You made it by lift ${FAIL}, every metre step-free.`;
+    d.textContent = f.hang ? `${f.hang} platforms here hang on this one lift. Next: it fails.` : "Next: it fails.";
+    next.innerHTML = `Lift ${FAIL} fails →`; next.onclick = () => { mission = 2; start(); };
+  } else if (kind === "out") {
+    $("outroKicker").textContent = "Mission 2 complete"; $("outroTitle").innerHTML = `Out in <em>${fmt(secs)}</em>`;
+    v.textContent = "You found another lift. Many platforms have no second one.";
+    d.textContent = cl ? `${cl.platforms_single_lift} of ${cl.platforms_step_free} MBTA step-free platforms have no second lift.` : "";
+    next.textContent = "Play again"; next.onclick = () => location.reload();
+  } else {
+    $("outroKicker").textContent = "Mission 2 complete"; $("outroTitle").innerHTML = `The long <em>way out</em>`;
+    v.textContent = `With lifts ${FAIL} and 961 both out, you can't leave Alewife. The only way off: one stop back to Davis and up its lifts.`;
+    d.textContent = f.journeys ? `LastLift flags ${FAIL} and 961 as a critical pair: ${f.journeys} step-free journeys cut. It finds pairs like this before they fail.` : "LastLift finds pairs like this before they fail.";
+    next.textContent = "Play again"; next.onclick = () => location.reload();
+  }
+  $("fade").classList.remove("on"); $("outro").classList.add("on"); next.focus();
+}
+
+/* ================================================================ the loop */
+const clock = new THREE.Clock(); let bob = 0, tick = 0, slow = 0, frames = 0;
+const fwd = new THREE.Vector3(), want = new THREE.Vector3();
+const damp = (a, b, k, dt) => a + (b - a) * (1 - Math.exp(-k * dt));
+const ease = (t) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
+const clamp01 = (t) => Math.max(0, Math.min(1, t));
+const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
+function loop() {
+  requestAnimationFrame(loop);
+  const dt = Math.min(0.05, clock.getDelta()), now = clock.elapsedTime;
+  if (phase === "play") {
+    // A and D turn the chair (with a little momentum); the mouse looks round; both ease in
+    const driving = AUTO && mission === 2 && autopilot(dt);
+    const turnIn = driving ? 0 : (keys.has("a") || keys.has("arrowleft") ? 1 : 0) - (keys.has("d") || keys.has("arrowright") ? 1 : 0);
+    me.turn = damp(me.turn, turnIn * 1.7, 9, dt); me.tyaw += me.turn * dt;
+    me.yaw = damp(me.yaw, me.tyaw, 16, dt); me.pitch = damp(me.pitch, me.tpitch, 16, dt);
+    fwd.set(-Math.sin(me.yaw), 0, -Math.cos(me.yaw)); if (!driving) want.set(0, 0, 0);
+    if (!driving) { if (keys.has("w") || keys.has("arrowup")) want.add(fwd); if (keys.has("s") || keys.has("arrowdown")) want.addScaledVector(fwd, -0.6); }
+    if (!driving && want.lengthSq()) want.multiplyScalar(keys.has("shift") ? 3.4 : 2.3);              // a push of the wheels, in metres a second
+    me.vel.lerp(want, Math.min(1, dt * (want.lengthSq() ? 3 : 4.2)));                       // roll up to speed, coast to a stop
+    const step = me.vel.clone().multiplyScalar(dt), len = step.length();
+    if (len > 1e-5) {
+      const dir = step.clone().normalize();
+      if (!blocked(me.pos, dir, len)) {
+        const next = me.pos.clone().add(step), fy = floorAt(next);
+        if (fy !== null && Math.abs(fy - me.pos.y) < 0.3) { next.y = fy; dist += len; me.pos.copy(next); } else me.vel.multiplyScalar(0.1);
+      } else me.vel.multiplyScalar(0.1);
+    }
+    bob += len * 4.5;
+    tick += dt; if (tick > 0.25) { tick = 0; $("timer").textContent = fmt((performance.now() - t0) / 1000); }
+    const p = near(), el = $("prompt");
+    const msg = !p ? "" : p.kind === "lift" ? (p.L.out ? `<kbd>E</kbd>Lift ${p.id}: out of service` : `<kbd>E</kbd>Call lift ${p.id} · ${p.L.dest}`)
+      : p.kind === "train" ? "<kbd>E</kbd>Board the train back to Davis"
+      : `<kbd>E</kbd>${p.kind === "stairs" ? "Stairs to the street" : "Escalators to the street"}`;
+    if (el.dataset.m !== msg) { el.innerHTML = msg; el.dataset.m = msg; el.classList.toggle("on", !!msg); }
+  } else if (phase === "intro") {
+    const a = reduced ? 0 : now * 0.05;                          // a slow drift along the platform behind the title
+    me.pos.set(-22 + Math.sin(a) * 6, 0, 0); aim(START_YAW + 0.5 + Math.sin(a * 1.3) * 0.25, 0.05);
+  } else if (phase === "fail") {
+    failScene(dt);
+  } else if (phase === "ride" && ride && !reduced) {
+    ride.t += dt; const t = ride.t, R = ride.L;
+    R.open = t < 3.2 ? clamp01(t / 0.8) : 1 - clamp01((t - 3.2) / 0.8);
+    const inT = ease(clamp01((t - 0.8) / 1.4)), turn = ease(clamp01((t - 1.6) / 1.4));
+    me.pos.lerpVectors(ride.from, R.inCab, inT);
+    aim(ride.yaw0 + wrap(Math.PI / 2 - ride.yaw0) * turn, ride.pitch0 * (1 - turn));   // turn round to face the doors
+    const up = ease(clamp01((t - 4.1) / 2.6)) * 6;
+    R.cab.position.y = up; me.pos.y = up;
+    if (t > 5.4 && !ride.faded) { ride.faded = true; $("fade").classList.add("on"); }
+    if (t > 6.6) { ride = null; finish("out"); }
+  }
+  // the doors slide apart and ride with the cab; a lift that is out pulses red
+  const pulse = Math.sin(now * 8) > 0 ? 1 : 0.15;
+  for (const L of LIFTS) {
+    for (const d of L.doors) { d.position.z = d.userData.s * (0.3 + 0.55 * ease(L.open)); d.position.y = L.cab.position.y; }
+    L.beacon.material.emissiveIntensity = L.out ? 4 * pulse + 0.4 : 0; L.alarm.intensity = L.out ? (L === lift ? 9 : 3) * pulse : 0;
+  }
+  if (lift.out && !reduced) M.strip.emissiveIntensity = 4.2 * (Math.random() > 0.985 ? 0.35 : 1);
+  // the train pulls out, gathering speed, into the tunnel
+  if (trainT >= 0 && !reduced) { trainT += dt; const t = Math.max(0, trainT - 1.4); train.position.x = -6 + 0.55 * t * t; if (train.position.x > 140) { train.visible = false; trainT = -1; } }
+  else if (trainT >= 0) { train.visible = false; trainT = -1; }
+  if (arriveT >= 0 && boardPoint.off) {
+    arriveT += dt; const T = 9, left = Math.max(0, T - arriveT);
+    davis.position.x = reduced ? -6 : -6 - 0.5 * 3.56 * left * left;
+    if (arriveT >= (reduced ? 0 : T)) {
+      boardPoint.off = false; davis.position.x = -6; tone(659, 0, 0.5, 0.05); tone(523, 0.35, 0.7, 0.05);
+      objective(2, "The only way off: the train back to Davis"); toast("Train to Davis, doors open. It is the only step-free way off this platform.", "good", 4200);
+    }
+  }
+  for (const t of escSteps) t.offset.y = (t.offset.y - dt * 0.18) % 1;
+  // camera: seated eye height, a gentle roll of the wheels, a jolt when the lift fails
+  const sway = reduced ? 0 : Math.sin(bob) * 0.01;
+  camera.position.set(me.pos.x, me.pos.y + EYE + sway, me.pos.z);
+  if (shake > 0) { shake = Math.max(0, shake - dt * 1.1); camera.position.x += (Math.random() - 0.5) * 0.07 * shake; camera.position.y += (Math.random() - 0.5) * 0.07 * shake; }
+  camera.rotation.set(me.pitch, me.yaw, 0, "YXZ");
+  if (EDIT) {
+    ray.setFromCamera(new THREE.Vector2(0, 0), camera); ray.far = 80; const h = ray.intersectObjects(solids, false)[0];
+    $("debug").textContent = `pos ${me.pos.toArray().map((v) => v.toFixed(2)).join(", ")}  yaw ${me.yaw.toFixed(2)}\naim ${h ? h.point.toArray().map((v) => v.toFixed(2)).join(", ") : "-"}\n${renderer.info.render.calls} calls`;
+  }
+  renderer.shadowMap.needsUpdate = frames < 3 || phase === "ride" || phase === "fail" || trainT >= 0 || (arriveT >= 0 && boardPoint.off);
+  composer.render(dt);
+  // if this machine struggles, drop the ambient occlusion, then render fewer pixels
+  frames++; slow += dt;
+  if (frames % 60 === 0) {
+    const avg = slow / 60; slow = 0;
+    if (avg > 1 / 45 && gtao.enabled) gtao.enabled = false;
+    else if (avg > 1 / 38 && renderer.getPixelRatio() > 0.85) { renderer.setPixelRatio(0.85); resize(); }
+  }
+}
+
+/* ================================================================ go */
+const [[bench, pendant]] = await Promise.all([models, env, signs()]);
+for (const [x, s] of [[-30, 1], [-20, -1], [-10, 1], [-30, -1], [12, 1], [12, -1], [22, 1]]) {
+  const b = bench.scene.clone(); b.scale.set(1.55, 1.0, 1.15); b.position.set(x, 0, s * 3.25); if (s > 0) b.rotation.y = Math.PI;
+  b.traverse((o) => { if (o.isMesh) o.castShadow = o.receiveShadow = true; }); world.add(b);
+  solid(1.9, 1.2, 0.85, x, 0.6, s * 3.25);
+}
+for (const x of [-26, -18, -2, 14, 22]) {
+  const p = pendant.scene.clone(); p.scale.setScalar(1.6); p.position.set(x, 3.9, 0); world.add(p);
+  mesh(new THREE.CylinderGeometry(0.008, 0.008, vaultY(0) - 4.7, 6), M.darkSteel, x, 4.7 + (vaultY(0) - 4.7) / 2, 0);
+  const pl = new THREE.PointLight(0xffd9a8, 4, 7, 1.6); pl.position.set(x, 4.1, 0); world.add(pl);
+}
+for (const id of (await facts).closed) { const L = LIFTS.find((l) => l.id === id); if (L) breakLift(L); }
+{ // the scenario is LastLift's own data for Alewife, not invented: say so on the title card
+  const f = await facts;
+  if (f.hang) $("introData").textContent = `From LastLift's data: at Alewife, lift ${FAIL} is the last step-free link for ${f.hang} platforms, and lift ${f.closed.join(", ")} is already out of service. The station is drawn for the game; the lifts, the closure and every number are real.`;
+}
+ready = true; bar.style.width = "100%";
+const sb = $("startBtn"); sb.disabled = false; sb.innerHTML = "Start <kbd>Enter</kbd>"; sb.onclick = start; sb.focus();
+$("skipBtn").hidden = false; $("skipBtn").onclick = () => { mission = 2; start(); };
+if (AUTO) { $("skipBtn").textContent = "Watch mission 2 play"; sb.hidden = true; $("skipBtn").focus(); }
+loop();
+window.__walk = { me, LIFTS, solids, POINTS, get phase() { return phase; } };
+</script>
+</body>
+</html>
