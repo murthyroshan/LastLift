@@ -1,21 +1,22 @@
-import { useCallback, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { getDisclaimers, getLiveStatus, pingLive, type LiveStatus, type Scope } from "./api";
 import { AgentDrawer } from "./components/AgentDrawer";
 import { AnnouncerProvider } from "./components/Announcer";
 import { isPresent, Present } from "./components/Present";
 import { EyesFree, isEyesFree } from "./components/EyesFree";
-import { About } from "./pages/About";
-import { Tour } from "./pages/Tour";
 import { Landing } from "./pages/Landing";
-import { Network } from "./pages/Network";
-import { Approvals } from "./pages/Approvals";
-import { Repairs } from "./pages/Repairs";
-import { Station } from "./pages/Station";
-import { Lab } from "./pages/lab/Lab";
-import { Console } from "./pages/Console";
-import { AtlasPage } from "./pages/Atlas";
-import { Sandbox } from "./pages/Sandbox";
-import { TimeMachine } from "./pages/TimeMachine";
+// every other page loads when it is first visited, so the landing ships only what it needs
+const About = lazy(() => import("./pages/About").then((m) => ({ default: m.About })));
+const Tour = lazy(() => import("./pages/Tour").then((m) => ({ default: m.Tour })));
+const Network = lazy(() => import("./pages/Network").then((m) => ({ default: m.Network })));
+const Approvals = lazy(() => import("./pages/Approvals").then((m) => ({ default: m.Approvals })));
+const Repairs = lazy(() => import("./pages/Repairs").then((m) => ({ default: m.Repairs })));
+const Station = lazy(() => import("./pages/Station").then((m) => ({ default: m.Station })));
+const Lab = lazy(() => import("./pages/lab/Lab").then((m) => ({ default: m.Lab })));
+const Console = lazy(() => import("./pages/Console").then((m) => ({ default: m.Console })));
+const AtlasPage = lazy(() => import("./pages/Atlas").then((m) => ({ default: m.AtlasPage })));
+const Sandbox = lazy(() => import("./pages/Sandbox").then((m) => ({ default: m.Sandbox })));
+const TimeMachine = lazy(() => import("./pages/TimeMachine").then((m) => ({ default: m.TimeMachine })));
 import { CommandPalette } from "./components/CommandPalette";
 import { I } from "./components/icons";
 import { DisplayPanel } from "./components/DisplayPanel";
@@ -184,6 +185,7 @@ export default function App() {
         )}
         <div className="shell-main">
           <main id="main" tabIndex={-1} key={displayVersion} data-page={page || "home"} data-section={page && current ? current.label : undefined}>
+            <Suspense fallback={<p className="page-loading" aria-busy="true">…</p>}>
             {page === "station" ? <Station key={scope} route={route} live={wake === "live"} scope={scope} />
               : page === "console" ? <Console key={scope} scope={scope} />
               : page === "repairs" ? <Repairs key={scope} scope={scope} live={wake === "live"} />
@@ -196,6 +198,7 @@ export default function App() {
               : page === "sandbox" ? <Sandbox key={scope} route={route} live={wake === "live"} scope={scope} />
               : page === "lab" && import.meta.env.DEV ? <Lab route={route} />       // development views only, never shipped
               : <Landing key={scope} scope={scope} />}
+            </Suspense>
           </main>
           <footer className="site"><p>{footer}</p></footer>
         </div>

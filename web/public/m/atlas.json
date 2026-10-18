@@ -48,6 +48,95 @@
     }
    ],
    "two_plus": 77
+  },
+  {
+   "assessable": true,
+   "at_grade": 1159,
+   "country": "DE",
+   "facility_ids": false,
+   "falkordb": {
+    "checked": 1670,
+    "equal": 1670
+   },
+   "id": "mdb-782",
+   "license": "http://vbb.de/vbbgtfs",
+   "lift_dependent": 951,
+   "lift_units": 589,
+   "no_route": 116,
+   "platforms": 2637,
+   "provider": "Verkehrsverbund Berlin-Brandenburg (VBB)",
+   "readiness": "B",
+   "single_lift": 761,
+   "single_lift_share": 0.8,
+   "stations_without_entrance_flags": 577,
+   "top_stations": [
+    {
+     "lifts": 6,
+     "single_lift_platforms": 12,
+     "station": "S+U Gesundbrunnen Bhf (Berlin)"
+    },
+    {
+     "lifts": 2,
+     "single_lift_platforms": 10,
+     "station": "S Olympiastadion (Berlin)"
+    },
+    {
+     "lifts": 6,
+     "single_lift_platforms": 10,
+     "station": "S+U Friedrichstr. Bhf (Berlin)"
+    },
+    {
+     "lifts": 6,
+     "single_lift_platforms": 10,
+     "station": "S+U Zoologischer Garten Bhf (Berlin)"
+    },
+    {
+     "lifts": 7,
+     "single_lift_platforms": 9,
+     "station": "Cottbus, Hauptbahnhof"
+    }
+   ],
+   "two_plus": 74
+  },
+  {
+   "assessable": false,
+   "at_grade": 1987,
+   "country": "FR",
+   "facility_ids": false,
+   "falkordb": {},
+   "id": "tdg-67595",
+   "license": "https://opendatacommons.org/licenses/odbl/1.0/",
+   "lift_dependent": 0,
+   "lift_units": 0,
+   "no_route": 0,
+   "platforms": 2738,
+   "provider": "SNCF",
+   "readiness": "C",
+   "single_lift": 0,
+   "single_lift_share": null,
+   "stations_without_entrance_flags": 761,
+   "top_stations": [],
+   "two_plus": 0
+  },
+  {
+   "assessable": false,
+   "at_grade": 608,
+   "country": "FR",
+   "facility_ids": false,
+   "falkordb": {},
+   "id": "tdg-80921",
+   "license": "https://wiki.lafabriquedesmobilites.fr/wiki/Licence_Mobilit%C3%A9s",
+   "lift_dependent": 0,
+   "lift_units": 0,
+   "no_route": 0,
+   "platforms": 1359,
+   "provider": "Île-de-France Mobilités",
+   "readiness": "C",
+   "single_lift": 0,
+   "single_lift_share": null,
+   "stations_without_entrance_flags": 761,
+   "top_stations": [],
+   "two_plus": 0
   }
  ],
  "aggregate": {
@@ -61,7 +150,7 @@
    "C": 4
   },
   "lift_dependent": 1619,
-  "named": 1,
+  "named": 4,
   "platforms": 3640,
   "shares": [
    0.0,

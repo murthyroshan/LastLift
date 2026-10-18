@@ -54,6 +54,17 @@ def main():
         + ", ".join(f"{v:,} windows {k}" for k, v in rep["lamp"]["windows_by_source"].items())
         + f"; {claims['hist_windows_imputed']} windows still have no recorded end (imputed, flagged).",
         "",
+        f"**Archive artifact (errata, 2026-10-18).** Rule: {rep['lamp']['artifacts']['rule']}, none of them in the "
+        "portal, are dropped as an archive artifact. It removes "
+        f"{rep['lamp']['artifacts']['windows_dropped']} windows, all starting at "
+        f"{', '.join(rep['lamp']['artifacts']['minutes'])}: each a different one-lift alert, absent from the portal "
+        "(where 5 closures start that day), and nearly all ending the next day. The largest real event in either "
+        "source is 47 lifts under one alert, confirmed by both. Before the rule, the ledger read 285 "
+        "platform-directions, 58,286 lost service hours, a 92.9% single-lift share and 390 concurrent losses; the "
+        "numbers below are after it. The 2025 LAMP-only bracket fell from 33,044 to "
+        f"{claims['hist_2025_lamp_h']:,} hours, and the one-lift contrast at Harvard from 224 hours to "
+        f"{claims['onelift_naive_hours']}.",
+        "",
         "## Ledger (since " + rep["from"] + ")",
         "",
         f"- Platform-directions that lost step-free access at least once: **{claims['hist_dirs_lost']}**.",
@@ -151,12 +162,13 @@ def main():
         "",
         "## Historical gold (H7)",
         "",
-        "20 archived closures (seed in `eval/sampling.json`) are labelled blind by the author from MBTA's own text "
-        "(ids and text hashes in `validation/history_gold_ids.csv`), then compared with the model's verdict for the "
+        "20 archived closures (seed in `eval/sampling.json`) are labelled blind by the author from MBTA's own text, "
+        "without seeing any model output (`validation/gold_history_author.csv`; ids and text hashes in "
+        "`validation/history_gold_ids.csv`), then compared with the model's verdict for the "
         "lifts closed at that moment (`scripts/history_gold.py --score`). "
         + (f"Result: {claims['hist_gold_agree']}/{claims['hist_gold_scored']} agree "
            f"(Wilson 95% {claims['hist_gold_agree_wilson95']})." if "hist_gold_scored" in claims
-           else "Status: awaiting the author's labels."),
+           else "Status: not yet scored."),
         "",
     ]
     (ROOT / "validation" / "HISTORY.md").write_text("\n".join(L), encoding="utf-8", newline="\n")

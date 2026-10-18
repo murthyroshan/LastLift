@@ -68,7 +68,9 @@ export function AtlasPage() {
             <tbody>
               {a.agencies.map((x) => (
                 <tr key={x.id}>
-                  <th scope="row">{x.provider} <span className="muted">({x.country})</span></th>
+                  <th scope="row">{x.provider} <span className="muted">({x.country})</span>
+                    {x.license && <> · <a className="small" href={x.license} target="_blank" rel="noopener noreferrer"
+                      aria-label={S.atlas.licenceOf(x.provider)}>{S.atlas.licence}</a></>}</th>
                   <td className="num">{x.platforms}</td><td className="num">{x.single_lift}</td><td className="num">{x.two_plus}</td>
                   <td className="num">{x.lift_units}</td><td>{S.atlas.grade[x.readiness]}</td>
                   <td>{S.atlas.checked(x.falkordb.equal ?? 0, x.falkordb.checked ?? 0)}</td>

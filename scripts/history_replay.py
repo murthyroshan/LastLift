@@ -28,6 +28,7 @@ from history import eastern_offset  # noqa: E402
 
 HIST = ROOT / "data" / "history"
 GAP_MIN = 30
+MASS_START = 50       # LAMP-only windows sharing one start minute at or above this are an archive artifact
 LEDGER_FROM = datetime(2024, 1, 1, tzinfo=timezone.utc)
 DAY_KIND = ["weekday"] * 5 + ["saturday", "sunday"]
 
@@ -45,11 +46,30 @@ def load_windows(name="windows.csv"):
                  "end_low": parse(r["end_low"]), "end_high": parse(r["end_high"])} for r in csv.DictReader(fh)]
 
 
+def lamp_artifacts(lamp, portal):
+    """Start minutes where MASS_START or more LAMP windows begin and none of their (alert, lift) pairs is in the
+    portal. On 2025-02-22 18:33 UTC, 104 one-lift alerts start in the same minute and end the next day, absent from
+    the portal; the largest real event in either source is 47 lifts under one alert, confirmed by both."""
+    in_portal = {(w["alert_id"], w["facility_id"]) for w in portal}
+    by_min = collections.defaultdict(list)
+    for w in lamp:
+        by_min[w["start"].replace(second=0, microsecond=0)].append(w)
+    return {m for m, ws in by_min.items()
+            if len(ws) >= MASS_START and not any((w["alert_id"], w["facility_id"]) in in_portal for w in ws)}
+
+
+def load_lamp(portal=None):
+    """LAMP windows without the mass-start artifacts (see lamp_artifacts)."""
+    lamp = load_windows("windows_lamp.csv")
+    bad = lamp_artifacts(lamp, load_windows() if portal is None else portal)
+    return [w for w in lamp if w["start"].replace(second=0, microsecond=0) not in bad]
+
+
 def merged_windows():
     """Portal windows first; a portal window with no recorded end takes LAMP's recorded end for the same alert and
     lift; LAMP windows for (alert, lift) pairs the portal lacks are added. Each row keeps its source."""
     portal = [{**w, "source": "portal"} for w in load_windows()]
-    lamp = load_windows("windows_lamp.csv")
+    lamp = load_lamp(portal)
     lamp_by = collections.defaultdict(list)
     for w in lamp:
         lamp_by[(w["alert_id"], w["facility_id"])].append(w)
@@ -257,7 +277,9 @@ def main():
     platform = net["platform"]
     ws = merged_windows()                     # portal + LAMP (see merged_windows)
     portal_ws = load_windows()
-    lamp_ws = load_windows("windows_lamp.csv")
+    lamp_raw = load_windows("windows_lamp.csv")
+    artifacts = sorted(lamp_artifacts(lamp_raw, portal_ws))
+    lamp_ws = load_lamp(portal_ws)
 
     def run(imputed="low", gap=GAP_MIN, start_at=LEDGER_FROM, src=None):
         eps = episodes(src if src is not None else ws, imputed, gap)
@@ -294,6 +316,9 @@ def main():
     sources = collections.Counter(w["source"] for w in ws)
     lamp = {"source": lamp_meta.get("source"), "sha256": lamp_meta.get("sha256"),
             "from": lamp_meta.get("first_window_start"), "windows_by_source": dict(sorted(sources.items())),
+            "artifacts": {"rule": f"{MASS_START}+ LAMP-only windows starting in the same minute",
+                          "minutes": [m.strftime("%Y-%m-%dT%H:%MZ") for m in artifacts],
+                          "windows_dropped": len(lamp_raw) - len(lamp_ws)},
             "yearly_service_h": {y: round(h) for y, h in sorted(yearly.items())}}
     lifts = lift_stats(eps, archive_end)
     from lastlift import network
@@ -347,7 +372,8 @@ def main():
     })
     claims.update({"hist_lamp_from": (lamp["from"] or "")[:7],
                    "hist_windows_lamp_added": sources.get("lamp", 0),
-                   "hist_windows_lamp_end": sources.get("portal+lamp_end", 0)})
+                   "hist_windows_lamp_end": sources.get("portal+lamp_end", 0),
+                   "hist_lamp_artifact_windows": lamp["artifacts"]["windows_dropped"]})
     claims_path.write_text(json.dumps(claims, indent=1, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
     print(json.dumps({k: v for k, v in claims.items() if k.startswith("hist_")}, indent=1))
     print(json.dumps(sens, indent=0))

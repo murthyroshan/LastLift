@@ -241,7 +241,7 @@ export const S = {
     colGain: "Platform-directions gaining a route at baseline",
     runs: (kind: string, ids: string, more: number) => `${kind} ${ids}${more ? ` (or ${more} parallel runs)` : ""}`,
     contrast: (station: string, gain: number, hours: number, year: number) =>
-      `Counting only how many platforms would gain a route points to ${station} (${gain} platform-directions), but there it would have prevented about ${hours} hours in ${year}: what you optimise matters.`,
+      `Counting only how many platforms would gain a route points to ${station} (${gain} platform-directions), but there it would have prevented ${hours ? `about ${hours} hours` : "no lost hours at all"} in ${year}: what you optimise matters.`,
     method: (n: number) => `Exact: a new lift restores a route exactly when its top is reachable from the street and its bottom reaches the platform with the closed lifts removed; the top ${n} were re-checked by solving max-flow with the new lift.`,
   },
 
@@ -458,7 +458,9 @@ export const S = {
     colGrade: "Data readiness",
     colChecked: "FalkorDB check",
     checked: (eq: number, n: number) => `${eq} of ${n} equal`,
-    unnamed: (n: number) => `${n} more agencies are counted above but not named until their data licence has been checked.`,
+    unnamed: (n: number) => `${n} more agencies are counted above but not named: their feeds state no licence that allows reuse, or it could not be confirmed.`,
+    licence: "licence",
+    licenceOf: (provider: string) => `Data licence of ${provider}`,
     gradesTitle: "Data readiness",
     grade: { A: "Ready", B: "Usable", C: "Not assessable" },
     gradeText: {
@@ -558,9 +560,9 @@ export const S = {
     with: "With LastLift's graph, through MCP",
     n1: "Gold questions scored against certified answers. The graph is what gets the ids right.",
     k2: "Counting lifts per station gets it wrong",
-    n2: "single-lift platforms missed by the obvious rule (a station with two lifts can still leave a platform on one). Max-flow counts the routes.",
+    n2: "lift-dependent platforms the obvious rule gets wrong: counting lifts per station misses platforms that hang on one lift at stations with two. Max-flow counts the routes.",
     k3: "Every FalkorDB max-flow result, certified",
-    n3: "checked by an independent certificate; a FalkorDB maxFlow wrong-answer defect was found this way and every result is repaired or confirmed.",
+    n3: "each one checked by an independent certificate before it is used, a guard against a known maxFlow wrong-answer defect (reproduction credited to the Chokepoint team); any failure is re-solved exactly.",
   },
   showcase: {
     title: "The agent, at work",

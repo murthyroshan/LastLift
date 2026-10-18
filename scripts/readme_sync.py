@@ -1,7 +1,7 @@
-"""Keep README.md bound to the data: every number comes from claims.json, every table from the code.
+"""Keep README.md and docs/*.md bound to the data: every number comes from claims.json, every table from the code.
 
-    python scripts/readme_sync.py           # rewrite the generated parts of README.md
-    python scripts/readme_sync.py --check   # exit 1 if README.md is out of date (CI)
+    python scripts/readme_sync.py           # rewrite the generated parts of README.md and docs/*.md
+    python scripts/readme_sync.py --check   # exit 1 if any of them is out of date (CI)
 
   <!--claim:KEY-->value<!--/claim-->           value = claims.json[KEY]
   <!--generated:cypher-->...<!--/generated-->  every Q_* statement in lastlift/queries.py
@@ -99,23 +99,32 @@ def render(text):
     claims = json.loads((ROOT / "claims.json").read_text(encoding="utf-8"))
     missing = [k for k in CLAIM.findall(text) if k[0] not in claims]
     if missing:
-        raise SystemExit(f"README cites claims that do not exist: {sorted({k[0] for k in missing})}")
+        raise SystemExit(f"a document cites claims that do not exist: {sorted({k[0] for k in missing})}")
     text = CLAIM.sub(lambda m: f"<!--claim:{m.group(1)}-->{fmt(claims[m.group(1)], m.group(1))}<!--/claim-->", text)
     gens = {"cypher": cypher_table, "counts": counts_table, "eval": eval_table}
     return GEN.sub(lambda m: f"{m.group(1)}\n{gens[m.group(2)]()}\n{m.group(4)}", text)
 
 
 def main():
-    text = README.read_text(encoding="utf-8")
-    new = render(text)
+    files = [README] + sorted((ROOT / "docs").glob("*.md"))
+    stale = []
+    for path in files:
+        text = path.read_text(encoding="utf-8")
+        if "<!--claim:" not in text and "<!--generated:" not in text:
+            continue
+        new = render(text)
+        if new == text:
+            continue
+        if "--check" in sys.argv:
+            stale.append(path.relative_to(ROOT).as_posix())
+        else:
+            path.write_text(new, encoding="utf-8", newline="\n")
+            print(f"{path.relative_to(ROOT).as_posix()} synced")
     if "--check" in sys.argv:
-        if new != text:
-            print("README.md is out of date: run python scripts/readme_sync.py")
+        if stale:
+            print(f"out of date: {', '.join(stale)}: run python scripts/readme_sync.py")
             return 1
-        print("README.md matches claims.json and the code")
-        return 0
-    README.write_text(new, encoding="utf-8", newline="\n")
-    print("README.md synced")
+        print("README.md and docs match claims.json and the code")
     return 0
 
 

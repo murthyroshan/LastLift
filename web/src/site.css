@@ -215,3 +215,6 @@ main#main .rank-card { grid-template-columns: 2.6rem minmax(0, 1.2fr) minmax(0, 
 .tour-body p { margin: 0; line-height: 1.5; max-width: 70ch; }
 .tour-go { white-space: nowrap; }
 @media (max-width: 720px) { .tour-stop { grid-template-columns: 1fr; padding-left: 4rem; } .tour-go { justify-self: start; } }
+/* the page reserves the screen while it loads, so the footer never flashes into view and jumps */
+main#main { min-height: 100vh; }
+.page-loading { min-height: 60vh; }

@@ -1,14 +1,14 @@
 {
  "basis": "calendar platform-direction-hours, recorded closures (lower bound)",
  "candidates_with_gain": 318,
- "candidates_with_hours": 334,
+ "candidates_with_hours": 286,
  "exactness_checked": 20,
  "top": [
   {
    "complex": "place-brntn",
    "eid": "STEP:node-334-platform>node-334-lobby",
    "from": "Braintree",
-   "hours_2025": 3971.1,
+   "hours_2025": 3895.1,
    "k_gains_baseline": 3,
    "kind": "escalator",
    "pathway_ids": [
@@ -21,7 +21,7 @@
    "complex": "place-brntn",
    "eid": "STEP:node-335-lobby>node-335-platform",
    "from": "Braintree",
-   "hours_2025": 3971.1,
+   "hours_2025": 3895.1,
    "k_gains_baseline": 3,
    "kind": "escalator",
    "pathway_ids": [
@@ -34,7 +34,7 @@
    "complex": "place-brntn",
    "eid": "STEP:node-brntn-nplatstairs-lobby>node-brntn-nplatstairs-platform",
    "from": "Braintree",
-   "hours_2025": 3971.1,
+   "hours_2025": 3895.1,
    "k_gains_baseline": 3,
    "kind": "stairs",
    "pathway_ids": [
@@ -47,7 +47,7 @@
    "complex": "place-brntn",
    "eid": "STEP:node-brntn-nplatstairs-platform>node-brntn-nplatstairs-lobby",
    "from": "Braintree",
-   "hours_2025": 3971.1,
+   "hours_2025": 3895.1,
    "k_gains_baseline": 3,
    "kind": "stairs",
    "pathway_ids": [
@@ -60,7 +60,7 @@
    "complex": "place-brntn",
    "eid": "STEP:node-brntn-splatstairs-lobby>node-brntn-splatstairs-platform",
    "from": "Braintree",
-   "hours_2025": 3971.1,
+   "hours_2025": 3895.1,
    "k_gains_baseline": 3,
    "kind": "stairs",
    "pathway_ids": [
@@ -73,7 +73,7 @@
    "complex": "place-brntn",
    "eid": "STEP:node-brntn-splatstairs-platform>node-brntn-splatstairs-lobby",
    "from": "Braintree",
-   "hours_2025": 3971.1,
+   "hours_2025": 3895.1,
    "k_gains_baseline": 3,
    "kind": "stairs",
    "pathway_ids": [
@@ -140,7 +140,7 @@
    "complex": "place-harsq",
    "eid": "STEP:door-harsq-brattle>node-harsq-bratstair-upper",
    "from": "Brattle Square",
-   "hours_2025": 224.5,
+   "hours_2025": 0,
    "k_gains_baseline": 9,
    "kind": "stairs",
    "pathway_ids": [
@@ -153,7 +153,7 @@
    "complex": "place-harsq",
    "eid": "STEP:node-harsq-bratstair-upper>door-harsq-brattle",
    "from": "Harvard",
-   "hours_2025": 224.5,
+   "hours_2025": 0,
    "k_gains_baseline": 9,
    "kind": "stairs",
    "pathway_ids": [
@@ -166,7 +166,7 @@
    "complex": "pktrm+dwnxg",
    "eid": "STEP:node-dwnxg-stair1-ol>node-dwnxg-stair1-rl",
    "from": "Downtown Crossing",
-   "hours_2025": 36.4,
+   "hours_2025": 0,
    "k_gains_baseline": 5,
    "kind": "stairs",
    "pathway_ids": [
@@ -179,7 +179,7 @@
    "complex": "pktrm+dwnxg",
    "eid": "STEP:node-dwnxg-stair1-rl>node-dwnxg-stair1-ol",
    "from": "Downtown Crossing",
-   "hours_2025": 36.4,
+   "hours_2025": 0,
    "k_gains_baseline": 5,
    "kind": "stairs",
    "pathway_ids": [
@@ -192,7 +192,7 @@
    "complex": "pktrm+dwnxg",
    "eid": "STEP:node-dwnxg-stair8-ol>node-dwnxg-stair8-rl",
    "from": "Downtown Crossing",
-   "hours_2025": 88.7,
+   "hours_2025": 63.4,
    "k_gains_baseline": 4,
    "kind": "stairs",
    "pathway_ids": [
@@ -205,7 +205,7 @@
    "complex": "pktrm+dwnxg",
    "eid": "STEP:node-dwnxg-stair8-rl>node-dwnxg-stair8-ol",
    "from": "Downtown Crossing",
-   "hours_2025": 88.7,
+   "hours_2025": 63.4,
    "k_gains_baseline": 4,
    "kind": "stairs",
    "pathway_ids": [
