@@ -197,7 +197,8 @@ export default function App() {
       {displayOpen && <DisplayPanel value={display} onChange={changeDisplay} onClose={closeDisplay}
                                     eyes={eyes} onEyes={(v) => setEyes(v)} />}
       <CommandPalette open={palette} setOpen={setPalette} actions={actions} />
-      {drawer && <AgentDrawer live={wake === "live"} scope={scope} onClose={close} />}
+      {drawer ? <AgentDrawer live={wake === "live"} scope={scope} onClose={close} />
+        : <button className="chat-launch" aria-label={S.agent.launch} onClick={() => setDrawer(true)}><I.agent /></button>}
       {eyes && <EyesFree live={wake === "live"} onClose={closeEyes} />}
       <p className="visually-hidden">{S.eyes.hint}</p>
     </AnnouncerProvider>

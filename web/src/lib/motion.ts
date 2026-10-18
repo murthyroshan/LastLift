@@ -12,7 +12,7 @@ export function startSmoothScroll(): () => void {
   lenis = new Lenis({
     lerp: 0.09, wheelMultiplier: 0.9, allowNestedScroll: true,
     // maps zoom, tables and panels scroll themselves, dialogs keep their own scroll
-    prevent: (node: HTMLElement) => !!node.closest?.(".maplibregl-map, .livemap, canvas, .table-wrap, .console, [role=dialog], textarea, select, [data-lenis-prevent]"),
+    prevent: (node: HTMLElement) => !!node.closest?.(".maplibregl-map, .livemap, canvas, .table-wrap, .console, .chat, [role=dialog], textarea, select, [data-lenis-prevent]"),
   });
   let raf = 0;
   const loop = (t: number) => { lenis?.raf(t); raf = requestAnimationFrame(loop); };

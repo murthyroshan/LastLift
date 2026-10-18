@@ -22,11 +22,14 @@ async function verifyChain(rec: { events: Ev[]; chain?: string[]; head?: string 
   return h === rec.head ? true : rec.events.length;
 }
 
-/** The agent's run, step by step: every tool call went through MCP; each step's Cypher is one click away. */
+/** The agent as a chat dock at the bottom right: one scrolling conversation, suggested (recorded) questions as chips,
+ *  each answer carrying its steps (every tool call went through MCP, each step's Cypher one click away), the
+ *  grounding check and the replay's hash-chain check. The message box stays pinned at the bottom. */
 export function AgentDrawer({ live, scope, onClose }: { live: boolean; scope: Scope; onClose: () => void }) {
   const [index, setIndex] = useState<{ id: string; question: string }[]>([]);
   const [events, setEvents] = useState<Ev[]>([]);
   const [question, setQuestion] = useState("");
+  const [asked, setAsked] = useState("");
   const [running, setRunning] = useState(false);
   const [queries, setQueries] = useState<Record<string, string>>({});
   const [open, setOpen] = useState<number | null>(null);
@@ -35,6 +38,7 @@ export function AgentDrawer({ live, scope, onClose }: { live: boolean; scope: Sc
   const announce = useAnnounce();
   const timers = useRef<number[]>([]);
   const heading = useRef<HTMLHeadingElement>(null);
+  const body = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     heading.current?.focus();
@@ -44,6 +48,9 @@ export function AgentDrawer({ live, scope, onClose }: { live: boolean; scope: Sc
     window.addEventListener("keydown", esc);
     return () => { window.removeEventListener("keydown", esc); timers.current.forEach(clearTimeout); };
   }, [onClose]);
+
+  // keep the newest message in view as the run streams in
+  useEffect(() => { const b = body.current; if (b && asked) b.scrollTop = b.scrollHeight; }, [events.length, running, asked]);
 
   function finish(evs: Ev[]) {
     const a = evs.find((e) => e.type === "answer");
@@ -56,7 +63,7 @@ export function AgentDrawer({ live, scope, onClose }: { live: boolean; scope: Sc
     setOpen(null); setRunning(true);
     const rec = await getReplay(id);
     setRec(rec); setVerified("");
-    setQuestion(rec.question);
+    setAsked(rec.question);
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) { setEvents(rec.events); finish(rec.events); return; }
     setEvents([]);
@@ -71,6 +78,7 @@ export function AgentDrawer({ live, scope, onClose }: { live: boolean; scope: Sc
   function ask() {
     if (!question.trim() || !live) return;
     setEvents([]); setOpen(null); setRunning(true); setRec(null); setVerified("");
+    setAsked(question.trim()); setQuestion("");
     const seen: Ev[] = [];
     askLive(question.trim(), (e) => {
       seen.push(e);
@@ -84,74 +92,89 @@ export function AgentDrawer({ live, scope, onClose }: { live: boolean; scope: Sc
   const claims: Ev[] = events.find((e) => e.type === "grounding")?.claims ?? [];
   const answer = events.find((e) => e.type === "answer");
   return (
-    <aside className="drawer" aria-labelledby="agent-h">
-      <h2 id="agent-h" tabIndex={-1} ref={heading}>{S.agent.title}</h2>
-      <p>{S.agent.intro}</p>
-      <button onClick={onClose}>{S.agent.close}</button>
+    <aside className="chat" aria-labelledby="agent-h">
+      <header className="chat-h">
+        <span className="chat-dot" data-live={live} aria-hidden="true" />
+        <h2 id="agent-h" tabIndex={-1} ref={heading}>{S.agent.title}</h2>
+        <button className="chat-x" onClick={onClose} aria-label={S.agent.close}>✕</button>
+      </header>
 
-      <h3>{S.agent.recorded}</h3>
-      <ul>
-        {index.map((r) => (
-          <li key={r.id}><button className="link" onClick={() => playRecorded(r.id)}>{r.question}</button></li>
-        ))}
-      </ul>
+      <div className="chat-body" ref={body}>
+        <p className="chat-intro">{S.agent.intro}</p>
+        <p className="chat-label">{S.agent.recorded}</p>
+        <ul className="chat-chips">
+          {index.map((r) => (
+            <li key={r.id}><button className="chat-chip" onClick={() => playRecorded(r.id)} disabled={running}>{r.question}</button></li>
+          ))}
+        </ul>
 
-      <form onSubmit={(e) => { e.preventDefault(); ask(); }}>
-        <label htmlFor="q">{S.agent.ask}</label><br />
-        <input id="q" type="text" value={question} placeholder={S.agent.placeholder}
-               onChange={(e) => setQuestion(e.target.value)} disabled={!live} />{" "}
-        <button className="primary" disabled={!live || running}>{S.agent.ask}</button>
-        {!live && <p className="muted">{S.agent.liveOnly}</p>}
-      </form>
+        {asked && <div className="msg me">{asked}</div>}
 
-      {running && <p aria-busy="true">{S.agent.running}</p>}
-      {results.length > 0 && <Waterfall events={events} />}
-      {results.length > 0 && <>
-        <h3>{S.agent.steps}</h3>
-        <ol className="trace">
-          {results.map((e, i) => (
-            <li key={i}>
-              <span className="tool">{e.tool}</span> <span className="chip">{S.agent.viaMcp}</span>
-              <div>{e.summary}</div>
-              {(e.queries?.length ?? 0) > 0 && (
-                <button className="link" aria-expanded={open === i} onClick={() => setOpen(open === i ? null : i)}>
-                  {S.agent.cypher}
-                </button>
-              )}
-              {open === i && e.queries.map((q: string) => (
-                <div key={q}><strong>{q}</strong>{queries[q] && <pre className="cypher">{queries[q]}</pre>}</div>
+        {results.length > 0 && (
+          <div className="msg steps">
+            <p className="msg-label">{S.agent.steps}</p>
+            <Waterfall events={events} />
+            <ol className="trace">
+              {results.map((e, i) => (
+                <li key={i}>
+                  <span className="tool">{e.tool}</span> <span className="chip">{S.agent.viaMcp}</span>
+                  <div>{e.summary}</div>
+                  {(e.queries?.length ?? 0) > 0 && (
+                    <button className="link" aria-expanded={open === i} onClick={() => setOpen(open === i ? null : i)}>
+                      {S.agent.cypher}
+                    </button>
+                  )}
+                  {open === i && e.queries.map((q: string) => (
+                    <div key={q}><strong>{q}</strong>{queries[q] && <pre className="cypher">{queries[q]}</pre>}</div>
+                  ))}
+                </li>
               ))}
-            </li>
-          ))}
-        </ol>
-      </>}
-      {answer && <>
-        <h3>{S.agent.answer}</h3>
-        <p>{answer.text}</p>
-        <p className="muted">{answer.source === "llm" ? S.agent.sourceLlm : S.agent.sourceTemplate}
-          {answer.source === "llm" && answer.model ? ` (${answer.model})` : ""}</p>
-        {claims.length > 0 && <ul className="claims" aria-label={S.agent.claimsLabel}>
-          {claims.map((c, i) => (
-            <li key={i}>
-              {c.ok ? <span className="chip ok">✓ {S.agent.claimOk(c.cites.join(", "))}</span>
-                : <span className="chip">✕ {S.agent.claimReplaced}</span>}{" "}
-              {c.ok ? c.text : (c.replaced_by ?? "")}
-            </li>
-          ))}
-        </ul>}
-        {failovers.length > 0 && <ul className="muted">
-          {failovers.map((f, i) => <li key={i}>{S.agent.failover(f.from_model, f.to_model)}</li>)}
-        </ul>}
-        {events[0]?.trace_id && <p className="muted">{S.agent.trace(events[0].trace_id)}</p>}
-        {rec?.chain && !running && <p>
-          <button onClick={async () => {
-            const r = await verifyChain(rec);
-            const msg = r === true ? S.agent.chainOk(rec.events.length, rec.head.slice(0, 12)) : S.agent.chainBroken(r);
-            setVerified(msg); announce(msg);
-          }}>{S.agent.verify}</button>{" "}
-          {verified && <span role="status">{verified}</span>}
-        </p>}
-      </>}
+            </ol>
+          </div>
+        )}
+
+        {running && <p className="msg ai typing" aria-busy="true"><span className="visually-hidden">{S.agent.running}</span><i /><i /><i /></p>}
+
+        {answer && (
+          <div className="msg ai">
+            <p className="msg-label">{S.agent.answer}</p>
+            <p className="msg-text">{answer.text}</p>
+            <p className="muted small">{answer.source === "llm" ? S.agent.sourceLlm : S.agent.sourceTemplate}
+              {answer.source === "llm" && answer.model ? ` (${answer.model})` : ""}</p>
+            {claims.length > 0 && <ul className="claims" aria-label={S.agent.claimsLabel}>
+              {claims.map((c, i) => (
+                <li key={i}>
+                  {c.ok ? <span className="chip ok">✓ {S.agent.claimOk(c.cites.join(", "))}</span>
+                    : <span className="chip">✕ {S.agent.claimReplaced}</span>}{" "}
+                  {c.ok ? c.text : (c.replaced_by ?? "")}
+                </li>
+              ))}
+            </ul>}
+            {failovers.length > 0 && <ul className="muted small">
+              {failovers.map((f, i) => <li key={i}>{S.agent.failover(f.from_model, f.to_model)}</li>)}
+            </ul>}
+            {events[0]?.trace_id && <p className="muted small">{S.agent.trace(events[0].trace_id)}</p>}
+            {rec?.chain && !running && <p className="chat-verify">
+              <button onClick={async () => {
+                const r = await verifyChain(rec);
+                const msg = r === true ? S.agent.chainOk(rec.events.length, rec.head.slice(0, 12)) : S.agent.chainBroken(r);
+                setVerified(msg); announce(msg);
+              }}>{S.agent.verify}</button>{" "}
+              {verified && <span role="status">{verified}</span>}
+            </p>}
+          </div>
+        )}
+      </div>
+
+      <form className="chat-compose" onSubmit={(e) => { e.preventDefault(); ask(); }}>
+        {!live && <p className="chat-hint">{S.agent.liveOnly}</p>}
+        <label htmlFor="q" className="visually-hidden">{S.agent.ask}</label>
+        <div className="chat-row">
+          <input id="q" type="text" value={question} placeholder={S.agent.placeholder} autoComplete="off"
+                 onChange={(e) => setQuestion(e.target.value)} disabled={!live} />
+          <button className="primary chat-send" disabled={!live || running || !question.trim()}>{S.agent.ask}</button>
+        </div>
+      </form>
     </aside>
   );
 }

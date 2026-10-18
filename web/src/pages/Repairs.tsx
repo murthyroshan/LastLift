@@ -14,6 +14,7 @@ export function Repairs({ scope, live = false }: { scope: Scope; live?: boolean 
   const [order, setOrder] = useState<Envelope | null>(null);
   const [records, setRecords] = useState<Record<string, any>>({});
   const dlg = useRef<HTMLDialogElement>(null);
+  const [allWatch, setAllWatch] = useState(false);
 
   useEffect(() => {
     getStateFor(scope).then((s) => {
@@ -46,14 +47,26 @@ export function Repairs({ scope, live = false }: { scope: Scope; live?: boolean 
       <p className="eyebrow">{S.repairs.eyebrow}</p>
       <h1>{S.repairs.title}</h1>
       <p className="lead">{S.repairs.intro}</p>
+      {[
+        { key: "now", tier: "repair_now", title: S.repairs.groupNow, items: shownRanks.filter((r) => r.tier <= 1) },
+        { key: "protect", tier: "protect", title: S.repairs.groupProtect, items: shownRanks.filter((r) => r.tier === 2) },
+        { key: "watch", tier: "watch", title: S.repairs.groupWatch, items: shownRanks.filter((r) => r.tier > 2) },
+      ].filter((g) => g.items.length).map((g) => {
+        const items = g.key === "watch" && !allWatch ? g.items.slice(0, 3) : g.items;
+        return (
+      <section key={g.key} className="rank-group" aria-labelledby={`rg-${g.key}`}>
+        <div className="rank-group-h">
+          <h2 id={`rg-${g.key}`}><span className="tier" data-tier={g.tier} aria-hidden="true" />{g.title}<span className="rank-count">{g.items.length}</span></h2>
+          <p className="muted">{g.items[0].tier_label}</p>
+        </div>
       <ol className="rank-list">
-        {shownRanks.map((r, i) => (
+        {items.map((r) => { const i = shownRanks.indexOf(r); return (
           <li key={`${r.facility_id}-${i}`} className="rank-card" data-tier={r.tier <= 1 ? "now" : r.tier <= 2 ? "protect" : "watch"}>
             <span className="rank-no" aria-hidden="true">{i + 1}</span>
             <div className="rank-main">
-              <p className="tier-line"><span className="tier" data-tier={r.tier <= 1 ? "repair_now" : r.tier <= 2 ? "protect" : "watch"}>{r.tier_label}</span></p>
-              <h2 className="rank-title"><span className="mono">{r.facility_id}</span> <span className="muted">{r.name}</span></h2>
-              <p className="rank-station"><a href={href(`/station/${r.station_id}`)}>{names[r.station_id] ?? r.station_id}</a></p>
+              <h3 className="rank-title"><a href={href(`/station/${r.station_id}`)}>{names[r.station_id] ?? r.station_id}</a>
+                {" "}<span className="rank-fid mono">{r.facility_id}</span></h3>
+              <p className="rank-desc" title={r.name}>{r.name}</p>
             </div>
             <dl className="rank-metrics">
               <div><dt>{S.repairs.colDirs}</dt><dd>{r.platform_directions}
@@ -68,8 +81,14 @@ export function Repairs({ scope, live = false }: { scope: Scope; live?: boolean 
               {r.tier <= 2 && <button onClick={() => openTicket(r.facility_id)}>{S.repairs.draft}</button>}
             </div>
           </li>
-        ))}
+        ); })}
       </ol>
+        {g.key === "watch" && g.items.length > 3 && (
+          <button className="link rank-more" aria-expanded={allWatch} onClick={() => setAllWatch(!allWatch)}>
+            {allWatch ? S.repairs.showFewer : S.repairs.showAll(g.items.length)}</button>
+        )}
+      </section>
+        ); })}
 
       <dialog ref={dlg} aria-labelledby="tk-h">
         <h2 id="tk-h">{S.repairs.ticketTitle}</h2>
@@ -80,7 +99,8 @@ export function Repairs({ scope, live = false }: { scope: Scope; live?: boolean 
         <form method="dialog"><button>{S.agent.close}</button></form>
       </dialog>
 
-      {order && order.data?.order?.length > 0 && <section aria-labelledby="or-h">
+      <div className="plan-grid">
+      {order && order.data?.order?.length > 0 && <section aria-labelledby="or-h" className="card plan-card">
         <h2 id="or-h">{S.order.title}</h2>
         <p>{S.order.intro}</p>
         <ol>{order.data.order.map((x: any) => (
@@ -90,10 +110,12 @@ export function Repairs({ scope, live = false }: { scope: Scope; live?: boolean 
           {order.data.gap?.[0] === 0 && order.data.gap?.[1] === 0 ? S.order.greedySame : S.order.greedyDiffers}</p>}
       </section>}
 
-      <WorstDay live={live} />
-      <OneLift />
+      <div className="card plan-card"><WorstDay live={live} /></div>
+      </div>
+      <div className="card plan-card"><OneLift /></div>
 
-      <h2 className="section-gap">{S.repairs.reroute}</h2>
+      <details className="more-panel">
+      <summary><h2>{S.repairs.reroute}</h2><span className="rank-count">{reroutes.length}</span></summary>
       {reroutes.map((r) => (
         <section key={r.platform.stop_id} className="card" style={{ marginBottom: "1rem" }}>
           <h3>{r.platform.name} {r.platform.platform_name}</h3>
@@ -103,8 +125,10 @@ export function Repairs({ scope, live = false }: { scope: Scope; live?: boolean 
           <ol>{(r.board.data.routes?.[0]?.steps ?? []).map((s: any, i: number) => <li key={i}>{s.text}</li>)}</ol>
         </section>
       ))}
+      </details>
 
-      <h2>{S.repairs.officialTitle}</h2>
+      <details className="more-panel">
+      <summary><h2>{S.repairs.officialTitle}</h2></summary>
       <p>{S.repairs.officialIntro}</p>
       {ev.live_scored !== undefined && <>
         <p><strong>{S.repairs.scored(ev.live_agree, ev.live_partial, ev.live_disagree, ev.live_scored)}</strong></p>
@@ -126,6 +150,7 @@ export function Repairs({ scope, live = false }: { scope: Scope; live?: boolean 
           </tbody>
         </table>
       </div>
+      </details>
     </>
   );
 }

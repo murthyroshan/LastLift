@@ -4,8 +4,8 @@ import "maplibre-gl/dist/maplibre-gl.css";
 // MapLibre finds its worker next to its own module; bundling moves it, so hand Vite's bundled worker URL over.
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import { MapboxOverlay } from "@deck.gl/mapbox";
-import { ArcLayer, ColumnLayer, LineLayer, ScatterplotLayer, TextLayer } from "@deck.gl/layers";
-import { getContingency, getMap, getStations } from "../api";
+import { ArcLayer, ColumnLayer, LineLayer, PathLayer, ScatterplotLayer, TextLayer } from "@deck.gl/layers";
+import { getContingency, getLines, getMap, getStations } from "../api";
 import { href } from "../router";
 
 export type Camera = { lng: number; lat: number; zoom: number; pitch: number; bearing: number };
@@ -39,7 +39,14 @@ function token(name: string, alpha = 255): RGBA {
 maplibregl.setWorkerUrl(workerUrl);
 
 const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-const dark = () => window.matchMedia("(prefers-color-scheme: dark)").matches;
+const dark = () => {                                 // the site's own theme first, then the device's
+  const t = document.documentElement.dataset.theme;
+  return t === "dark" || (t !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+};
+/** MBTA's line colours (Mattapan rides the Red Line's colour; anything else is neutral). */
+const LINE_COLOUR = (route: string): RGBA => route.startsWith("Red") || route === "Mattapan" ? [218, 41, 28, 255]
+  : route.startsWith("Orange") ? [237, 139, 0, 255] : route.startsWith("Blue") ? [0, 61, 165, 255]
+  : route.startsWith("Green") ? [0, 132, 61, 255] : route.startsWith("7") ? [124, 135, 142, 255] : [124, 135, 142, 255];
 
 type Props = {
   camera?: Camera;
@@ -69,6 +76,7 @@ export function LiveMap({ camera = CAMERAS.overview, highlight = null, arcLifts 
   const overlay = useRef<MapboxOverlay | null>(null);
   const [rows, setRows] = useState<Row[]>([]);
   const [links, setLinks] = useState<{ a: string; b: string; rail: boolean }[]>([]);
+  const [lines, setLines] = useState<{ route_id: string; stations: string[] }[]>([]);
   const [spof, setSpof] = useState<{ facility_id: string; station_id: string; dominates_for: string[] }[]>([]);
   const [ready, setReady] = useState(false);
   const [pulse, setPulse] = useState(0);
@@ -81,6 +89,7 @@ export function LiveMap({ camera = CAMERAS.overview, highlight = null, arcLifts 
       setLinks(m.links);
       setSpof(c?.network_spof ?? []);
     }).catch(() => {});
+    getLines().then((l) => setLines(l.lines)).catch(() => {});
   }, []);
 
   useEffect(() => {                                   // create the map once
@@ -153,21 +162,40 @@ export function LiveMap({ camera = CAMERAS.overview, highlight = null, arcLifts 
       return [base[0], base[1], base[2], Math.round(235 * dim(r.id))];
     };
     const data = rows.filter((r) => r.data);
+    // the rapid-transit lines in their own colours, drawn as one soft glow under a crisp core
+    const paths = lines.map((l) => ({ id: l.route_id, colour: LINE_COLOUR(l.route_id),
+      path: l.stations.map((id) => at.get(id)).filter(Boolean).map((r) => [r!.lon, r!.lat]) })).filter((p) => p.path.length > 1);
+    const fade = highlight ? 0.35 : 1;
     const layers = [
       new LineLayer({
         id: "links", data: links.filter((l) => at.has(l.a) && at.has(l.b)),
         getSourcePosition: (l: any) => [at.get(l.a)!.lon, at.get(l.a)!.lat],
         getTargetPosition: (l: any) => [at.get(l.b)!.lon, at.get(l.b)!.lat],
-        getColor: (l: any) => (l.rail ? [c.fg[0], c.fg[1], c.fg[2], 70] : [c.fg[0], c.fg[1], c.fg[2], 28]),
-        getWidth: (l: any) => (l.rail ? 2 : 1), widthUnits: "pixels",
+        getColor: (l: any) => (l.rail ? [c.fg[0], c.fg[1], c.fg[2], 45] : [c.fg[0], c.fg[1], c.fg[2], 18]),
+        getWidth: (l: any) => (l.rail ? 1.5 : 1), widthUnits: "pixels",
+      }),
+      new PathLayer({
+        id: "line-glow", data: paths, getPath: (p: any) => p.path, widthUnits: "pixels", getWidth: 9,
+        getColor: (p: any) => [p.colour[0], p.colour[1], p.colour[2], Math.round(55 * fade)], jointRounded: true, capRounded: true,
+        updateTriggers: { getColor: [highlight] },
+      }),
+      new PathLayer({
+        id: "line-core", data: paths, getPath: (p: any) => p.path, widthUnits: "pixels", getWidth: 3,
+        getColor: (p: any) => [p.colour[0], p.colour[1], p.colour[2], Math.round(235 * fade)], jointRounded: true, capRounded: true,
+        updateTriggers: { getColor: [highlight] },
+      }),
+      new ScatterplotLayer({
+        id: "column-glow", data: data.filter((r) => r.single > 0 || r.lost > 0), getPosition: (r: Row) => [r.lon, r.lat],
+        getRadius: 11, radiusUnits: "pixels", getFillColor: (r: Row) => { const k = colour(r); return [k[0], k[1], k[2], Math.round(70 * dim(r.id))]; },
+        updateTriggers: { getFillColor: [highlight] },
       }),
       new ScatterplotLayer({
         id: "nodata", data: rows.filter((r) => !r.data), getPosition: (r: Row) => [r.lon, r.lat],
         getRadius: 2.2, radiusUnits: "pixels", getFillColor: c.unknown,
       }),
       new ScatterplotLayer({
-        id: "base", data, getPosition: (r: Row) => [r.lon, r.lat], getRadius: 5, radiusUnits: "pixels",
-        getFillColor: colour, stroked: true, getLineColor: [0, 0, 0, 160], lineWidthUnits: "pixels", getLineWidth: 1,
+        id: "base", data, getPosition: (r: Row) => [r.lon, r.lat], getRadius: 4, radiusUnits: "pixels",
+        getFillColor: colour, stroked: true, getLineColor: dark() ? [10, 13, 18, 220] : [255, 255, 255, 230], lineWidthUnits: "pixels", getLineWidth: 1.5,
         pickable: true, updateTriggers: { getFillColor: [highlight] },
       }),
       new ColumnLayer({
@@ -223,7 +251,7 @@ export function LiveMap({ camera = CAMERAS.overview, highlight = null, arcLifts 
         window.location.hash = href(`/station/${object.id}`).slice(1);
       } : undefined,
     } as any);
-  }, [rows, links, highlight, arcs, rise, labels, pulse, closedHere, interactive, scale]);
+  }, [rows, links, lines, highlight, arcs, rise, labels, pulse, closedHere, interactive, scale]);
 
   return <div ref={box} className={`livemap ${className}`} />;
 }
