@@ -5,6 +5,7 @@ import { AnnouncerProvider } from "./components/Announcer";
 import { isPresent, Present } from "./components/Present";
 import { EyesFree, isEyesFree } from "./components/EyesFree";
 import { About } from "./pages/About";
+import { Tour } from "./pages/Tour";
 import { Landing } from "./pages/Landing";
 import { Network } from "./pages/Network";
 import { Approvals } from "./pages/Approvals";
@@ -100,8 +101,8 @@ export default function App() {
       tabs: [["/network", S.tabs.network], ["/history", S.tabs.history]] },
     { key: "plan", path: "/repairs", label: S.nav.plan, pages: ["repairs", "sandbox"],
       tabs: [["/repairs", S.tabs.priorities], ["/sandbox", S.tabs.whatif]] },
-    { key: "about", path: "/about", label: S.nav.about, pages: ["about", "atlas"],
-      tabs: [["/about", S.tabs.how], ["/atlas", S.tabs.cities]] },
+    { key: "about", path: "/about", label: S.nav.about, pages: ["about", "atlas", "tour"],
+      tabs: [["/about", S.tabs.how], ["/atlas", S.tabs.cities], ["/tour", S.tabs.tour]] },
   ];
   const current = sections.find((s) => s.pages.includes(page));
 
@@ -189,6 +190,7 @@ export default function App() {
               : page === "network" || page === "contingency" ? <Network key={scope} scope={scope} />
               : page === "approvals" ? <Approvals key={scope} scope={scope} live={wake === "live"} />
               : page === "about" ? <About />
+              : page === "tour" ? <Tour />
               : page === "atlas" ? <AtlasPage />
               : page === "history" ? <TimeMachine />
               : page === "sandbox" ? <Sandbox key={scope} route={route} live={wake === "live"} scope={scope} />

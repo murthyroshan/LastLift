@@ -75,6 +75,7 @@ export function AgentShowcase() {
         <div className="as-ctas">
           <button className="lh-btn lh-btn-ink" onClick={() => window.dispatchEvent(new CustomEvent("lastlift:ask"))}>{S.showcase.ask}</button>
           <a className="lh-btn" href={href("/approvals")}>{S.showcase.agents}</a>
+          <a className="lh-btn lh-btn-ghost" href={href("/tour")}>{S.showcase.tour}</a>
         </div>
       </div>
     </section>

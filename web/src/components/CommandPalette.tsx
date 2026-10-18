@@ -44,7 +44,7 @@ export function CommandPalette({ open, setOpen, actions }: { open: boolean; setO
   const pages: [string, string, keyof typeof I][] = [
     ["/", S.nav.home, "story"], ["/console", S.tabs.live, "command"], ["/approvals", S.tabs.agents, "ops"],
     ["/network", S.tabs.network, "network"], ["/history", S.tabs.history, "story"], ["/repairs", S.tabs.priorities, "repairs"],
-    ["/sandbox", S.tabs.whatif, "lift"], ["/about", S.tabs.how, "about"], ["/atlas", S.tabs.cities, "network"]];
+    ["/sandbox", S.tabs.whatif, "lift"], ["/about", S.tabs.how, "about"], ["/atlas", S.tabs.cities, "network"], ["/tour", S.tabs.tour, "story"]];
 
   return (
     <Command.Dialog open={open} onOpenChange={setOpen} label={S.palette.label} className="cmdk" overlayClassName="cmdk-overlay" filter={paletteScore}>

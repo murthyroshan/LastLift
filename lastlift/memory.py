@@ -56,7 +56,7 @@ def _now():
 
 
 def record_run(graph: str, client: str, question: str | None, events: list[dict], results: list[dict],
-               answer: dict | None, state_version: str | None) -> str:
+               answer: dict | None, state_version: str | None, trace_id: str = "") -> str:
     """Write one run (best effort: a failure here never changes an answer)."""
     run_id = uuid.uuid4().hex[:16]
     calls = [e for e in events if e.get("type") == "tool_call"]
@@ -71,7 +71,7 @@ def record_run(graph: str, client: str, question: str | None, events: list[dict]
     usage = (answer or {}).get("usage") or {}
     run = {"run_id": run_id, "client": client, "model": (answer or {}).get("model") or "",
            "tokens_in": usage.get("input_tokens") or 0, "tokens_out": usage.get("output_tokens") or 0,
-           "state_version": state_version or "", "at": _now(), "tools": len(rows)}
+           "state_version": state_version or "", "at": _now(), "tools": len(rows), "trace_id": trace_id}
     g = db.client().select_graph(graph)
     g.query(Q_RUN, {"run": run, "calls": rows})
     if reads:
@@ -79,10 +79,26 @@ def record_run(graph: str, client: str, question: str | None, events: list[dict]
     if answer is not None:
         g.query(Q_ANSWER, {"a": {"run_id": run_id, "source": answer.get("source", ""),
                                  "grounded": bool(answer.get("grounded", True)), "stale": False, "stale_reason": "",
-                                 "question": (question or "")[:300], "at": run["at"]},
+                                 "question": (question or "")[:300], "at": run["at"], "trace_id": trace_id},
                            "tids": [r["p"]["tid"] for r in rows]})
     g.query(Q_PRUNE, {"keep": MAX_RUNS})
     return run_id
+
+
+Q_ANSWER_STATUS = (
+    "MATCH (a:Answer {trace_id:$t}) OPTIONAL MATCH (a)-[:CITES]->(:ToolCall)-[:READ]->(l:Lift) "
+    "RETURN a.stale, a.stale_reason, a.question, a.at, collect(DISTINCT l.facility_id) LIMIT 1"
+)
+
+
+def answer_status(graph: str, trace_id: str) -> dict:
+    """Is an earlier answer still true? It goes stale the moment a lift it read changes state (invalidate below)."""
+    rs = db.client().select_graph(graph).ro_query(Q_ANSWER_STATUS, {"t": trace_id}).result_set
+    if not rs:
+        return {"found": False}
+    stale, reason, question, at, lifts = rs[0]
+    return {"found": True, "stale": bool(stale), "stale_reason": reason or "", "question": question, "at": at,
+            "lifts_read": sorted(x for x in lifts if x)}
 
 
 def invalidate(graph: str, changed) -> int:

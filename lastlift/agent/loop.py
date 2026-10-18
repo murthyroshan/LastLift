@@ -153,6 +153,10 @@ async def ask(question: str, scope: str = "demo", mode: str | None = None, emit=
             send("grounding", ok=not problems, problems=problems, claims=report)
             if not any(c["ok"] for c in report) or not text:
                 text, source = None, "template"
+        elif text is not None and re.search(r'"(claims|cites|kind)"\s*:', text):
+            # JSON the parser could not recover is never shown as an answer: the template is built instead
+            send("grounding", ok=False, problems=["the model's structured answer could not be read"])
+            text, source = None, "template"
         elif text is not None:
             problems = grounding.check(text, results)
             if problems:
@@ -176,7 +180,7 @@ async def ask(question: str, scope: str = "demo", mode: str | None = None, emit=
         g = state.graph_name(scope)
         ver = db_version(g)
         memory.record_run(g, "lastlift-chat", question, events, results,
-                          next((e for e in events if e["type"] == "answer"), None), ver)
+                          next((e for e in events if e["type"] == "answer"), None), ver, trace_id=trace_id)
     except Exception:
         pass
     return {"answer": text, "source": source, "events": events, "results": results, "trace_id": trace_id}

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getOps, decideProposal, getProposals, getStations, type Scope } from "../api";
 import { href } from "../router";
 import { S } from "../strings.en";
+import { CaseTimeline } from "../components/CaseTimeline";
 
 /** The operations agents' work: what each closure means (Analyst) and the actions it proposes (Dispatcher), with the
  *  human decision. The snapshot comes from the mirror; decisions need the live API. */
@@ -45,6 +46,8 @@ export function Approvals({ scope, live }: { scope: Scope; live: boolean }) {
         <li data-agent="human"><span className="pl-n">{live && inbox ? inbox.length : "–"}</span><span className="pl-t">{S.ops.stage.human}</span>
           <span className="pl-d">{S.ops.stageText.human}</span></li>
       </ol>
+
+      <CaseTimeline ops={ops} names={names} />
 
       <section aria-labelledby="as-h">
         <h2 id="as-h">{S.ops.assessTitle}</h2>

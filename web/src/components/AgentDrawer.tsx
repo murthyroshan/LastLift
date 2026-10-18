@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { askLive, getQueries, getReplay, getReplayIndex, type Scope } from "../api";
+import { askLive, getAnswerStatus, getQueries, getReplay, getReplayIndex, type Scope } from "../api";
 import { useAnnounce } from "./Announcer";
 import { S } from "../strings.en";
 
@@ -35,6 +35,7 @@ export function AgentDrawer({ live, scope, onClose }: { live: boolean; scope: Sc
   const [open, setOpen] = useState<number | null>(null);
   const [rec, setRec] = useState<any>(null);
   const [verified, setVerified] = useState<string>("");
+  const [status, setStatus] = useState<{ stale: boolean; reason: string; lifts: string[] } | null>(null);
   const announce = useAnnounce();
   const timers = useRef<number[]>([]);
   const heading = useRef<HTMLHeadingElement>(null);
@@ -75,17 +76,31 @@ export function AgentDrawer({ live, scope, onClose }: { live: boolean; scope: Sc
     });
   }
 
-  function ask() {
-    if (!question.trim() || !live) return;
+  function ask(text: string = question) {
+    if (!text.trim() || !live) return;
     setEvents([]); setOpen(null); setRunning(true); setRec(null); setVerified("");
-    setAsked(question.trim()); setQuestion("");
+    setAsked(text.trim()); setQuestion("");
     const seen: Ev[] = [];
-    askLive(question.trim(), (e) => {
+    askLive(text.trim(), (e) => {
       seen.push(e);
       setEvents([...seen]);
       if (e.type === "done") finish(seen);
     }, scope);
   }
+
+  // a live answer is checked against the graph while the chat is open: it goes stale the moment a lift it read changes
+  const liveTrace = !rec && !running && events.some((e) => e.type === "answer") ? events[0]?.trace_id : null;
+  useEffect(() => {
+    setStatus(null);
+    if (!liveTrace) return;
+    let alive = true;
+    const check = () => getAnswerStatus(liveTrace, scope).then((s) => {
+      if (alive && s.found) setStatus({ stale: !!s.stale, reason: s.stale_reason ?? "", lifts: s.lifts_read ?? [] });
+    }).catch(() => {});
+    check();
+    const t = window.setInterval(check, 8000);
+    return () => { alive = false; clearInterval(t); };
+  }, [liveTrace, scope]);
 
   const results = events.filter((e) => e.type === "tool_result");
   const failovers = events.filter((e) => e.type === "error" && e.stage === "llm_failover");
@@ -153,6 +168,10 @@ export function AgentDrawer({ live, scope, onClose }: { live: boolean; scope: Sc
             {failovers.length > 0 && <ul className="muted small">
               {failovers.map((f, i) => <li key={i}>{S.agent.failover(f.from_model, f.to_model)}</li>)}
             </ul>}
+            {status && <p className={`chat-fresh ${status.stale ? "stale" : ""}`} role="status">
+              {status.stale ? S.agent.stale(status.reason) : S.agent.fresh(status.lifts.length > 1 ? S.agent.freshMany(status.lifts.length) : status.lifts.length ? S.agent.freshOne : S.agent.freshNone)}
+              {status.stale && <> <button className="link" onClick={() => ask(asked)}>{S.agent.askAgain}</button></>}
+            </p>}
             {events[0]?.trace_id && <p className="muted small">{S.agent.trace(events[0].trace_id)}</p>}
             {rec?.chain && !running && <p className="chat-verify">
               <button onClick={async () => {

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { UseFromAgent } from "../components/UseFromAgent";
 import { getClaims, getDisclaimers } from "../api";
 import { S } from "../strings.en";
 
@@ -64,6 +65,7 @@ export function About() {
           </li>
         ))}
       </ol>
+      <UseFromAgent />
       <section className="card about-notes">
         <h2>{S.about.limitsTitle}</h2>
         <p>{S.about.assumptions}</p>

@@ -316,6 +316,16 @@ def agent_approvals(scope: Literal["demo", "live"] = "demo", status: str | None 
     return {"scope": scope, "proposals": roles.proposals(scope, status), "policy": roles.POLICY}
 
 
+@app.get("/v1/answers/{trace_id}")
+def answer_status(trace_id: str, scope: Literal["demo", "live"] = "demo"):
+    """Whether an earlier agent answer is still true: it is marked stale, in the graph, as soon as any lift it read
+    changes state. The chat polls this for each live answer."""
+    from . import memory
+    if not re.fullmatch(r"[0-9a-f]{32}", trace_id):
+        raise HTTPException(400, "trace id must be 32 hex characters")
+    return _call(memory.answer_status, {"graph": state.graph_name(scope), "trace_id": trace_id})
+
+
 @app.post("/v1/approvals/{pid}")
 def agent_decide(pid: str, request: Request, body: dict = Body(...), scope: Literal["demo", "live"] = "demo",
                  idempotency_key: str | None = Header(default=None)):

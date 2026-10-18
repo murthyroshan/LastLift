@@ -1,0 +1,22 @@
+{
+ "repo": "murthyroshan/lastlift-ops",
+ "issues_url": "https://github.com/murthyroshan/lastlift-ops/issues",
+ "issues": [
+  {
+   "number": 1,
+   "url": "https://github.com/murthyroshan/lastlift-ops/issues/1",
+   "facility_id": "891",
+   "kind": "protect_ticket",
+   "title": "[LastLift] Protect lift 891 (Downtown Crossing Elevator 891 (Oak Grove platform to Franklin Street))",
+   "filed_at": "2026-10-18T06:32:19Z"
+  },
+  {
+   "number": 2,
+   "url": "https://github.com/murthyroshan/lastlift-ops/issues/2",
+   "facility_id": "885",
+   "kind": "repair_ticket",
+   "title": "[LastLift] Repair lift 885 (Revere Beach Elevator 885 (Wonderland platform to lobby))",
+   "filed_at": "2026-10-18T06:32:20Z"
+  }
+ ]
+}

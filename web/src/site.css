@@ -177,3 +177,41 @@ main#main .rank-card { grid-template-columns: 2.6rem minmax(0, 1.2fr) minmax(0, 
 .plan-card .table-wrap { max-height: 22rem; overflow: auto; }
 .plan-card ol { padding-left: 1.3rem; display: flex; flex-direction: column; gap: 0.3rem; }
 @media (max-width: 1000px) { .plan-grid { grid-template-columns: 1fr; } }
+
+/* the chat's freshness line: an answer stays true until a lift it read changes state */
+.chat-fresh { margin: 0.4rem 0; padding: 0.45rem 0.6rem; border-radius: 10px; font-size: 0.82rem; line-height: 1.4;
+  background: color-mix(in srgb, #2fb5a0 12%, transparent); color: color-mix(in srgb, #2fb5a0 40%, var(--fg)); }
+.chat-fresh.stale { background: color-mix(in srgb, #e5484d 14%, transparent); color: color-mix(in srgb, #e5484d 45%, var(--fg)); font-weight: 600; }
+.chat-fresh .link { font-weight: 700; text-decoration: underline; }
+
+/* operations: one closure followed end to end, ending in the GitHub issue the Dispatcher filed */
+.tl-steps { list-style: none; margin: 1rem 0; padding: 0; display: grid; gap: 0; counter-reset: tl; }
+.tl-steps li { position: relative; display: grid; grid-template-columns: 9.5rem 1fr; gap: 1rem; padding: 0.9rem 0 0.9rem 2.6rem; counter-increment: tl; }
+.tl-steps li::before { content: counter(tl); position: absolute; left: 0; top: 0.85rem; width: 1.7rem; height: 1.7rem; border-radius: 50%; display: grid; place-items: center;
+  font: 700 0.8rem/1 var(--mono); color: #fff; background: var(--tl, #5d6169); z-index: 1; }
+.tl-steps li:not(:last-child)::after { content: ""; position: absolute; left: 0.83rem; top: 2.5rem; bottom: -0.9rem; width: 2px; background: color-mix(in srgb, var(--fg) 14%, transparent); }
+.tl-steps li[data-tone="monitor"] { --tl: #3b82f6; } .tl-steps li[data-tone="analyst"] { --tl: #b7791f; }
+.tl-steps li[data-tone="dispatcher"] { --tl: #7c3aed; } .tl-steps li[data-tone="human"] { --tl: #c22f35; } .tl-steps li[data-tone="filed"] { --tl: #1f7a6d; }
+.tl-who { font-family: var(--mono); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding-top: 0.25rem; }
+.tl-what { line-height: 1.5; } .tl-what a { font-weight: 700; }
+.tl-foot { margin: 0.4rem 0 0; font-weight: 600; }
+@media (max-width: 640px) { .tl-steps li { grid-template-columns: 1fr; gap: 0.2rem; } }
+
+/* about: use LastLift from your own agent (MCP config and HTTP examples) */
+.use-agent { margin: 2rem 0; }
+.ua-gets { margin: 0.6rem 0 1rem; padding-left: 1.2rem; display: grid; gap: 0.35rem; line-height: 1.5; }
+.ua-block { margin: 0.8rem 0; border-radius: 14px; overflow: hidden; box-shadow: inset 0 0 0 1px var(--line); }
+.ua-head { display: flex; justify-content: space-between; align-items: center; padding: 0.45rem 0.9rem; font-family: var(--mono); font-size: 0.78rem;
+  letter-spacing: 0.08em; text-transform: uppercase; background: color-mix(in srgb, var(--fg) 6%, var(--panel)); }
+.ua-block pre { margin: 0; padding: 0.9rem 1rem; overflow-x: auto; background: #12151c; color: #e6e8ec; font-size: 0.84rem; line-height: 1.55; }
+
+/* for judges: the tour, numbered stops that each open the real thing */
+.tour-stops { list-style: none; margin: 2rem 0; padding: 0; display: grid; gap: 0.9rem; counter-reset: stop; }
+.tour-stop { position: relative; display: grid; grid-template-columns: 1fr auto; gap: 1.2rem; align-items: center; padding: 1.3rem 1.4rem 1.3rem 4.4rem;
+  border-radius: 22px; background: var(--panel); box-shadow: 0 20px 50px -34px rgb(22 24 29 / 0.4), inset 0 0 0 1px var(--line); counter-increment: stop; }
+.tour-stop::before { content: counter(stop); position: absolute; left: 1.3rem; top: 50%; transform: translateY(-50%); width: 2.2rem; height: 2.2rem; border-radius: 50%;
+  display: grid; place-items: center; font-family: var(--display); font-weight: 900; font-size: 1.2rem; background: var(--fg); color: var(--bg); }
+.tour-body h2 { margin: 0 0 0.3rem; font-size: clamp(1.2rem, 2vw, 1.5rem); }
+.tour-body p { margin: 0; line-height: 1.5; max-width: 70ch; }
+.tour-go { white-space: nowrap; }
+@media (max-width: 720px) { .tour-stop { grid-template-columns: 1fr; padding-left: 4rem; } .tour-go { justify-self: start; } }

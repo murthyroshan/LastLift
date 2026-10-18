@@ -4,6 +4,7 @@ import { S } from "../strings.en";
 import type { Scope } from "../api";
 import { GameTeaser } from "./GameTeaser";
 import { AgentShowcase } from "./AgentShowcase";
+import { WhyGraph } from "./WhyGraph";
 
 const BASE = import.meta.env.BASE_URL;
 const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -82,7 +83,7 @@ export function LandingHero({ claims, stations, film = false, scope = "demo" }: 
           </button>
         </div>}
 
-        <div className="lh-product"><AgentShowcase /><GameTeaser /></div>
+        <div className="lh-product"><AgentShowcase /><WhyGraph claims={claims} /><GameTeaser /></div>
         <span className="lh-ghost" aria-hidden="true">{claims?.platforms_single_lift ?? ""}</span>
       </section>
 

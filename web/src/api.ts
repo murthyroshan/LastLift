@@ -111,6 +111,10 @@ export const getMap = () => mirror<{ stations: any[]; links: any[] }>("map.json"
 
 /** The operations agents: a mirrored demo tick, the live inbox, and human decisions (Idempotency-Key per click). */
 export const getOps = () => mirror<Record<string, any>>("ops.json");
+/** The tickets the Dispatcher filed after a human approved them (issues in the lastlift-ops repository). */
+export type Filed = { repo: string; issues_url: string;
+  issues: { number: number; url: string; facility_id: string; kind: string; title: string; filed_at: string }[] };
+export const getFiled = () => mirror<Filed>("filed.json");
 export const getProposals = (scope: Scope) =>
   json<{ proposals: any[] }>(`${API_BASE}/v1/approvals?scope=${scope}&status=proposed`).then((r) => r.proposals);
 export const decideProposal = (scope: Scope, pid: string, decision: "approve" | "reject") =>
@@ -190,6 +194,11 @@ export async function pingLive(timeoutMs = 6000): Promise<boolean> {
 }
 
 /** Ask the live agent; events arrive one by one (server-sent events). */
+/** Whether an earlier live answer is still true (the graph marks it stale when a lift it read changes state). */
+export const getAnswerStatus = (traceId: string, scope: Scope) =>
+  json<{ found: boolean; stale?: boolean; stale_reason?: string; lifts_read?: string[] }>(
+    `${API_BASE}/v1/answers/${encodeURIComponent(traceId)}?scope=${scope}`);
+
 export function askLive(question: string, onEvent: (e: any) => void, scope: Scope = "demo"): () => void {
   const src = new EventSource(`${API_BASE}/api/ask?q=${encodeURIComponent(question)}&scope=${scope}`);
   const kinds = ["start", "tool_call", "tool_result", "error", "grounding", "answer", "done"];
@@ -203,7 +212,10 @@ export function askLive(question: string, onEvent: (e: any) => void, scope: Scop
       if (ev.type === "done") src.close();
     });
   }
-  src.onerror = () => {
+  src.onerror = (e) => {
+    // the server's own "error" events (an LLM failover, a tool error) arrive through the same handler:
+    // they carry data and the stream goes on; only a real connection failure has none
+    if (typeof (e as MessageEvent).data === "string") return;
     onEvent({ type: "error", stage: "network", message: "connection lost" });
     onEvent({ type: "done" });
     src.close();

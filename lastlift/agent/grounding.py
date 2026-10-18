@@ -71,16 +71,26 @@ def check_claim(claim: dict, results: list[dict]) -> list[str]:
     return problems
 
 
+def _loads(s: str):
+    """json.loads, then once more without trailing commas (a common small-model slip)."""
+    for t in (s, re.sub(r",\s*([\]}])", r"\1", s)):
+        try:
+            return json.loads(t)
+        except ValueError:
+            continue
+    return None
+
+
 def parse_claims(content: str) -> list[dict] | None:
-    """The final LLM message as a list of claims, or None if it is not the requested JSON."""
+    """The final LLM message as a list of claims, or None if it is not the requested JSON. A malformed or cut-off
+    message is recovered claim by claim: each complete {"text": ..., "cites": [...]} object is kept."""
     m = re.search(r"\{.*\}", content or "", re.S)
     if not m:
         return None
-    try:
-        data = json.loads(m.group(0))
-    except ValueError:
-        return None
+    data = _loads(m.group(0))
     claims = data.get("claims") if isinstance(data, dict) else None
+    if not isinstance(claims, list) and '"claims"' in content:
+        claims = [o for o in (_loads(x) for x in re.findall(r"\{[^{}]*\}", content)) if isinstance(o, dict) and "text" in o]
     if not isinstance(claims, list):
         return None
     out = []
