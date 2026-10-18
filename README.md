@@ -1,23 +1,50 @@
+<div align="center">
+
+<img src="docs/logo.svg" width="64" height="64" alt="">
+
 # LastLift
 
-**Find the last lift before it fails.** No prediction. Just the graph.
+### Find the last lift before it fails.
+
+**No prediction. Just the graph.**
 
 [![ci](https://github.com/murthyroshan/LastLift/actions/workflows/ci.yml/badge.svg)](https://github.com/murthyroshan/LastLift/actions/workflows/ci.yml)
+[![live site](https://img.shields.io/badge/live-lastlift.vercel.app-16181d?logo=vercel&logoColor=white)](https://lastlift.vercel.app)
+[![API](https://img.shields.io/badge/API-FastAPI%20on%20Render-2fb5a0)](https://lastlift-api.onrender.com/v1/docs)
+[![MCP](https://img.shields.io/badge/MCP-streamable%20HTTP-3b82f6)](#use-it-from-your-own-agent)
+[![FalkorDB](https://img.shields.io/badge/FalkorDB-4.22-f5a524)](https://www.falkordb.com)
+[![a11y](https://img.shields.io/badge/axe-every%20page%2C%20light%20%2B%20dark-16181d)](web/tests/a11y.spec.ts)
+[![licence](https://img.shields.io/badge/licence-MIT-lightgrey)](LICENSE)
+[![release](https://img.shields.io/github/v/release/murthyroshan/LastLift?color=f5a524)](https://github.com/murthyroshan/LastLift/releases)
+[![judge it](https://img.shields.io/badge/judge%20it-python%20scripts%2Fsmoke.py%20--prod-2fb5a0)](#judge-it-in-90-seconds)
+[![tracks](https://img.shields.io/badge/Graph%20Hacks-Track%201%20%C2%B7%20Track%202-f5a524)](#tracks-entered)
+
+**[Live site](https://lastlift.vercel.app)** · **[Play the walkthrough](https://lastlift.vercel.app/concepts/alewife.html)** · **[API docs](https://lastlift-api.onrender.com/v1/docs)** · **[MCP endpoint](#use-it-from-your-own-agent)** · **[Issues the agent filed](https://github.com/murthyroshan/lastlift-ops/issues)** · Demo video: _link added when recorded_
+
+<br>
+
+<img src="docs/img/hero.gif" alt="LastLift in seven frames: the finding, the agent calling tools over MCP, every claim checked, an answer marked out of date when lift 813 changes state, the ticket the agents filed after a person approved, and the walkthrough" width="100%">
+
+</div>
 
 > Unofficial decision-support prototype. Not affiliated with or endorsed by the MBTA or MassDOT. Uses MBTA GTFS and V3 API data under the MassDOT Developers License Agreement. Data may be incomplete or out of date. Always check mbta.com/alerts/access before travelling. Elevator status line 617-222-2828; customer support 617-222-3200 (TTY 711).
 >
 > Results describe the open-data model and may differ from conditions on the ground.
 
-**<!--claim:platforms_single_lift-->89<!--/claim--> of <!--claim:platforms_step_free-->366<!--/claim--> step-free platforms in Boston's MBTA station data hang on a single lift.** LastLift turns the MBTA's published station layouts into a flow network in FalkorDB, so for every platform it knows how many lift failures it takes to cut riders who need step-free access off, which lift that is, and what to do when it happens. An agent answers questions about it through tools that any MCP client can call.
+## The finding
+
+<table>
+<tr>
+<td align="center" width="25%"><h1><!--claim:platforms_single_lift-->89<!--/claim--></h1>of <!--claim:platforms_step_free-->366<!--/claim--> step-free platforms in Boston's MBTA station data hang on <b>a single lift</b></td>
+<td align="center" width="25%"><h1><!--claim:n2_critical_pairs-->42<!--/claim--></h1>lift pairs are harmless alone but <b>cut platforms off together</b></td>
+<td align="center" width="25%"><h1><!--claim:net_spof_lifts-->15<!--/claim--></h1>lifts can each cut <b>a whole station</b> off from the step-free network</td>
+<td align="center" width="25%"><h1><!--claim:falkordb_certified-->734<!--/claim--></h1>of <!--claim:maxflow_calls-->734<!--/claim--> FalkorDB max-flow results <b>certified</b> and equal to NetworkX</td>
+</tr>
+</table>
+
+LastLift turns the MBTA's published station layouts into a flow network in FalkorDB, so for every platform it knows how many lift failures it takes to cut riders who need step-free access off, which lift that is, and what to do when it happens. An agent answers questions about it through tools that any MCP client can call, and operations agents turn a closure into a ticket a person approves.
 
 **Graph Hacks track:** Agents That Act on Connected Data.
-
-| | |
-|---|---|
-| Live API (FastAPI + FalkorDB) | https://lastlift-api.onrender.com/v1/docs (free hosting: the first request may take a minute to wake it) |
-| MCP endpoint | `https://lastlift-api.onrender.com/mcp/` |
-| Website | _link added when deployed_ |
-| Demo video | _link added when recorded_ |
 
 ### If you have 60 seconds
 
@@ -25,6 +52,71 @@
 - Today, with lift 961 closed at Alewife, **lift 813 is newly the only lift** for the Red Line, Track 1 and Track 2 platforms. No alert says that; the graph does.
 - <!--claim:naive_two_lifts_but_k1-->74<!--/claim--> of the single-lift platforms are at stations with two or more lifts: counting lifts is not enough.
 - Every number is a certified FalkorDB result, cross-checked against NetworkX, and every agent answer cites the exact Cypher it ran.
+
+## See it
+
+<table>
+<tr>
+<td width="50%"><img src="docs/img/command.webp" alt="The Command console: lift alerts beside a map of the network with a column per station"><br><b>Command.</b> Every open lift alert, what it means, and a map of the network coloured by MBTA line.</td>
+<td width="50%"><img src="docs/img/station-xray.webp" alt="A station x-ray of Alewife: a 3D model of its levels with each platform's lift routes"><br><b>Station x-ray.</b> Alewife's levels in 3D, every platform's independent lift routes, and the table twin for screen readers.</td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/img/operations.webp" alt="The Operations page: Monitor, Analyst, Dispatcher and a person deciding"><br><b>Operations agents.</b> Monitor, Analyst and Dispatcher work every closure; a person approves before anything is filed.</td>
+<td width="50%"><img src="docs/img/plan.webp" alt="The Plan page: lifts to repair now, ranked by platform-directions and departures"><br><b>Plan.</b> Which lifts to repair now, which to protect, and what breaks if you close any three.</td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/img/why-graph.webp" alt="Why a graph: the same model names the right lifts in far more answers with the graph than without; counting lifts misses many single-lift platforms; every FalkorDB result certified"><br><b>Why a graph.</b> The evaluation's own numbers on the landing page: the same model with and without the graph, the count-lifts rule, and certification.</td>
+<td width="50%"><img src="docs/img/timeline.webp" alt="One closure end to end: Monitor, Analyst, Dispatcher, a person's approval, and the GitHub issue it filed"><br><b>One closure, end to end.</b> Lift 869 closes at Downtown Crossing; the agents find 891 is now the last lift; a person approves; the issue is filed.</td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/img/stale-answer.webp" alt="The chat marks an earlier answer out of date because lift 813 changed state after it was given"><br><b>Answers that expire.</b> Each live answer is checked against the graph while the chat is open, and flips to out of date the moment a lift it read changes.</td>
+<td width="50%"><img src="docs/img/use-from-agent.webp" alt="Use LastLift from your own agent: the tools, resources and prompts, and a copy-paste MCP client config"><br><b>Bring your own agent.</b> The same tools, resources and prompts over a public MCP endpoint, with a copy-paste client config.</td>
+</tr>
+<tr>
+<td colspan="2"><img src="docs/img/game-813-fails.webp" alt="The 3D walkthrough: lift 813 on an underground platform, taped off and out of service" width="100%"><br><b>Walk through Alewife.</b> A seated first-person walkthrough built from LastLift's own data: lift 961 is closed, then lift 813 fails in front of you. <a href="https://lastlift.vercel.app/concepts/alewife.html">Play it</a>, or <a href="https://lastlift.vercel.app/concepts/alewife.html?autoplay">watch it play itself</a>.</td>
+</tr>
+</table>
+
+## The agent, grounded in a graph
+
+A recorded run from [`web/public/replay/whatif-813.json`](web/public/replay/whatif-813.json): a language model reaching LastLift's tools only through MCP, every claim in its answer checked against what the tools returned. The website replays it on the landing page and lets you verify its hash chain in the browser.
+
+```text
+Q  What happens if lift 813 fails too?
+
+1  resolve_place      query: lift 813                                        via MCP ·   36 ms
+   → lift 813 (Alewife Elevator 813 (Platform to main lobby))
+2  what_if_close      facility_ids: [813]                                    via MCP · 1070 ms
+   → simulated closing 813: 3 more platforms lose step-free access; 0 lifts become the last lift
+     (simulation on a copy; live state unchanged)
+3  step_free_route    from_station: place-alfcl · to_platform: Red Line
+                      also_closed: [813]                                     via MCP ·   67 ms
+   → no step-free route in the open-data model
+
+✓  grounded: every claim checked against the tool results
+
+A  If lift 813 fails, the Alewife Red Line platform loses step-free access in the open-data model.
+   No step-free route exists in the open-data model to board that platform via other stations.
+   Check mbta.com/alerts/access.
+```
+
+And the agents act. These two issues were filed by the Dispatcher, after a person approved each proposal, as lift dossiers with a drawing of the station's step-free graph:
+
+| | Issue | Why the graph proposed it |
+|---|---|---|
+| **Protect** | [lastlift-ops#1: lift 891, Downtown Crossing](https://github.com/murthyroshan/lastlift-ops/issues/1) | Still working, but with 869 closed it is the last lift for the Oak Grove and Alewife platforms (minimum cut {869, 891}) |
+| **Repair** | [lastlift-ops#2: lift 885, Revere Beach](https://github.com/murthyroshan/lastlift-ops/issues/2) | Closed, and the Wonderland platform has no other step-free route |
+
+## Answers that know when they are out of date
+
+<p align="center"><img src="docs/img/stale-answer.webp" alt="An agent answer in the chat marked out of date: lift 813 changed state after this answer, with an Ask again button" width="420"></p>
+
+An agent's answer is only as good as the context it was built from, and lift status changes by the hour. LastLift keeps that context honest in the graph itself:
+
+- Every chat run is written as `(:Run)-[:CALLED]->(:ToolCall)-[:READ]->(:Lift)` with its `(:Answer)`, tagged with the run's trace id.
+- When a lift changes state (`state.sync`), the same step marks every answer that read it `stale`, with the reason. An unrelated answer is untouched.
+- `GET /v1/answers/{trace_id}` reports whether an answer is still true. The chat polls it while it is open: "✓ Still true" until a lift it read changes, then "⚠ Out of date: lift 813 changed state after this answer", with **Ask again**.
+- To see it happen: ask about Alewife in the chat, then run `python scripts/demo_stale.py close 813` against your own graph; the answer flips within seconds. `python scripts/demo_stale.py restore` puts the closures back exactly as they were.
 
 ## Instead of "Elevator out of service", LastLift says what it means for you
 
@@ -34,7 +126,37 @@
 | "Alewife Elevator 961 is unavailable." | No platform loses access, but lift 813 is now the only lift for three platforms. Protect it. |
 | "Elevator 782 at Worcester is unavailable." | Cannot assess: MBTA publishes no station layout for Worcester. |
 
+## How it proves a last lift
+
+<p align="center"><img src="docs/how-it-proves.svg" alt="Max-flow from the street to a platform equals its number of lift-disjoint step-free routes: at Alewife, k is 2 with both lifts, 1 with lift 961 closed, 0 if lift 813 fails too" width="100%"></p>
+
+FalkorDB 4.22's `algo.maxFlow` can return a wrong value on some networks: on an 11-edge reproduction it returns 300 where the true max-flow is 453 (reported by the Chokepoint project; reproduced in [`docs/falkordb-maxflow-note.md`](docs/falkordb-maxflow-note.md)). So no FalkorDB flow is trusted on its own:
+
+- each result is certified by checking that the returned flow is a feasible flow whose residual graph has no augmenting path, and repaired with an exact Dinic run if it is not;
+- the minimum cut names the lifts; each lift on a single route is removed in turn to find every single point of failure;
+- an independent checker validates the k lift-disjoint routes as a proof.
+
+On LastLift's network: <!--claim:maxflow_calls-->734<!--/claim--> max-flow calls, <!--claim:falkordb_first_pass_exact-->734<!--/claim--> certified on the first pass, <!--claim:falkordb_repaired-->0<!--/claim--> repaired, <!--claim:falkordb_eq_networkx-->734<!--/claim--> equal to NetworkX, <!--claim:checker_accepted-->333<!--/claim--> route proofs accepted and <!--claim:checker_rejected-->0<!--/claim--> rejected. `scripts/verify_claims.py` re-derives every headline number from the committed snapshot with NetworkX alone.
+
+The same caution applies to path search: on 4.22 `algo.SPpaths` enumerates paths and ignored the server timeout in our tests, so LastLift routes with Dijkstra over edges read from the graph and re-checks every edge of a route in FalkorDB ([`docs/falkordb-sppaths-note.md`](docs/falkordb-sppaths-note.md)).
+
+## Architecture
+
+<p align="center"><img src="docs/architecture.svg" alt="LastLift architecture: MBTA open data, an ingest and proof stage, FalkorDB, tools over MCP and REST, a grounded chat agent and human-approved operations agents, and the website, MCP clients, the walkthrough and the ops issue tracker" width="100%"></p>
+
+| Layer | What it is | Where |
+|---|---|---|
+| Data | MBTA GTFS-Pathways, V3 alerts, MassDOT alert archives and LAMP | [`ingest/`](ingest/), [`data/`](data/) |
+| Proof | A pinned snapshot, the flow certifier, an independent NetworkX re-derivation | [`lastlift/flow.py`](lastlift/flow.py), [`lastlift/checker.py`](lastlift/checker.py), [`scripts/verify_claims.py`](scripts/verify_claims.py) |
+| Graph | FalkorDB 4.22: the step-free network, closures as relationship swaps, what-ifs on `GRAPH.COPY`, memory and provenance | [`lastlift/queries.py`](lastlift/queries.py), [`lastlift/memory.py`](lastlift/memory.py) |
+| Tools | Thirteen read-only tools over fixed, parameterised Cypher | [`lastlift/tools.py`](lastlift/tools.py) |
+| MCP and API | `/mcp` (public, read-only), `/mcp-ops` (approvals), REST `/v1`, SSE `/api/ask` | [`lastlift/mcp_server.py`](lastlift/mcp_server.py), [`lastlift/main.py`](lastlift/main.py) |
+| Agents | A grounded chat agent with a provider chain; Monitor, Analyst and Dispatcher | [`lastlift/agent/`](lastlift/agent/), [`lastlift/agents/`](lastlift/agents/) |
+| Surfaces | React and Vite on Vercel (pages open from a snapshot FalkorDB computed; live answers from the graph), the 3D walkthrough, `lastlift-ops` | [`web/`](web/), [`web/public/concepts/alewife.html`](web/public/concepts/alewife.html) |
+
 ## Judge it in 90 seconds
+
+**On the site:** [the Judge's tour](https://lastlift.vercel.app/#/tour) walks through everything in seven stops, each one the real thing. **From a terminal:**
 
 1. `POST https://lastlift-api.onrender.com/v1/tools/platform_redundancy` with `{"station_id": "place-alfcl"}`: Alewife, with the lift that became the last lift and why.
 2. `POST .../v1/tools/what_if_close` with `{"facility_ids": ["813"]}`: close a working lift on a copy of the graph; three platforms lose step-free access; the live state is untouched.
@@ -50,22 +172,15 @@
 | README with setup instructions and the graph data model | [Run it yourself](#run-it-yourself), [The graph data model](#the-graph-data-model) |
 | The Cypher queries or graph algorithms the product depends on | [The Cypher and the algorithms](#the-cypher-and-the-algorithms) (generated from `lastlift/queries.py`) |
 | A demo video | _added when recorded_ |
-| A live deployment, or complete local setup | https://lastlift-api.onrender.com and [Run it yourself](#run-it-yourself) |
-| The track | Agents That Act on Connected Data |
+| A live deployment, or complete local setup | https://lastlift.vercel.app, https://lastlift-api.onrender.com and [Run it yourself](#run-it-yourself) |
+| The tracks | Track 1, Agents That Act on Connected Data; Track 2, Agent Memory and Coordination ([why both](#tracks-entered)) |
+
+### Tracks entered
+
+- **Track 1, Agents That Act on Connected Data.** Operations agents act on the graph: the Monitor reads live MBTA alerts, the Analyst picks a playbook from certified max-flow, the Dispatcher proposes only while the graph is unchanged, and a person's approval files a real ticket ([lastlift-ops](https://github.com/murthyroshan/lastlift-ops/issues)). The chat agent answers only through the tools, over MCP, with every claim checked.
+- **Track 2, Agent Memory and Coordination.** The agents' memory lives in FalkorDB: every run, tool call and answer is a node with what it read; an answer is marked stale the moment a lift it read changes ([Answers that know when they are out of date](#answers-that-know-when-they-are-out-of-date)); the agents coordinate by writing assessments and proposals into the graph, guarded by its state version, never by messaging each other.
 
 Rule 3 (the graph does real work): see [Turn FalkorDB off](#turn-falkordb-off-and-here-is-exactly-what-stops-working). Rule 6 (data you may use): public MBTA open data only. Rule 11 (AI disclosure): [AI assistance](#ai-assistance).
-
-## Every redundancy number comes with a certificate
-
-FalkorDB 4.22's `algo.maxFlow` can return a wrong value on some networks: on an 11-edge reproduction it returns 300 where the true max-flow is 453 (reported by the Chokepoint project; reproduced in [`docs/falkordb-maxflow-note.md`](docs/falkordb-maxflow-note.md)). So no FalkorDB flow is trusted on its own:
-
-- each result is certified by checking that the returned flow is a feasible flow whose residual graph has no augmenting path, and repaired with an exact Dinic run if it is not;
-- the minimum cut names the lifts; each lift on a single route is removed in turn to find every single point of failure;
-- an independent checker validates the k lift-disjoint routes as a proof.
-
-On LastLift's network: <!--claim:maxflow_calls-->734<!--/claim--> max-flow calls, <!--claim:falkordb_first_pass_exact-->734<!--/claim--> certified on the first pass, <!--claim:falkordb_repaired-->0<!--/claim--> repaired, <!--claim:falkordb_eq_networkx-->734<!--/claim--> equal to NetworkX, <!--claim:checker_accepted-->333<!--/claim--> route proofs accepted and <!--claim:checker_rejected-->0<!--/claim--> rejected. `scripts/verify_claims.py` re-derives every headline number from the committed snapshot with NetworkX alone.
-
-The same caution applies to path search: on 4.22 `algo.SPpaths` enumerates paths and ignored the server timeout in our tests, so LastLift routes with Dijkstra over edges read from the graph and re-checks every edge of a route in FalkorDB ([`docs/falkordb-sppaths-note.md`](docs/falkordb-sppaths-note.md)).
 
 ## One closed lift, seen across the whole network
 
@@ -138,6 +253,8 @@ Everything LastLift computes is computed in FalkorDB: redundancy (`algo.maxFlow`
 
 ## Operations agents: no language model in the critical path
 
+<p align="center"><img src="docs/img/timeline.webp" alt="The Operations page following one closure end to end: Monitor reads the alert for lift 869, the Analyst finds 891 is now the last step-free link, the Dispatcher proposes a protect ticket after its state check, a person approves, and issue number one is filed in lastlift-ops" width="100%"></p>
+
 Three roles in one process act on every lift closure ([`lastlift/agents/`](lastlift/agents/)), handing off by writing nodes so every decision can be read back in Cypher:
 
 - **Monitor** reads MBTA's alerts. **Analyst** chooses a playbook from graph facts (lift not modelled: *abstain*; a platform-direction's k went to 0: *access lost*; another lift became the last one: *preventive*; otherwise *no loss*; a lift in the top quarter of closures in the archive's last year adds *chronic*, so memory changes the action), calls the tools through MCP and writes `(:Assessment)-[:ABOUT]->(:Lift)`. **Dispatcher** proposes actions from a fixed policy table, and only if a Cypher guard confirms the assessment was made at the graph's current `state_version`: a stale belief cannot act.
@@ -146,7 +263,7 @@ Three roles in one process act on every lift closure ([`lastlift/agents/`](lastl
 - Memory and provenance: every chat run is recorded as `(:Run)-[:CALLED]->(:ToolCall)-[:READ]->(:Lift|:Platform|:Station)` with its `(:Answer)`; when a lift changes state, the answers that read it are marked stale in the same step. `recall_lift_history` and `lift_dossier` read it back. Memory means observed history and provenance; nothing is learned.
 - Recorded runs are hash-chained: the website's "Verify this replay" button recomputes the chain in the browser, and one edited byte fails.
 
-## Use the same tools from any MCP client
+## Use it from your own agent
 
 Point any MCP client that supports streamable HTTP at the endpoint:
 
@@ -156,9 +273,35 @@ Point any MCP client that supports streamable HTTP at the endpoint:
 
 All thirteen tools are read-only (`readOnlyHint`), with an output schema; `what_if_close` works on a throwaway copy. The server also offers resources (`lastlift://model`, `lastlift://stations/{id}` and its Mermaid drawing `graph.mmd`, `lastlift://lifts/{id}/dossier.md`, `lastlift://incidents/open`, `lastlift://runs/{id}`, `lastlift://eval/latest`) and prompts (`triage_closure`, `station_briefing`, `plan_step_free_trip`, `explain_certificate`). The free host sleeps when idle, so the first call may take a minute.
 
+The same block works in Cursor (`.cursor/mcp.json`), VS Code and desktop agents that speak MCP; they then see LastLift's tools, resources and prompts alongside their own.
+
+Or straight over HTTP:
+
+```sh
+# Which Alewife platforms hang on one lift, and why
+curl -s -X POST https://lastlift-api.onrender.com/v1/tools/platform_redundancy \
+  -H 'Content-Type: application/json' -d '{"station_id": "place-alfcl"}'
+
+# Close a working lift on a throwaway copy of the graph
+curl -s -X POST https://lastlift-api.onrender.com/v1/tools/what_if_close \
+  -H 'Content-Type: application/json' -d '{"facility_ids": ["813"]}'
+
+# Ask the agent; the reply carries every tool call it made and a trace id
+curl -s -X POST https://lastlift-api.onrender.com/api/ask \
+  -H 'Content-Type: application/json' -d '{"question": "What happens if lift 813 fails too?"}'
+```
+
 ## Does it travel? The Step-Free Atlas
 
 The same rules, with no agency-specific handling, run on every transit agency that publishes GTFS-Pathways with open access in the Mobility Database catalogue: 14 feeds, of which 10 model their lifts well enough to assess. Only the needed files are fetched, by HTTP range reads on each zip ([`ingest/atlas_fetch.py`](ingest/atlas_fetch.py)). Every lift-dependent platform-direction is solved exactly in Python and again with FalkorDB's `algo.maxFlow` in a temporary graph that is deleted afterwards: 2884 of 2884 agree ([`scripts/atlas_sweep.py`](scripts/atlas_sweep.py)). Run on the MBTA's feed, the generic rules give the same 89 single-lift platforms as LastLift's own model. Each agency gets a data-readiness grade; agencies are named on the site only after their data licence has been checked ([`data/atlas_licences.json`](data/atlas_licences.json)).
+
+## Walk through Alewife
+
+[`/concepts/alewife.html`](https://lastlift.vercel.app/concepts/alewife.html) is a seated first-person walkthrough of a platform like Alewife's, built in three.js from photo-scanned CC0 materials and a real metro HDRI (credits in [`web/public/world/CREDITS.md`](web/public/world/CREDITS.md)). The station is drawn for the game; the lifts, the closure and the numbers on its results screens come from LastLift's data.
+
+- **Mission 1:** the train pulls out; lift 961 is taped off; find lift 813 and ride it up.
+- **Mission 2:** lift 813 fails in front of you. With both lifts out there is no step-free way off the platform, and the only way out is the train back to Davis.
+- W and S roll, A and D turn, the mouse looks, E uses; touch controls on phones. Add `?autoplay` to watch mission 2 play itself.
 
 ## Built for the people it is about
 
@@ -169,23 +312,29 @@ The same rules, with no agency-specific handling, run on every transit agency th
 - CI runs axe on every core screen in light and dark themes with the API blocked, plus keyboard-only and 320-pixel checks (`web/tests/a11y.spec.ts`).
 - Wording rules and exact disclaimers are enforced by a lint ([`lastlift/wording.py`](lastlift/wording.py)); see [`docs/ETHICS.md`](docs/ETHICS.md). Not yet reviewed by disabled riders; designed for that review.
 
+## Security and safeguards
+
+- **Agents cannot act on their own.** No language model is given a write tool. Repair and protect tickets need a person's approval with an `Idempotency-Key`; filing is off by default (`ACTIONS_MODE=draft`) and, when switched on, accepted only from the operator's own machine.
+- **Stale beliefs cannot act.** A proposal goes through only if the graph's `state_version` has not changed since it was made.
+- **Grounding gate.** An id or number in an answer that is not in a tool result sends the answer back to a template built from the tool results; questions about anything but step-free access get the scope answer.
+- **Spend caps.** Daily LLM call and token budgets; past them the agent answers from templates.
+- **Website headers** ([`web/vercel.json`](web/vercel.json)): a content security policy that allows the app's own scripts only, HSTS, `nosniff`, a strict referrer policy and a permissions policy. The browser tests run under the same headers.
+- **Secrets** live only in the environment; a pre-commit and pre-push scan ([`scripts/secret_scan.py`](scripts/secret_scan.py)) blocks keys, wrong authors and banned wording.
+
+## Tests and quality
+
+| Check | What it proves |
+|---|---|
+| `pytest` | Tools, agents, approvals, MCP surface, memory, recorded runs, the evaluation reproducing byte for byte, README and claims |
+| Playwright (`web/tests/`) | 34 browser tests: every page from FalkorDB's precomputed snapshot with the API blocked, axe in light and dark at 320 and 1280 pixels, keyboard-only use, eyes-free mode |
+| `scripts/verify_claims.py` | Every headline number re-derived from the snapshot with NetworkX alone |
+| `scripts/verify_replays.py` | Recorded agent runs re-executed against the graph; a stale fact fails the build |
+| `scripts/readme_sync.py --check` | Every number in this README comes from `claims.json`, every table from the code |
+| `scripts/copy_lint.py` | No user-facing text says what LastLift cannot know |
+
 ## The graph data model
 
-```mermaid
-graph LR
-  Station -- HAS_PLATFORM --> Platform
-  Station -- HAS_ENTRANCE --> Entrance
-  Station -- HAS_LIFT --> Lift
-  Street -- "SF (street)" --> Entrance
-  Entrance -- "SF (walk / gate)" --> Generic
-  Generic -- "SF (lift_access)" --> Lift
-  Lift -- "SF (lift, capacity 1) / SF_CLOSED" --> LiftOut
-  LiftOut -- "SF (lift_access)" --> Platform
-  Generic -. "STEP (stairs, escalator)" .-> Platform
-  Platform -- "RIDE (train, minutes)" --> Platform
-  Platform -- "DEPENDS_ON / DEPENDS_NOW {dir}" --> Lift
-  Lift -- CLOSED_IN --> Incident
-```
+<p align="center"><img src="docs/data-model.svg" alt="LastLift graph data model: a station complex from street to entrance, walkways and gates, lift (an edge of capacity 1, retyped SF_CLOSED when out), the lift's far door and the platform; stairs and escalators are STEP edges never used; platforms depend on lifts and ride to other platforms; lifts link to incidents" width="100%"></p>
 
 Every node in a station complex carries `cx`; step-free walkways, gates and lift-access edges have capacity 1,000,000 and lift edges capacity 1, so a platform's max-flow from its station's street node is its number of lift-disjoint step-free routes. A closed lift's edge is retyped `SF_CLOSED`, which takes it out of every algorithm at once. Model rules, including five evidence-backed overrides of the published data, are in [`docs/model_rules.md`](docs/model_rules.md).
 
@@ -222,7 +371,10 @@ Every node in a station complex carries `cx`; step-free walkways, gates and lift
 Snapshot `2026-10-15`, GTFS feed "Fall 2026, 2026-10-14T18:47:38+00:00, version D", seed sha256 `8277887f216a…`: 3,765 nodes, 11,929 relationships.
 <!--/generated-->
 
-## The Cypher and the algorithms
+<a id="the-cypher-and-the-algorithms"></a>
+
+<details>
+<summary><b>The Cypher and the algorithms</b>: every statement LastLift runs</summary>
 
 FalkorDB algorithms used: `algo.maxFlow` (redundancy, certified), `algo.WCC` (load verification), full-text index (station search), `GRAPH.COPY` (what-ifs). Every statement LastLift runs, generated from [`lastlift/queries.py`](lastlift/queries.py):
 
@@ -272,17 +424,7 @@ FalkorDB algorithms used: `algo.maxFlow` (redundancy, certified), `algo.WCC` (lo
 | `Q_WRITE_INCIDENTS` | `UNWIND $rows AS r CREATE (i:Incident) SET i = r.p WITH i, r UNWIND r.fids AS fid MATCH (l:Lift {facility_id:fid}) MERGE (l)-[:CLOSED_IN]->(i)` |
 <!--/generated-->
 
-## Architecture
-
-```mermaid
-graph LR
-  GTFS[MBTA GTFS + alerts] --> Ingest[ingest/build_snapshot.py] --> Snap[(snapshot JSONL)] --> Seed[seed.py] --> FDB[(FalkorDB 4.22)]
-  FDB --> Tools[8 tools] --> API[FastAPI /v1] --> Web[website]
-  Tools --> MCP[MCP server /mcp] --> Agent[agent: LLM chain or template]
-  V3[MBTA V3 alerts] -.->|LIVE_FEED=on| Poller[live poller] --> FDB
-  MCP --> Clients[any MCP client]
-  FDB --> Mirror[scripts/build_mirror.py] --> Web
-```
+</details>
 
 ## Run it yourself
 
@@ -328,7 +470,7 @@ This project was built with the help of an AI coding assistant. Design decisions
 
 ## Credits
 
-The `algo.maxFlow` defect reproduction is credited to the Chokepoint project. Built on FalkorDB, FastAPI, FastMCP, NetworkX, React and Vite.
+The `algo.maxFlow` defect reproduction is credited to the Chokepoint project. Built on FalkorDB, FastAPI, FastMCP, NetworkX, React, Vite, deck.gl, MapLibre and three.js. The walkthrough's materials and lighting are CC0 scans from Poly Haven.
 
 ## Feedback
 

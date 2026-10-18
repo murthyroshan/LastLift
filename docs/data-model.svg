@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,Helvetica,Arial,sans-serif">
+<title>LastLift graph data model</title>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#151821"/><stop offset="1" stop-color="#0d1017"/></linearGradient>
+  <radialGradient id="glowA" cx="0.18" cy="0.1" r="0.6"><stop offset="0" stop-color="#f5a524" stop-opacity="0.14"/><stop offset="1" stop-color="#f5a524" stop-opacity="0"/></radialGradient>
+  <radialGradient id="glowB" cx="0.9" cy="0.95" r="0.6"><stop offset="0" stop-color="#3b82f6" stop-opacity="0.12"/><stop offset="1" stop-color="#3b82f6" stop-opacity="0"/></radialGradient>
+  <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r="1" fill="#ffffff" fill-opacity="0.045"/></pattern>
+  <marker id="mA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f5a524"/></marker>
+  <marker id="mR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e5484d"/></marker>
+  <marker id="mT" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2fb5a0"/></marker>
+  <marker id="mB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#3b82f6"/></marker>
+  <marker id="mG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8b93a1"/></marker>
+</defs>
+<rect x="1" y="1" width="1598" height="898" rx="28" fill="url(#bg)" stroke="#2a3040"/>
+<rect x="1" y="1" width="1598" height="898" rx="28" fill="url(#dots)"/>
+<rect x="1" y="1" width="1598" height="898" rx="28" fill="url(#glowA)"/>
+<rect x="1" y="1" width="1598" height="898" rx="28" fill="url(#glowB)"/>
+<text x="56" y="70" fill="#8b93a1" font-size="15" font-weight="700" letter-spacing="3">LASTLIFT · GRAPH DATA MODEL</text>
+<text x="56" y="112" fill="#f3f4f6" font-size="34" font-weight="800">One station complex, as FalkorDB stores it</text>
+<text x="56" y="144" fill="#a3aab6" font-size="17">Lifts are edges of capacity 1, so max-flow from the street to a platform counts its lift-disjoint step-free routes.</text>
+<g><rect x="55.0" y="398.0" width="150" height="64" rx="16" fill="#171b25" stroke="#8b93a1" stroke-opacity="0.75" stroke-width="1.6"/>
+<rect x="55.0" y="398.0" width="5" height="64" rx="2.5" fill="#8b93a1"/>
+<text x="75.0" y="426" fill="#f3f4f6" font-size="19" font-weight="700">Street</text>
+<text x="75.0" y="448" fill="#98a0ad" font-size="13" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace">per complex</text></g>
+<g><rect x="272.0" y="398.0" width="176" height="64" rx="16" fill="#171b25" stroke="#3b82f6" stroke-opacity="0.75" stroke-width="1.6"/>
+<rect x="272.0" y="398.0" width="5" height="64" rx="2.5" fill="#3b82f6"/>
+<text x="292.0" y="426" fill="#f3f4f6" font-size="19" font-weight="700">Entrance</text>
+<text x="292.0" y="448" fill="#98a0ad" font-size="13" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace">:Node:Entrance</text></g>
+<g><rect x="502.0" y="398.0" width="176" height="64" rx="16" fill="#171b25" stroke="#3b82f6" stroke-opacity="0.75" stroke-width="1.6"/>
+<rect x="502.0" y="398.0" width="5" height="64" rx="2.5" fill="#3b82f6"/>
+<text x="522.0" y="426" fill="#f3f4f6" font-size="19" font-weight="700">Generic</text>
+<text x="522.0" y="448" fill="#98a0ad" font-size="13" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace">walkway · gate · hall</text></g>
+<g><rect x="732.0" y="398.0" width="176" height="64" rx="16" fill="#171b25" stroke="#f5a524" stroke-opacity="0.75" stroke-width="1.6"/>
+<rect x="732.0" y="398.0" width="5" height="64" rx="2.5" fill="#f5a524"/>
+<text x="752.0" y="426" fill="#f3f4f6" font-size="19" font-weight="700">Lift</text>
+<text x="752.0" y="448" fill="#98a0ad" font-size="13" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace">:Node:Lift</text></g>
+<g><rect x="1022.0" y="398.0" width="176" height="64" rx="16" fill="#171b25" stroke="#f5a524" stroke-opacity="0.75" stroke-width="1.6"/>
+<rect x="1022.0" y="398.0" width="5" height="64" rx="2.5" fill="#f5a524"/>
+<text x="1042.0" y="426" fill="#f3f4f6" font-size="19" font-weight="700">Lift out</text>
+<text x="1042.0" y="448" fill="#98a0ad" font-size="13" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace">the far door</text></g>
+<g><rect x="1262.0" y="398.0" width="176" height="64" rx="16" fill="#171b25" stroke="#2fb5a0" stroke-opacity="0.75" stroke-width="1.6"/>
+<rect x="1262.0" y="398.0" width="5" height="64" rx="2.5" fill="#2fb5a0"/>
+<text x="1282.0" y="426" fill="#f3f4f6" font-size="19" font-weight="700">Platform</text>
+<text x="1282.0" y="448" fill="#98a0ad" font-size="13" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace">stop_id · board/exit</text></g>
+<path d="M205,430 L268,430" fill="none" stroke="#3b82f6" stroke-width="2.4" marker-end="url(#mB)" stroke-linecap="round"/>
+<g><rect x="188.95" y="382" width="95.10000000000001" height="26" rx="13" fill="#0f131b" stroke="#93b4f5" stroke-opacity="0.6"/>
+<text x="236.5" y="400" fill="#93b4f5" font-size="13" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" text-anchor="middle">SF street</text></g>
+<path d="M448,430 L498,430" fill="none" stroke="#3b82f6" stroke-width="2.4" marker-end="url(#mB)" stroke-linecap="round"/>
+<g><rect x="405.7" y="382" width="134.60000000000002" height="26" rx="13" fill="#0f131b" stroke="#93b4f5" stroke-opacity="0.6"/>
+<text x="473.0" y="400" fill="#93b4f5" font-size="13" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" text-anchor="middle">SF walk / gate</text></g>
+<path d="M678,430 L728,430" fill="none" stroke="#3b82f6" stroke-width="2.4" marker-end="url(#mB)" stroke-linecap="round"/>
+<g><rect x="635.7" y="382" width="134.60000000000002" height="26" rx="13" fill="#0f131b" stroke="#93b4f5" stroke-opacity="0.6"/>
+<text x="703.0" y="400" fill="#93b4f5" font-size="13" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" text-anchor="middle">SF lift_access</text></g>
+<path d="M1198,430 L1258,430" fill="none" stroke="#3b82f6" stroke-width="2.4" marker-end="url(#mB)" stroke-linecap="round"/>
+<g><rect x="1160.7" y="382" width="134.60000000000002" height="26" rx="13" fill="#0f131b" stroke="#93b4f5" stroke-opacity="0.6"/>
+<text x="1228.0" y="400" fill="#93b4f5" font-size="13" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" text-anchor="middle">SF lift_access</text></g>
+<path d="M908,422 L1018,422" fill="none" stroke="#f5a524" stroke-width="3.2" marker-end="url(#mA)" stroke-linecap="round"/>
+<path d="M908,440 L1018,440" fill="none" stroke="#e5484d" stroke-width="2.2" stroke-dasharray="7 7" marker-end="url(#mR)" stroke-linecap="round"/>
+<g><rect x="872.0" y="364" width="182.0" height="26" rx="13" fill="#0f131b" stroke="#f5a524" stroke-opacity="0.6"/>
+<text x="963.0" y="382" fill="#f5a524" font-size="13" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" text-anchor="middle">SF lift · capacity 1</text></g>
+<g><rect x="879.9" y="468" width="166.20000000000002" height="26" rx="13" fill="#0f131b" stroke="#e5484d" stroke-opacity="0.6"/>
+<text x="963.0" y="486" fill="#e5484d" font-size="13" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" text-anchor="middle">SF_CLOSED when out</text></g>
+<g><rect x="725.0" y="200.0" width="190" height="64" rx="16" fill="#171b25" stroke="#c084fc" stroke-opacity="0.75" stroke-width="1.6"/>
+<rect x="725.0" y="200.0" width="5" height="64" rx="2.5" fill="#c084fc"/>
+<text x="745.0" y="228" fill="#f3f4f6" font-size="19" font-weight="700">Station</text>
+<text x="745.0" y="250" fill="#98a0ad" font-size="13" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace">uid · name · cx</text></g>
+<path d="M750,264 C750,342 360,302 360,396" fill="none" stroke="#c084fc" stroke-width="1.6" marker-end="url(#mG)" stroke-linecap="round"/>
+<g><rect x="495.6" y="302" width="118.80000000000001" height="26" rx="13" fill="#0f131b" stroke="#d6b4fe" stroke-opacity="0.6"/>
+<text x="555.0" y="320" fill="#d6b4fe" font-size="13" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" text-anchor="middle">HAS_ENTRANCE</text></g>
+<path d="M820,264 L820,360" fill="none" stroke="#c084fc" stroke-width="1.6" marker-end="url(#mG)" stroke-linecap="round"/>
+<g><rect x="836.4" y="295.0" width="87.2" height="26" rx="13" fill="#0f131b" stroke="#d6b4fe" stroke-opacity="0.6"/>
+<text x="880.0" y="313.0" fill="#d6b4fe" font-size="13" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" text-anchor="middle">HAS_LIFT</text></g>
+<path d="M890,264 C890,342 1350,302 1350,396" fill="none" stroke="#c084fc" stroke-width="1.6" marker-end="url(#mG)" stroke-linecap="round"/>
+<g><rect x="1060.6" y="302" width="118.80000000000001" height="26" rx="13" fill="#0f131b" stroke="#d6b4fe" stroke-opacity="0.6"/>
+<text x="1120.0" y="320" fill="#d6b4fe" font-size="13" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" text-anchor="middle">HAS_PLATFORM</text></g>
+<path d="M560,462 C560,720 1320,720 1320,464" fill="none" stroke="#8b93a1" stroke-width="2" stroke-dasharray="7 7" marker-end="url(#mG)" stroke-linecap="round"/>
+<g><rect x="758.15" y="641" width="363.7" height="26" rx="13" fill="#0f131b" stroke="#b8bec9" stroke-opacity="0.6"/>
+<text x="940.0" y="659" fill="#b8bec9" font-size="13" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" text-anchor="middle">STEP · stairs, escalators (never step-free)</text></g>
+<path d="M1370,462 C1370,580 860,580 860,466" fill="none" stroke="#2fb5a0" stroke-width="2.2" marker-end="url(#mT)" stroke-linecap="round"/>
+<g><rect x="984.5" y="534" width="261.0" height="26" rx="13" fill="#0f131b" stroke="#7fe0cf" stroke-opacity="0.6"/>
+<text x="1115.0" y="552" fill="#7fe0cf" font-size="13" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" text-anchor="middle">DEPENDS_ON / DEPENDS_NOW {dir}</text></g>
+<path d="M1438,418 C1550,340 1550,520 1438,444" fill="none" stroke="#2fb5a0" stroke-width="2" marker-end="url(#mT)" stroke-linecap="round"/>
+<g><rect x="1379.0" y="338" width="182.0" height="26" rx="13" fill="#0f131b" stroke="#7fe0cf" stroke-opacity="0.6"/>
+<text x="1470.0" y="356" fill="#7fe0cf" font-size="13" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" text-anchor="middle">RIDE · train minutes</text></g>
+<g><rect x="735.0" y="758.0" width="170" height="64" rx="16" fill="#171b25" stroke="#e5484d" stroke-opacity="0.75" stroke-width="1.6"/>
+<rect x="735.0" y="758.0" width="5" height="64" rx="2.5" fill="#e5484d"/>
+<text x="755.0" y="786" fill="#f3f4f6" font-size="19" font-weight="700">Incident</text>
+<text x="755.0" y="808" fill="#98a0ad" font-size="13" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace">alert · archive</text></g>
+<path d="M780,462 L780,756" fill="none" stroke="#e5484d" stroke-width="2" marker-end="url(#mR)" stroke-linecap="round"/>
+<g><rect x="668.45" y="546" width="95.10000000000001" height="26" rx="13" fill="#0f131b" stroke="#f4a3a6" stroke-opacity="0.6"/>
+<text x="716.0" y="564" fill="#f4a3a6" font-size="13" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" text-anchor="middle">CLOSED_IN</text></g>
+<g font-size="14" fill="#c9ced8">
+<line x1="1170" y1="730" x2="1206" y2="730" stroke="#3b82f6" stroke-width="3" stroke-linecap="round"/>
+<text x="1220" y="735">step-free walk, capacity 1,000,000</text>
+<line x1="1170" y1="758" x2="1206" y2="758" stroke="#f5a524" stroke-width="3" stroke-linecap="round"/>
+<text x="1220" y="763">lift, capacity 1</text>
+<line x1="1170" y1="786" x2="1206" y2="786" stroke="#e5484d" stroke-width="3" stroke-dasharray="6 6" stroke-linecap="round"/>
+<text x="1220" y="791">closed lift (out of every algorithm)</text>
+<line x1="1170" y1="814" x2="1206" y2="814" stroke="#2fb5a0" stroke-width="3" stroke-linecap="round"/>
+<text x="1220" y="819">derived: dependence, rides</text>
+<line x1="1170" y1="842" x2="1206" y2="842" stroke="#8b93a1" stroke-width="3" stroke-dasharray="6 6" stroke-linecap="round"/>
+<text x="1220" y="847">stairs, escalators (not step-free)</text>
+</g>
+<text x="56" y="868" fill="#7d8592" font-size="14">Every node in a complex carries cx. Closing a lift retypes its edge to SF_CLOSED, which removes it from algo.maxFlow and BFS at once.</text>
+</svg>
