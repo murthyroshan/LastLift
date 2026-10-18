@@ -20,9 +20,9 @@ services:
       - key: LIVE_FEED
         value: "on"
       - key: GROQ_MODEL
-        value: qwen/qwen3.8-27b
-      - key: GROQ_FALLBACK_MODEL
         value: openai/gpt-oss-120b
+      - key: GROQ_FALLBACK_MODEL
+        value: qwen/qwen3.8-27b
       - key: GEMINI_CHAT_MODEL
         value: gemini-3.1-flash-lite
       - key: OPS_REPO

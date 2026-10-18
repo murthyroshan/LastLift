@@ -6,7 +6,9 @@
 
 ### Find the last lift before it fails.
 
-**No prediction. Just the graph.**
+**An agent that finds the lift a platform depends on, before it fails, and files the ticket after a person approves.**
+
+No prediction. Just the graph.
 
 [![ci](https://github.com/murthyroshan/LastLift/actions/workflows/ci.yml/badge.svg)](https://github.com/murthyroshan/LastLift/actions/workflows/ci.yml)
 [![live site](https://img.shields.io/badge/live-lastlift.vercel.app-16181d?logo=vercel&logoColor=white)](https://lastlift.vercel.app)
@@ -333,6 +335,7 @@ The same rules, with no agency-specific handling, run on every transit agency th
 | `scripts/verify_replays.py` | Recorded agent runs re-executed against the graph; a stale fact fails the build |
 | `scripts/readme_sync.py --check` | Every number in this README comes from `claims.json`, every table from the code |
 | `scripts/copy_lint.py` | No user-facing text says what LastLift cannot know |
+| `scripts/latency.py --prod` | End-to-end answer time of the deployed agent over ten questions. Last run, on the free tiers: median 7.9 s, 95th percentile 19.4 s; 7 of 10 answered by the language model, the rest by the grounded template. Most of the wait is free-tier rate limiting (19 model failovers in that run); answers that need no model return in about a second |
 
 ## The graph data model
 

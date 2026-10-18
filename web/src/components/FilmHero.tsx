@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { lessMotion, scrollToY, scrollVelocity } from "../lib/motion";
 import { href } from "../router";
 import { S } from "../strings.en";
@@ -89,6 +89,15 @@ export function FilmHero({ film, claims, onTry }: { film: Manifest; claims: Reco
   const [p, setP] = useState(0);
   const [loaded, setLoaded] = useState(0);              // share of the first, coarse pass that has arrived
   const [still] = useState(lessMotion);
+
+  // the bar floats over the film from the very first paint: set before paint, so nothing shifts when the frames arrive
+  useLayoutEffect(() => {
+    document.body.classList.add("has-film");
+    const header = document.querySelector<HTMLElement>("header.site");
+    const bar = header && getComputedStyle(header).position !== "fixed" ? header.getBoundingClientRect().height : 0;
+    box.current?.style.setProperty("--bar", `${bar}px`);
+    return () => document.body.classList.remove("has-film");
+  }, []);
 
   useEffect(() => {
     // frames are composed on a 2D canvas; where WebGL is available it is shown through the liquid layer
@@ -236,7 +245,7 @@ export function FilmHero({ film, claims, onTry }: { film: Manifest; claims: Reco
         {!still && (
           <nav className="fh-rail" aria-label={S.film.chapters} style={{ opacity: Math.max(0, Math.min(1, (0.98 - p) / 0.04)) }}>
             {S.film.chapter.map((c, k) => (
-              <button key={c} onClick={() => jump(k)} aria-current={active === k ? "step" : undefined}>
+              <button key={c} onClick={() => jump(k)} aria-current={active === k ? "step" : undefined} aria-label={c}>
                 <span className="fh-tick" aria-hidden="true" /><span className="fh-chap">{c}</span>
               </button>
             ))}

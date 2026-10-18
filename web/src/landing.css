@@ -240,7 +240,7 @@ h3 { font-weight: 800; letter-spacing: 0.02em; font-size: 1.25rem; }
 .fh-rail { position: absolute; z-index: 3; left: 50%; bottom: clamp(1rem, 4vh, 2.2rem); transform: translateX(-50%); display: flex; gap: clamp(0.8rem, 3vw, 2.6rem); padding: 0.6rem 0 0; }
 .fh-rail::before, .fh-fill { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px; border-radius: 2px; background: rgb(22 24 29 / 0.15); }
 .fh-fill { background: #16181d; transform-origin: left; }
-.fh-rail button { display: flex; align-items: center; gap: 0.45rem; min-height: 32px; background: none; border: 0; padding: 0; cursor: pointer; color: #5b5e66;
+.fh-rail button { display: flex; align-items: center; gap: 0.45rem; min-height: 44px; min-width: 44px; justify-content: center; background: none; border: 0; padding: 0; cursor: pointer; color: #5b5e66;
   font: 600 0.72rem/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; transition: color 200ms; }
 .fh-rail button:hover, .fh-rail button[aria-current] { color: #16181d; }
 .fh-tick { width: 8px; height: 8px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px currentColor; transition: background 200ms, transform 300ms cubic-bezier(.34, 1.56, .64, 1); }

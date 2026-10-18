@@ -10,6 +10,8 @@ import "./site.css";
 
 // The front door is the landing film at #/; a bare visit lands there.
 if (!window.location.hash) history.replaceState(null, "", "#/");
+// the landing film floats the bar over itself; set it before the first paint so nothing shifts (FilmHero owns it after)
+if (window.location.hash === "#/" || window.location.hash === "#") document.body.classList.add("has-film");
 installMediaOverrides();
 applyDisplay(loadDisplay());
 createRoot(document.getElementById("root")!).render(
