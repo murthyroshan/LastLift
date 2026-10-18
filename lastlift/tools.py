@@ -512,6 +512,22 @@ def repair_order(scope: str = "demo"):
                      highlight={"nodes": [f"lift:{f}" for f in closed], "edges": []}, entities=closed)
 
 
+def warm(scopes=("demo", "live")):
+    """Compute ahead what the slow tools memoise per closed set (the network's journey analyses and the repair order),
+    so the first question after a restart or a closure change does not wait for them. The answers are unchanged: the
+    same functions, same inputs, run earlier. With nothing changed a call costs a few lookups."""
+    net = network.get(state.graph_name("base"))
+    network.cached(net, "od", ())
+    network.cached(net, "n1", ())
+    for scope in scopes:
+        if not state.exists(state.graph_name(scope)):
+            continue
+        closed = state.closed(state.graph_name(scope))
+        network.cached(net, "od", closed)
+        network.cached(net, "n1", closed)
+        repair_order(scope)
+
+
 def recall_lift_history(facility_id: str, scope: str = "demo"):
     """What LastLift remembers about a lift: closures on record, its archive record, the agents' past assessments and
     proposals, disagreements with MBTA, and how many earlier answers cited it (and are now stale). Never a forecast."""

@@ -41,6 +41,7 @@ async def lifespan(_app):
     except Exception as exc:                # graph server not up yet: /healthz reports it
         log.warning("boot sync skipped: %s", exc)
     poller = asyncio.create_task(live.run_forever(settings.live_poll_s)) if settings.live_feed == "on" else None
+    warming = asyncio.create_task(_warm())
     try:
         async with mcp_app.lifespan(mcp_app):
             if ops_app is not None:
@@ -49,8 +50,20 @@ async def lifespan(_app):
             else:
                 yield
     finally:
+        warming.cancel()
         if poller:
             poller.cancel()
+
+
+async def _warm():
+    """Background: the slow tools' memoised analyses for the demo and live closures, computed at boot so the first
+    judge's question is not the one that pays for them (the live poller re-warms when the closures change)."""
+    try:
+        t = time.perf_counter()
+        await asyncio.to_thread(tools.warm)
+        log.info("warm: analyses ready in %.1f s", time.perf_counter() - t)
+    except Exception as exc:                # graph server not up yet: the tools compute on first use as before
+        log.warning("warm skipped: %s", type(exc).__name__)
 
 
 app = FastAPI(title="LastLift", version=__version__, docs_url="/v1/docs", openapi_url="/v1/openapi.json",
@@ -89,9 +102,10 @@ def _rss_mb() -> float | None:
     return None
 
 
-@app.get("/healthz", include_in_schema=False)
+@app.api_route("/healthz", methods=["GET", "HEAD"], include_in_schema=False)
 def healthz():
-    """Render health check: fast, never touches the LLM. 503 when the graph server is unreachable."""
+    """Render health check: fast, never touches the LLM. 503 when the graph server is unreachable.
+    HEAD too, for uptime monitors (UptimeRobot's free checks use HEAD)."""
     if db.ping():
         return {"status": "ok"}
     return JSONResponse({"status": "degraded", "reason": "graph server unreachable"}, status_code=503)

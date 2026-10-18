@@ -89,6 +89,8 @@ async def run_forever(interval_s: int):
     while True:
         try:
             await asyncio.to_thread(poll_once)
+            from .tools import warm             # a no-op unless the closures changed: then the new analyses are ready first
+            await asyncio.to_thread(warm, ("live",))
         except Exception as exc:            # graph server down: keep the loop alive, report it in the status
             with _lock:
                 _status["failures"] += 1

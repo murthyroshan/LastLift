@@ -127,3 +127,12 @@ def test_http_station_graph():
     assert client.get("/v1/stations/place-alfcl/graph", params={"dir": "exit"}).status_code == 200
     assert client.get("/v1/stations/place-nowhere/graph").status_code == 404
     assert client.get("/v1/stations/place-alfcl/graph", params={"scenario": "dev_ll_base"}).status_code == 404
+
+
+def test_warm_fills_the_caches_the_slow_tools_read():
+    from lastlift import network
+    tools.warm(("demo",))
+    net = network.get(state.graph_name("base"))
+    key = (id(net), "n1", tuple(DEMO))
+    assert key in network._results and (state.graph_name("demo"), tuple(DEMO)) in tools._ORDERS
+    assert tools.network_impact(None, "demo")["ok"]

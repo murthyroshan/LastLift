@@ -15,6 +15,10 @@ def test_healthz_reflects_graph_server():
         assert r.status_code == 503
 
 
+def test_healthz_answers_head_for_uptime_monitors():
+    assert client.head("/healthz").status_code == (200 if db.ping() else 503)
+
+
 def test_v1_health_shape():
     body = client.get("/v1/health").json()
     assert {"status", "version", "falkordb", "llm_mode", "actions_mode", "uptime_s"} <= body.keys()
