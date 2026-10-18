@@ -17,7 +17,7 @@
 [![licence](https://img.shields.io/badge/licence-MIT-lightgrey)](LICENSE)
 [![release](https://img.shields.io/github/v/release/murthyroshan/LastLift?color=f5a524)](https://github.com/murthyroshan/LastLift/releases)
 [![judge it](https://img.shields.io/badge/judge%20it-python%20scripts%2Fsmoke.py%20--prod-2fb5a0)](#judge-it-in-90-seconds)
-[![tracks](https://img.shields.io/badge/Graph%20Hacks-Track%201%20%C2%B7%20Track%202-f5a524)](#tracks-entered)
+[![track](https://img.shields.io/badge/Graph%20Hacks-Track%201%3A%20Agents%20That%20Act-f5a524)](#track-entered)
 
 **[Live site](https://lastlift.vercel.app)** · **[Play the walkthrough](https://lastlift.vercel.app/concepts/alewife.html)** · **[API docs](https://lastlift-api.onrender.com/v1/docs)** · **[MCP endpoint](#use-it-from-your-own-agent)** · **[Issues the agent filed](https://github.com/murthyroshan/lastlift-ops/issues)** · Demo video: _link added when recorded_
 
@@ -173,12 +173,14 @@ The same caution applies to path search: on 4.22 `algo.SPpaths` enumerates paths
 | The Cypher queries or graph algorithms the product depends on | [The Cypher and the algorithms](#the-cypher-and-the-algorithms) (generated from `lastlift/queries.py`) |
 | A demo video | _added when recorded_ |
 | A live deployment, or complete local setup | https://lastlift.vercel.app, https://lastlift-api.onrender.com and [Run it yourself](#run-it-yourself) |
-| The tracks | Track 1, Agents That Act on Connected Data; Track 2, Agent Memory and Coordination ([why both](#tracks-entered)) |
+| The track | Track 1, Agents That Act on Connected Data ([how it fits](#track-entered)) |
 
-### Tracks entered
+### Track entered
 
-- **Track 1, Agents That Act on Connected Data.** Operations agents act on the graph: the Monitor reads live MBTA alerts, the Analyst picks a playbook from certified max-flow, the Dispatcher proposes only while the graph is unchanged, and a person's approval files a real ticket ([lastlift-ops](https://github.com/murthyroshan/lastlift-ops/issues)). The chat agent answers only through the tools, over MCP, with every claim checked.
-- **Track 2, Agent Memory and Coordination.** The agents' memory lives in FalkorDB: every run, tool call and answer is a node with what it read; an answer is marked stale the moment a lift it read changes ([Answers that know when they are out of date](#answers-that-know-when-they-are-out-of-date)); the agents coordinate by writing assessments and proposals into the graph, guarded by its state version, never by messaging each other.
+**Track 1, Agents That Act on Connected Data.**
+
+- **The agents act on the graph.** Operations agents work every closure: the Monitor reads live MBTA alerts, the Analyst picks a playbook from certified max-flow, the Dispatcher proposes only while the graph is unchanged, and a person's approval files a real ticket ([lastlift-ops](https://github.com/murthyroshan/lastlift-ops/issues)). The chat agent answers only through the tools, over MCP, with every claim checked.
+- **They act on context that is still true.** The agents' memory lives in FalkorDB: every run, tool call and answer is a node with what it read; an answer is marked stale the moment a lift it read changes ([Answers that know when they are out of date](#answers-that-know-when-they-are-out-of-date)); the agents coordinate by writing assessments and proposals into the graph, guarded by its state version, never by messaging each other.
 
 Rule 3 (the graph does real work): see [Turn FalkorDB off](#turn-falkordb-off-and-here-is-exactly-what-stops-working). Rule 6 (data you may use): public MBTA open data only. Rule 11 (AI disclosure): [AI assistance](#ai-assistance).
 

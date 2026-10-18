@@ -204,6 +204,8 @@ html.anim-on .gt-img { animation: gt-drift 18s ease-in-out infinite alternate; }
 .as-ctas { display: flex; flex-wrap: wrap; gap: 0.6rem; }
 @media (max-width: 700px) { .as-steps li { grid-template-columns: 1fr; } .as-args { white-space: normal; } }
 @media (prefers-reduced-motion: reduce) { .as-steps li, .as-answer { transition: none; } }
+/* animations are switched on by html.anim-on only (never under automation or reduced motion): no fade to catch mid-way */
+html:not(.anim-on) .as-steps li, html:not(.anim-on) .as-answer { transition: none; }
 
 /* why a graph: the evaluation's numbers side by side (with and without the graph, count rule, certification) */
 .landing .wg { max-width: 1240px; margin: 0 auto 6rem; }
