@@ -14,7 +14,7 @@ services:
       - key: APP_ENV
         value: production
       - key: LLM_MODE
-        value: replay
+        value: live
       - key: ACTIONS_MODE
         value: draft
       - key: LIVE_FEED

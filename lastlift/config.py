@@ -22,7 +22,8 @@ def _load_env_file() -> dict[str, str]:
 
 
 def _get(file_values: dict[str, str], key: str, default: str = "") -> str:
-    return os.environ.get(key) or file_values.get(key) or default
+    # trimmed: a key pasted into a dashboard with a trailing newline makes an illegal HTTP header
+    return (os.environ.get(key) or file_values.get(key) or default).strip()
 
 
 @dataclass(frozen=True)

@@ -163,7 +163,10 @@ async def ask(question: str, scope: str = "demo", mode: str | None = None, emit=
         if text is None:
             if not results:
                 await router.run(question, call)
-            text = templates.answer(results)
+            # in the chat (not the scored router run, mode "off"), a question that resolved to no lift and to no station
+            # named in it is off topic: say what the agent can answer instead of listing fuzzy full-text matches
+            stray = results and all(r.get("tool") == "resolve_place" and not (r.get("data") or {}).get("lifts") for r in results)
+            text = templates.OFF_TOPIC if mode != "off" and stray else templates.answer(results)
     send("answer", text=text, source=source, grounded=source == "template" or not problems,
          tools=[r.get("tool") for r in results], model=chain.models[-1] if source == "llm" and chain.models else None,
          usage={"input_tokens": chain.tokens["input"], "output_tokens": chain.tokens["output"]})

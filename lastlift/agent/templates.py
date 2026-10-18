@@ -2,12 +2,13 @@
 from ..wording import DISCLAIMERS
 
 FOOTER = "Results describe the open-data model and may differ on site. Check mbta.com/alerts/access."
+OFF_TOPIC = ("I can only answer questions about step-free (lift) access at MBTA stations. "
+             "Try a station name or a lift number. " + FOOTER)
 
 
 def answer(results: list[dict]) -> str:
     if not results:
-        return ("I can only answer questions about step-free (lift) access at MBTA stations. "
-                "Try a station name or a lift number. " + FOOTER)
+        return OFF_TOPIC
     parts = []
     # resolve_place only finds ids for the next tool; it is shown only when it is all there is.
     shown = [r for r in results if r.get("tool") != "resolve_place"] or results

@@ -317,11 +317,14 @@ def agent_approvals(scope: Literal["demo", "live"] = "demo", status: str | None 
 
 
 @app.post("/v1/approvals/{pid}")
-def agent_decide(pid: str, body: dict = Body(...), scope: Literal["demo", "live"] = "demo",
+def agent_decide(pid: str, request: Request, body: dict = Body(...), scope: Literal["demo", "live"] = "demo",
                  idempotency_key: str | None = Header(default=None)):
     """A human decision: {"decision": "approve" | "reject"}. Needs an Idempotency-Key header; a repeat with the same
-    key returns the first result. Refused if the graph changed since the proposal (the proposal is superseded)."""
+    key returns the first result. Refused if the graph changed since the proposal (the proposal is superseded).
+    With ACTIONS_MODE=file an approval files a real GitHub issue, so it is taken only from the operator's own machine."""
     from .agents import roles
+    if settings.actions_mode == "file" and (request.client.host if request.client else "") not in ("127.0.0.1", "::1", "localhost"):
+        raise HTTPException(403, "filing tickets is enabled only on the operator's machine")
     if body.get("decision") not in ("approve", "reject"):
         raise HTTPException(400, "decision must be approve or reject")
     if not idempotency_key:
