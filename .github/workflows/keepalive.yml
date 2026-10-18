@@ -1,0 +1,14 @@
+# Keeps the free Render instance awake during judging, so the first chat answer is not a 50-second cold start.
+name: keepalive
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+permissions: {}
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Ping the API health check
+        run: curl -fsS -m 90 https://lastlift-api.onrender.com/healthz || echo "API did not answer in time"
